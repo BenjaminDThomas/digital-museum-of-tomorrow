@@ -1,1 +1,1 @@
-# digital-museum-of-tommrowo
+# digital-museum-of-tomorrow

@@ -40,7 +40,15 @@ function injectA11yToolbar() {
   });
 
   toolbar.append(largeTextBtn, contrastBtn);
-  document.body.appendChild(toolbar);
+  const headerInner = document.querySelector('.header-inner');
+  const navToggle = document.querySelector('.nav-toggle');
+  if (headerInner && navToggle) {
+    headerInner.insertBefore(toolbar, navToggle);
+  } else if (headerInner) {
+    headerInner.appendChild(toolbar);
+  } else {
+    document.body.appendChild(toolbar);
+  }
 
   // Restore preferences
   if (localStorage.getItem('vam-large-text') === 'true') document.body.classList.add('large-text');

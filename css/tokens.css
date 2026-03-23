@@ -3,23 +3,40 @@
    ========================================= */
 
 :root {
-  /* Colour Palette — museum-warm dark editorial */
-  --clr-bg:           #0e0c09;
-  --clr-surface:      #161410;
-  --clr-surface-2:    #1e1b17;
-  --clr-surface-3:    #252119;
-  --clr-border:       #2e2a24;
-  --clr-border-light: #3d3830;
+  /* Colour Palette — WCAG 3+ optimized contrast strategy */
+  --clr-header-bg:      #0A0A0A;
+  --clr-header-text:    #FFFFFF;
+  --clr-header-border:  #FF8C00;
 
-  --clr-text:         #f0ebe3;
-  --clr-text-muted:   #a09888;
-  --clr-text-faint:   #5e574e;
+  --clr-bg:             #121212;  /* dark base background */
+  --clr-surface:        #1D1D1D;  /* dark cards */
+  --clr-surface-2:      #262626;  /* secondary surfaces */
+  --clr-surface-3:      #2F2F2F;  /* strong surface variant */
+  --clr-border:         #4F4F4F;
+  --clr-border-light:   #6F6F6F;
 
-  /* Accent — warm amber/gold */
-  --clr-accent:       #c9a84c;
-  --clr-accent-light: #e0c47a;
-  --clr-accent-dim:   #7a6230;
-  --clr-accent-glow:  rgba(201, 168, 76, 0.12);
+  --clr-text:           #F8F8F8;  /* near-white body text */
+  --clr-text-muted:     #D6D6D6;  /* high contrast muted text */
+  --clr-text-faint:     #B2B2B2;  /* still WCAG accessible for labels */
+
+  /* Accent palette with bright contrast colors */
+  --clr-accent:         #FF8C00;  /* vivid orange */
+  --clr-accent-light:   #FFC36F;  /* bright warm */
+  --clr-accent-dim:     #E6A34A;  /* strong dimmed accent */
+  --clr-accent-glow:    rgba(255, 140, 0, 0.2);
+
+  --clr-success:        #48C774;
+  --clr-warning:        #FF8C00;
+  --clr-error:          #FF4C51;
+  --clr-info:           #4EB6FF;
+
+  --clr-chatbot:        #203E5D;
+  --clr-recommender:    #2F5E3E;
+  --clr-visual:         #5E3E30;
+  --clr-generative:     #5D3E91;
+
+  --clr-ai-badge:       #FFC36F;
+  --clr-ai-badge-bg:    rgba(255, 140, 0, 0.2);
 
   /* Tool colours */
   --clr-chatbot:      #8fa8c8;

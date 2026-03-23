@@ -8,74 +8,6 @@
   <link rel="stylesheet" href="../css/tokens.css" />
   <link rel="stylesheet" href="../css/main.css" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    .chat-welcome {
-      max-width: 560px;
-      margin: var(--sp-16) auto;
-      text-align: center;
-    }
-    .chat-welcome h2 {
-      font-size: var(--fs-2xl);
-      margin-bottom: var(--sp-4);
-    }
-    .chat-welcome p {
-      color: var(--clr-text-muted);
-      margin-bottom: var(--sp-8);
-      line-height: var(--lh-loose);
-    }
-    .related-objects {
-      margin-top: var(--sp-4);
-      padding: var(--sp-4);
-      background: var(--clr-surface-3);
-      border-radius: var(--radius-md);
-    }
-    .related-objects h4 {
-      font-family: var(--ff-body);
-      font-size: var(--fs-xs);
-      font-weight: var(--fw-medium);
-      letter-spacing: var(--ls-wider);
-      text-transform: uppercase;
-      color: var(--clr-text-faint);
-      margin-bottom: var(--sp-3);
-    }
-    .related-objects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: var(--sp-2);
-    }
-    .related-mini-card {
-      background: var(--clr-surface-2);
-      border: 1px solid var(--clr-border);
-      border-radius: var(--radius-md);
-      padding: var(--sp-3);
-      cursor: pointer;
-      transition: border-color var(--transition-fast);
-    }
-    .related-mini-card:hover { border-color: var(--clr-border-light); }
-    .related-mini-card:focus-visible { outline: 2px solid var(--clr-accent); outline-offset: 2px; }
-    .related-mini-card img {
-      width: 100%; aspect-ratio: 1; object-fit: cover;
-      border-radius: var(--radius-sm); margin-bottom: var(--sp-2);
-    }
-    .related-mini-card p {
-      font-size: var(--fs-xs);
-      color: var(--clr-text-muted);
-      line-height: var(--lh-snug);
-    }
-    .typing-indicator { display: flex; gap: 5px; padding: var(--sp-4); align-items: center; }
-    .typing-indicator span {
-      width: 7px; height: 7px;
-      background: var(--clr-text-faint);
-      border-radius: 50%;
-      animation: bounce 1.2s ease-in-out infinite;
-    }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-6px); }
-    }
-  </style>
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to main content</a>
@@ -108,16 +40,16 @@
       <aside class="chat-sidebar" aria-label="Conversation history and filters">
         <div>
           <p class="chat-sidebar__title">Suggested topics</p>
-          <div id="topic-suggestions" style="display:flex;flex-direction:column;gap:var(--sp-1);"></div>
+          <div id="topic-suggestions"></div>
         </div>
         <div>
           <p class="chat-sidebar__title">Recent chats</p>
           <div id="chat-history" aria-live="polite"></div>
         </div>
-        <div style="margin-top:auto;">
+        <div class="chat-sidebar-footer">
           <div class="bias-notice">
             <span class="bias-notice__icon">ℹ</span>
-            <span>AI responses are generated from V&amp;A catalogue data. Sources are shown with each answer. <a href="transparency.html" style="color:var(--clr-accent-dim)">Learn more.</a></span>
+            <span>AI responses are generated from V&amp;A catalogue data. Sources are shown with each answer. <a href="transparency.html" class="inline-link">Learn more.</a></span>
           </div>
         </div>
       </aside>
@@ -126,10 +58,10 @@
       <div class="chat-main" role="region" aria-label="Chat conversation">
         <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="Conversation messages">
           <div class="chat-welcome" id="chat-welcome">
-            <div class="ai-badge" style="margin: 0 auto var(--sp-4); width:fit-content;">✦ AI Tool</div>
+            <div class="ai-badge">✦ AI Tool</div>
             <h2>Ask the Collection</h2>
             <p>Ask anything about the V&A's 2.3 million objects. Try a broad question like "Tell me about Victorian glassware" or a specific one like "Find objects made in Japan using lacquer".</p>
-            <div class="suggested-prompts" id="welcome-prompts" style="justify-content:center;"></div>
+            <div class="suggested-prompts" id="welcome-prompts"></div>
           </div>
         </div>
 
@@ -222,31 +154,6 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
     ollamaChecked = true;
   }
 
-  async function callOllamaChat(messages) {
-    await checkOllamaApi();
-
-    const response = await fetch(OLLAMA_CHAT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'phi3:mini',
-        stream: false,
-        options: { num_predict: 1000 },
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...messages
-        ]
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Ollama request failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.message?.content || '';
-  }
-
   // Render topics in sidebar
   TOPICS.forEach(topic => {
     const btn = document.createElement('button');
@@ -313,28 +220,6 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
     return msg;
   }
 
-  function appendTypingIndicator() {
-    const msg = document.createElement('div');
-    msg.className = 'message message--ai';
-    msg.id = 'typing-indicator';
-    msg.innerHTML = `
-      <div class="message__avatar" aria-hidden="true">✦</div>
-      <div class="message__bubble">
-        <div class="typing-indicator" aria-label="AI is thinking">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
-    `;
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return msg;
-  }
-
-  function removeTypingIndicator() {
-    const el = document.getElementById('typing-indicator');
-    if (el) el.remove();
-  }
-
   async function sendMessage(text) {
     if (!text.trim()) return;
 
@@ -352,46 +237,113 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
     histItem.setAttribute('tabindex', '0');
     chatHistory.prepend(histItem);
 
-    const typingEl = appendTypingIndicator();
+    // Create an empty assistant message we'll update incrementally
+    const assistantMessageDiv = appendMessage('', 'assistant');
+    let fullResponse = '';
 
     try {
-      const aiTextRaw = await callOllamaChat(conversationHistory);
-      removeTypingIndicator();
+      await checkOllamaApi();
 
-      const aiText = aiTextRaw || 'I couldn\'t find an answer. Please try rephrasing your question.';
-      conversationHistory.push({ role: 'assistant', content: aiText });
+      const response = await fetch(OLLAMA_CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'phi3:mini',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...conversationHistory
+          ],
+          stream: true  // This enables streaming!
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Get a reader for the response body stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        // Read a chunk from the stream
+        const { done, value } = await reader.read();
+
+        // Exit if stream is complete
+        if (done) break;
+
+        // Convert bytes to text
+        const chunk = decoder.decode(value);
+
+        // Split into lines (each line is separate JSON)
+        const lines = chunk.split('\n').filter(line => line.trim());
+
+        for (const line of lines) {
+          try {
+            // Parse the JSON
+            const data = JSON.parse(line);
+
+            // Check if this chunk contains content
+            if (data.message && data.message.content) {
+              // Append to our full response
+              fullResponse += data.message.content;
+
+              // Update the displayed message
+              assistantMessageDiv.querySelector('.message__text').innerHTML = escHtml(fullResponse).replace(/\n/g, '<br>');
+
+              // Keep the latest message visible
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+          } catch (e) {
+            // Skip lines that aren't valid JSON
+          }
+        }
+      }
+
+      // Once streaming is complete, add to history
+      conversationHistory.push({
+        role: 'assistant',
+        content: fullResponse
+      });
 
       // Extract any search params
-      let cleanText = aiText;
+      let cleanText = fullResponse;
       let searchParams = null;
-      const jsonMatch = aiText.match(/\{"vam_search":\s*(\{[^}]+\})\}/);
+      const jsonMatch = fullResponse.match(/\{"vam_search":\s*(\{[^}]+\})\}/);
       if (jsonMatch) {
         try {
           const parsed = JSON.parse(jsonMatch[0]);
           searchParams = parsed.vam_search;
-          cleanText = aiText.replace(jsonMatch[0], '').trim();
+          cleanText = fullResponse.replace(jsonMatch[0], '').trim();
+          // Update the displayed message without the JSON
+          assistantMessageDiv.querySelector('.message__text').innerHTML = escHtml(cleanText).replace(/\n/g, '<br>');
         } catch(e) {}
       }
 
-      const msgEl = appendMessage('assistant', cleanText, {
-        source: 'V&A Collections API + AI'
-      });
+      // Add source info
+      const sourceDiv = document.createElement('div');
+      sourceDiv.className = 'message__source';
+      sourceDiv.innerHTML = '<span>📖</span> Source: V&A Collections API + AI';
+      assistantMessageDiv.querySelector('.message__bubble').appendChild(sourceDiv);
 
       // If AI suggested a search, run it
       if (searchParams) {
-        await appendRelatedObjects(msgEl.querySelector('.message__bubble'), searchParams);
+        await appendRelatedObjects(assistantMessageDiv.querySelector('.message__bubble'), searchParams);
       }
 
       showInlinePrompts();
 
-    } catch (err) {
-      removeTypingIndicator();
-      appendMessage('assistant', 'I\'m having trouble connecting right now. Please check your connection and try again.');
-      console.error('Chat error:', err);
+    } catch (error) {
+      assistantMessageDiv.querySelector('.message__text').textContent =
+        `Error: ${error.message}. Make sure OLLAMA is running.`;
+      console.error('Error:', error);
+    } finally {
+      // Re-enable controls
+      sendBtn.disabled = false;
+      chatInput.focus();
     }
-
-    sendBtn.disabled = false;
-    chatInput.focus();
   }
 
   async function appendRelatedObjects(container, params) {
@@ -415,7 +367,7 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
         const imgUrl = window.VAM.getArtefactImageUrl(record, 'thumb');
         const title = record._primaryTitle || record.objectType || 'Object';
         mini.innerHTML = `
-          ${imgUrl ? `<img src="${imgUrl}" alt="${window.VAM.escHtml(title)}" loading="lazy"/>` : '<div style="aspect-ratio:1;background:var(--clr-surface-3);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:var(--sp-2)">🏺</div>'}
+          ${imgUrl ? `<img src="${imgUrl}" alt="${window.VAM.escHtml(title)}" loading="lazy"/>` : '<div class="artefact-placeholder">🏺</div>'}
           <p>${window.VAM.escHtml(title.slice(0, 40))}${title.length > 40 ? '…' : ''}</p>
         `;
         mini.addEventListener('click', () => window.VAM.renderArtefactCard && openArtefactModalFromRecord(record));

@@ -303,18 +303,18 @@ function openArtefactModal(record, systemNumber) {
       <button class="artefact-modal__close" aria-label="Close artefact detail">✕</button>
       <div class="artefact-modal__grid">
         <div class="artefact-modal__image">
-          ${imgUrl ? `<img src="${imgUrl}" alt="${escHtml(title)}" />` : '<div class="artefact-card__image-placeholder" style="height:300px">🏺</div>'}
+          ${imgUrl ? `<img src="${imgUrl}" alt="${escHtml(title)}" />` : '<div class="artefact-card__image-placeholder artefact-card__image-placeholder-300">🏺</div>'}
         </div>
         <div class="artefact-modal__content">
           <p class="section-eyebrow">${escHtml(record.objectType || '')}</p>
-          <h2 id="modal-title" style="font-size: var(--fs-2xl); margin-bottom: var(--sp-2);">${escHtml(title)}</h2>
-          <p style="color: var(--clr-text-muted); margin-bottom: var(--sp-6);">${escHtml(formatDateRange(record))}</p>
-          ${desc ? `<p style="line-height: var(--lh-loose); color: var(--clr-text-muted); margin-bottom: var(--sp-6);">${escHtml(desc)}</p>` : ''}
+          <h2 id="modal-title" class="artefact-modal__title">${escHtml(title)}</h2>
+          <p class="artefact-modal__meta">${escHtml(formatDateRange(record))}</p>
+          ${desc ? `<p class="artefact-modal__desc">${escHtml(desc)}</p>` : ''}
           <div class="bias-notice">
             <span class="bias-notice__icon">ℹ</span>
-            <span>This record is from the V&A Collections API. Descriptions reflect historical cataloguing and may contain dated terminology. <a href="pages/transparency.html" style="color: var(--clr-accent-dim);">Learn more about our approach.</a></span>
+            <span>This record is from the V&A Collections API. Descriptions reflect historical cataloguing and may contain dated terminology. <a href="pages/transparency.html" class="link-accent-dim">Learn more about our approach.</a></span>
           </div>
-          ${systemNumber ? `<a href="https://collections.vam.ac.uk/item/${systemNumber}/" target="_blank" rel="noopener noreferrer" class="btn btn--ghost" style="margin-top: var(--sp-6);">View on V&A website ↗</a>` : ''}
+          ${systemNumber ? `<a href="https://collections.vam.ac.uk/item/${systemNumber}/" target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn-mt-6">View on V&A website ↗</a>` : ''}
         </div>
       </div>
     </div>

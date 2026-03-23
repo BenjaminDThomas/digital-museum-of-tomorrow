@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Our principles for responsible, transparent, and inclusive use of AI in the V&A collection. How we address bias, trust, privacy, and accessibility." />
+  <title>AI &amp; Trust — V&A AI Explorer</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    .transparency-hero {
+      padding: var(--sp-16) 0 var(--sp-12);
+      border-bottom: 1px solid var(--clr-border);
+      margin-bottom: var(--sp-16);
+    }
+    .principles-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--sp-6);
+      margin-bottom: var(--sp-20);
+    }
+    .principle-card {
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-8);
+    }
+    .principle-card__number {
+      font-family: var(--ff-display);
+      font-size: var(--fs-4xl);
+      font-weight: var(--fw-light);
+      color: var(--clr-text-faint);
+      letter-spacing: var(--ls-tight);
+      line-height: 1;
+      margin-bottom: var(--sp-4);
+    }
+    .principle-card h3 {
+      font-size: var(--fs-xl);
+      margin-bottom: var(--sp-3);
+    }
+    .principle-card p {
+      font-size: var(--fs-sm);
+      color: var(--clr-text-muted);
+      line-height: var(--lh-loose);
+    }
+    .principle-card ul {
+      list-style: none;
+      margin-top: var(--sp-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+    .principle-card li {
+      font-size: var(--fs-sm);
+      color: var(--clr-text-muted);
+      padding-left: var(--sp-5);
+      position: relative;
+      line-height: var(--lh-loose);
+    }
+    .principle-card li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--clr-success);
+      font-size: var(--fs-xs);
+    }
+    .faq-section {
+      margin-bottom: var(--sp-20);
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .faq-question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: var(--sp-5) 0;
+      background: none;
+      border: none;
+      color: var(--clr-text);
+      font-family: var(--ff-display);
+      font-size: var(--fs-lg);
+      font-weight: var(--fw-light);
+      text-align: left;
+      cursor: pointer;
+      gap: var(--sp-4);
+    }
+    .faq-question:focus-visible { outline: 2px solid var(--clr-accent); outline-offset: 2px; border-radius: var(--radius-sm); }
+    .faq-question__icon {
+      font-size: var(--fs-xl);
+      color: var(--clr-text-faint);
+      flex-shrink: 0;
+      transition: transform var(--transition-base);
+      line-height: 1;
+    }
+    .faq-item.open .faq-question__icon { transform: rotate(45deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-slow), padding var(--transition-slow);
+    }
+    .faq-item.open .faq-answer {
+      max-height: 600px;
+      padding-bottom: var(--sp-6);
+    }
+    .faq-answer-inner {
+      font-size: var(--fs-sm);
+      color: var(--clr-text-muted);
+      line-height: var(--lh-loose);
+    }
+    .faq-answer-inner p + p { margin-top: var(--sp-3); }
+    .tool-breakdown {
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--sp-20);
+    }
+    .tool-breakdown table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--fs-sm);
+    }
+    .tool-breakdown th {
+      background: var(--clr-surface-3);
+      padding: var(--sp-4) var(--sp-5);
+      text-align: left;
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-medium);
+      letter-spacing: var(--ls-wider);
+      text-transform: uppercase;
+      color: var(--clr-text-faint);
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .tool-breakdown td {
+      padding: var(--sp-4) var(--sp-5);
+      border-bottom: 1px solid var(--clr-border);
+      color: var(--clr-text-muted);
+      line-height: var(--lh-loose);
+      vertical-align: top;
+    }
+    .tool-breakdown tr:last-child td { border-bottom: none; }
+    .tool-breakdown td:first-child { color: var(--clr-text); font-weight: var(--fw-medium); }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-1);
+      padding: 2px var(--sp-2);
+      border-radius: var(--radius-full);
+      font-size: var(--fs-xs);
+    }
+    .status-badge--on { background: rgba(123, 172, 122, 0.15); color: var(--clr-success); border: 1px solid rgba(123,172,122,0.3); }
+    .status-badge--partial { background: rgba(201, 168, 76, 0.12); color: var(--clr-warning); border: 1px solid rgba(201,168,76,0.3); }
+    .contact-section {
+      padding: var(--sp-16);
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      margin-bottom: var(--sp-20);
+    }
+    .contact-section h2 { font-size: var(--fs-2xl); margin-bottom: var(--sp-4); }
+    .contact-section p { color: var(--clr-text-muted); max-width: 480px; margin: 0 auto var(--sp-8); line-height: var(--lh-loose); }
+    @media (max-width: 768px) {
+      .principles-grid { grid-template-columns: 1fr; }
+      .tool-breakdown { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
+        <span class="logo-vam">V&amp;A</span>
+        <span class="logo-divider" aria-hidden="true">|</span>
+        <span class="logo-sub">Collection Explorer</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul role="list">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="chatbot.html">Ask the Collection</a></li>
+          <li><a href="recommender.html">Discover</a></li>
+          <li><a href="visual.html">Visual Search</a></li>
+          <li><a href="generative.html">Reimagine</a></li>
+          <li><a href="transparency.html" aria-current="page">AI &amp; Trust</a></li>
+        </ul>
+      </nav>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container">
+
+      <!-- Hero -->
+      <section class="transparency-hero" aria-labelledby="transparency-heading">
+        <div class="ai-badge" style="margin-bottom:var(--sp-4)">AI &amp; Trust</div>
+        <h1 id="transparency-heading" style="font-size:clamp(var(--fs-2xl),4vw,var(--fs-4xl));max-width:640px;margin-bottom:var(--sp-6)">How we use AI — honestly, inclusively, and with accountability</h1>
+        <p style="color:var(--clr-text-muted);max-width:640px;line-height:var(--lh-loose);font-size:var(--fs-md)">
+          These AI tools are designed to open new pathways into the V&A collection — not replace curatorial expertise. We are committed to transparency about what AI can and cannot do, who these tools serve, and how we mitigate their harms.
+        </p>
+      </section>
+
+      <!-- Principles -->
+      <section aria-labelledby="principles-heading" style="margin-bottom:var(--sp-16)">
+        <header class="section-header" style="text-align:left;max-width:none;margin-bottom:var(--sp-10)">
+          <p class="section-eyebrow">Our commitments</p>
+          <h2 id="principles-heading" style="font-size:var(--fs-3xl)">Six guiding principles</h2>
+        </header>
+
+        <div class="principles-grid">
+          <article class="principle-card">
+            <div class="principle-card__number">01</div>
+            <h3>Transparency</h3>
+            <p>Every AI-generated element is clearly labelled. We show you <em>why</em> an object was recommended, what data was used, and where our sources come from.</p>
+            <ul>
+              <li>All recommendations show reasoning</li>
+              <li>Sources cited in chatbot responses</li>
+              <li>Similarity scores shown on visual search</li>
+              <li>Generative content clearly marked AI-created</li>
+            </ul>
+          </article>
+
+          <article class="principle-card">
+            <div class="principle-card__number">02</div>
+            <h3>Bias awareness</h3>
+            <p>Museum collections reflect historical power structures. The V&A's holdings over-represent certain cultures, periods, and acquisition contexts. We acknowledge this openly.</p>
+            <ul>
+              <li>Underrepresented collections deliberately surfaced</li>
+              <li>Bias notices shown throughout tools</li>
+              <li>Ongoing audit of recommendation diversity</li>
+              <li>Historical language flagged where found</li>
+            </ul>
+          </article>
+
+          <article class="principle-card">
+            <div class="principle-card__number">03</div>
+            <h3>Inclusion</h3>
+            <p>These tools are designed for everyone — regardless of prior knowledge, disability, age, or cultural background.</p>
+            <ul>
+              <li>Full keyboard navigation throughout</li>
+              <li>Screen reader compatible (ARIA, semantic HTML)</li>
+              <li>Large text and high contrast modes</li>
+              <li>Plain language throughout — no jargon</li>
+              <li>Preference controls stored locally only</li>
+            </ul>
+          </article>
+
+          <article class="principle-card">
+            <div class="principle-card__number">04</div>
+            <h3>Privacy</h3>
+            <p>We do not track individuals, create persistent profiles, or share your data. Your preferences are stored in your browser only.</p>
+            <ul>
+              <li>No user accounts or login required</li>
+              <li>No personal data sent to external servers</li>
+              <li>Interest preferences stored locally only</li>
+              <li>Chat history not retained after session</li>
+            </ul>
+          </article>
+
+          <article class="principle-card">
+            <div class="principle-card__number">05</div>
+            <h3>Accuracy &amp; humility</h3>
+            <p>AI can be wrong. We always include caveats, point back to authoritative sources, and never present AI output as definitive museum statements.</p>
+            <ul>
+              <li>Chatbot responses cite V&A API data</li>
+              <li>AI interpretations framed as explorations</li>
+              <li>Links to authoritative V&A records</li>
+              <li>Clear error states and fallback messaging</li>
+            </ul>
+          </article>
+
+          <article class="principle-card">
+            <div class="principle-card__number">06</div>
+            <h3>Human centrality</h3>
+            <p>AI is a guide, not a gatekeeper. You are always in control. These tools supplement — never replace — human curiosity, curatorial knowledge, and museum expertise.</p>
+            <ul>
+              <li>You can always bypass AI tools entirely</li>
+              <li>Direct links to V&A collections provided</li>
+              <li>No filter bubbles — serendipity mode available</li>
+              <li>Feedback mechanism for AI errors</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- Per-tool breakdown -->
+      <section aria-labelledby="tool-breakdown-heading" style="margin-bottom:var(--sp-16)">
+        <p class="section-eyebrow">Tool by tool</p>
+        <h2 id="tool-breakdown-heading" style="font-size:var(--fs-2xl);margin-bottom:var(--sp-8)">How each AI tool works</h2>
+        <div class="tool-breakdown" role="region" aria-label="AI tool details">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Tool</th>
+                <th scope="col">What AI does</th>
+                <th scope="col">Data used</th>
+                <th scope="col">Transparency measures</th>
+                <th scope="col">Bias mitigations</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ask the Collection</td>
+                <td>Natural language processing; generates contextual explanations; maps user questions to V&A API queries</td>
+                <td>V&A Collections API; local Ollama phi3 model</td>
+                <td>Every response labels AI content; sources shown; links to V&A records</td>
+                <td>Prompts instruct AI to flag uncertain claims and dated terminology</td>
+              </tr>
+              <tr>
+                <td>Discover</td>
+                <td>Matches user interest tags to V&A API search parameters; includes serendipitous and underrepresented modes</td>
+                <td>V&A Collections API; locally-stored interest preferences</td>
+                <td>
+                  <span class="status-badge status-badge--on">✓ Why shown</span><br>
+                  Similarity reasoning displayed per card
+                </td>
+                <td>Underrepresented mode actively surfaces less-visited collections; bias notice shown</td>
+              </tr>
+              <tr>
+                <td>Visual Search</td>
+                <td>Analyses image or text description to extract visual attributes; generates V&A API queries</td>
+                <td>Uploaded images (not stored); V&A Collections API; local Ollama phi3 model</td>
+                <td>Similarity confidence scores shown; AI attributes listed; uploaded images not retained</td>
+                <td>Notice that AI may miss cultural/symbolic meaning; confidence scores allow user judgment</td>
+              </tr>
+              <tr>
+                <td>Reimagine</td>
+                <td>Generates interpretive text through a chosen lens; suggests collection connections</td>
+                <td>V&A API object data; local Ollama phi3 model</td>
+                <td>
+                  <span class="status-badge status-badge--on">✓ AI label required</span><br>
+                  All output labelled as AI interpretation, not authoritative statement
+                </td>
+                <td>System prompt instructs cultural sensitivity; caveats generated with each output; connections link to real objects</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="faq-section" aria-labelledby="faq-heading">
+        <p class="section-eyebrow">Common questions</p>
+        <h2 id="faq-heading" style="font-size:var(--fs-2xl);margin-bottom:var(--sp-8)">Frequently asked questions</h2>
+
+        <div id="faq-list" role="list"></div>
+      </section>
+
+      <!-- Contact -->
+      <section class="contact-section" aria-labelledby="contact-heading">
+        <h2 id="contact-heading">Something not right?</h2>
+        <p>If you encounter AI-generated content that feels inaccurate, offensive, or culturally insensitive, please let us know. Feedback directly improves these tools.</p>
+        <div style="display:flex;gap:var(--sp-4);justify-content:center;flex-wrap:wrap">
+          <a href="mailto:digitalcollections@vam.ac.uk" class="btn btn--primary">Report an issue</a>
+          <a href="https://www.vam.ac.uk" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">V&A website ↗</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="../main.js"></script>
+  <script>
+  'use strict';
+
+  const FAQS = [
+    {
+      q: 'Is the AI making things up about artefacts?',
+      a: `The chatbot draws on actual V&A Collections API data. However, large language models can sometimes combine information incorrectly or fill in gaps with plausible but inaccurate details — this is called "hallucination". Every AI response includes a disclaimer and links to the authoritative V&A record. Always verify important information with V&A curators or official collections pages.`
+    },
+    {
+      q: 'Does the recommender create a filter bubble?',
+      a: `We have explicitly designed against this. Alongside personalised recommendations, we offer a "Serendipitous" mode that surfaces random objects across the whole collection, and an "Underrepresented" mode that deliberately shows objects from less commonly visited collections. Your interest preferences are applied loosely, and we intentionally inject diversity into results. You can also clear all preferences at any time.`
+    },
+    {
+      q: 'Why are some artefact descriptions in old or offensive language?',
+      a: `The V&A holds records dating back to the 19th century. Some historical catalogue entries use terminology that is now considered outdated, disrespectful, or reflecting colonial viewpoints. We display this data as it exists in the API, but our AI tools are instructed to flag such language where possible. We are actively working with the museum to improve catalogue descriptions. If you spot something harmful, please report it using the link above.`
+    },
+    {
+      q: 'How is my data used?',
+      a: `We do not create user accounts, require logins, or store personal information. Your interest preferences are saved to your browser's local storage only — they are never sent to our servers. Uploaded images in the Visual Search tool are sent to the AI model for analysis only and are not stored. Chat messages within a session are used to maintain conversation context but are not retained after you close the browser.`
+    },
+    {
+      q: 'Does the AI represent all cultures equally?',
+      a: `No — and we are honest about this. The V&A's own collection is significantly weighted toward European, South Asian, and East Asian objects due to historical acquisition patterns. Our AI tools inherit this bias. In the Discover tool, we have an "Underrepresented" mode that specifically surfaces objects from collections that receive less traffic, including African, Latin American, and Oceanic holdings. This does not solve the underlying problem, but it is one active step we are taking. We publish a bias report updated quarterly.`
+    },
+    {
+      q: 'How accessible are these tools?',
+      a: `All tools are built with accessibility as a core requirement, not an afterthought. This includes: semantic HTML5 landmarks and headings; ARIA labels throughout; full keyboard navigation; screen reader compatible (tested with NVDA, VoiceOver); a built-in large text mode; a high contrast mode; colour choices that meet WCAG 2.1 AA contrast ratios; and a skip-to-content link. We welcome accessibility feedback to improve further.`
+    },
+    {
+      q: 'Are the AI interpretations in the Reimagine tool accurate?',
+      a: `The "Reimagine" tool is explicitly an interpretive and educational tool, not a source of authoritative museum information. Every output is clearly labelled as AI-generated interpretation. The AI is instructed to acknowledge uncertainty, flag when it is speculating, and note where cultural perspectives are incomplete or contested. Think of it as a starting point for exploration — always follow the links to real collection objects and curated V&A content to go deeper.`
+    },
+  ];
+
+  const faqList = document.getElementById('faq-list');
+  FAQS.forEach((faq, i) => {
+    const item = document.createElement('div');
+    item.className = 'faq-item';
+    item.setAttribute('role', 'listitem');
+    const id = `faq-answer-${i}`;
+    item.innerHTML = `
+      <button class="faq-question" aria-expanded="false" aria-controls="${id}" type="button">
+        <span>${faq.q}</span>
+        <span class="faq-question__icon" aria-hidden="true">+</span>
+      </button>
+      <div class="faq-answer" id="${id}" role="region">
+        <div class="faq-answer-inner">
+          ${faq.a.split('\n').map(p => p.trim() ? `<p>${p.trim()}</p>` : '').join('')}
+        </div>
+      </div>
+    `;
+    const btn = item.querySelector('.faq-question');
+    btn.addEventListener('click', () => {
+      const open = item.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    faqList.appendChild(item);
+  });
+  </script>
+</body>
+</html>

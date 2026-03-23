@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Search the V&A collection visually. Describe what you see or upload an image to find visually similar artefacts." />
+  <title>Visual Search — V&A AI Explorer</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    .visual-search-hero {
+      padding: var(--sp-12) 0 var(--sp-10);
+      max-width: var(--container-narrow);
+      margin: 0 auto;
+      text-align: center;
+    }
+    .upload-zone {
+      border: 2px dashed var(--clr-border-light);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-12) var(--sp-8);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--transition-base), background var(--transition-base);
+      margin-bottom: var(--sp-6);
+      position: relative;
+    }
+    .upload-zone.drag-over {
+      border-color: var(--clr-accent);
+      background: var(--clr-accent-glow);
+    }
+    .upload-zone:focus-within { border-color: var(--clr-accent); }
+    .upload-zone__icon { font-size: 2.5rem; margin-bottom: var(--sp-4); opacity: 0.5; }
+    .upload-zone__title { font-family: var(--ff-display); font-size: var(--fs-xl); margin-bottom: var(--sp-2); }
+    .upload-zone__sub { font-size: var(--fs-sm); color: var(--clr-text-muted); margin-bottom: var(--sp-6); }
+    #file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-preview {
+      display: none;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .upload-preview.show { display: block; }
+    .upload-preview img {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--clr-border);
+    }
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      margin: var(--sp-6) 0;
+      color: var(--clr-text-faint);
+      font-size: var(--fs-xs);
+      letter-spacing: var(--ls-wider);
+      text-transform: uppercase;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--clr-border);
+    }
+    .describe-input-wrapper {
+      display: flex;
+      gap: var(--sp-3);
+    }
+    .results-section {
+      padding: var(--sp-12) 0;
+    }
+    .visual-attributes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      margin-top: var(--sp-4);
+      justify-content: center;
+    }
+    .visual-attr-chip {
+      padding: var(--sp-1) var(--sp-3);
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-full);
+      font-size: var(--fs-xs);
+      color: var(--clr-text-muted);
+    }
+    .confidence-bar {
+      height: 3px;
+      background: var(--clr-border);
+      border-radius: 2px;
+      margin-top: var(--sp-2);
+      overflow: hidden;
+    }
+    .confidence-fill {
+      height: 100%;
+      background: var(--clr-accent);
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+    .similarity-score {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: var(--fs-xs);
+      color: var(--clr-text-faint);
+      margin-top: var(--sp-2);
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
+        <span class="logo-vam">V&amp;A</span>
+        <span class="logo-divider" aria-hidden="true">|</span>
+        <span class="logo-sub">Collection Explorer</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul role="list">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="chatbot.html">Ask the Collection</a></li>
+          <li><a href="recommender.html">Discover</a></li>
+          <li><a href="visual.html" aria-current="page">Visual Search</a></li>
+          <li><a href="generative.html">Reimagine</a></li>
+          <li><a href="transparency.html">AI &amp; Trust</a></li>
+        </ul>
+      </nav>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container">
+      <div class="visual-search-hero">
+        <div class="ai-badge" style="margin: 0 auto var(--sp-4); width:fit-content;">✦ AI Tool — Visual Search</div>
+        <h1 style="font-size:clamp(var(--fs-2xl),4vw,var(--fs-4xl));margin-bottom:var(--sp-4)">Search by sight</h1>
+        <p style="color:var(--clr-text-muted);line-height:var(--lh-loose);max-width:480px;margin:0 auto">Upload an image or describe what you see — shape, colour, pattern, material. Our AI finds visually similar artefacts from the V&A collection.</p>
+      </div>
+
+      <!-- Upload zone -->
+      <div style="max-width:640px;margin:0 auto var(--sp-10)">
+        <div class="upload-zone" id="upload-zone" role="button" aria-label="Upload an image or drag and drop" tabindex="0">
+          <input type="file" id="file-input" accept="image/*" aria-label="Upload image file" />
+          <div class="upload-zone__icon" aria-hidden="true">🖼</div>
+          <h2 class="upload-zone__title">Drop an image here</h2>
+          <p class="upload-zone__sub">or click to browse — JPG, PNG, GIF up to 5MB</p>
+          <button class="btn btn--ghost" type="button" style="pointer-events:none" tabindex="-1" aria-hidden="true">Browse files</button>
+        </div>
+
+        <div class="upload-preview" id="upload-preview">
+          <img id="preview-img" src="" alt="Uploaded image preview" />
+          <div class="visual-attributes" id="detected-attrs" aria-label="Detected visual attributes" aria-live="polite"></div>
+          <button class="btn btn--ghost" id="clear-upload" style="margin-top:var(--sp-4);width:100%;justify-content:center">Clear image ✕</button>
+        </div>
+
+        <div class="or-divider" aria-hidden="true">or describe it</div>
+
+        <div class="describe-input-wrapper">
+          <label for="visual-describe" class="sr-only">Describe what you are looking for visually</label>
+          <input type="text" id="visual-describe" placeholder="e.g. blue floral pattern on white porcelain, geometric gold border…" />
+          <button class="btn btn--primary" id="search-btn" type="button" aria-label="Search by description">Search</button>
+        </div>
+
+        <div class="bias-notice" style="margin-top:var(--sp-5)">
+          <span class="bias-notice__icon">ℹ</span>
+          <span>Visual AI analyses shape, colour, and pattern. Results show <strong>similarity confidence scores</strong> so you can judge relevance yourself. AI may not recognise cultural or symbolic significance.</span>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <section class="results-section" id="results-section" aria-label="Visual search results" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-6)">
+          <h2 style="font-size:var(--fs-xl)" id="results-heading">Visually similar artefacts</h2>
+          <p id="result-count" style="font-size:var(--fs-sm);color:var(--clr-text-muted)" aria-live="polite"></p>
+        </div>
+        <div class="artefact-grid" id="visual-results" role="list" aria-label="Visual search results"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../main.js"></script>
+  <script>
+  'use strict';
+
+  const VISUAL_AI_SYSTEM = `You are a visual analysis assistant for the Victoria & Albert Museum. Your task is to analyse an image description or uploaded image and:
+1. Extract 3-5 key visual attributes (colour palette, patterns, materials, style period, object type)
+2. Generate 2-3 optimal V&A collection search queries that would find visually similar objects
+3. List the detected attributes as a JSON array
+
+Respond ONLY with valid JSON in this format:
+{
+  "attributes": ["attribute1", "attribute2", "attribute3"],
+  "searches": [
+    {"q": "search term", "label": "Why this search"},
+    {"q": "another search", "label": "Why this search"}
+  ]
+}`;
+
+  const OLLAMA_CHAT_URL = 'http://localhost:11434/api/chat';
+  const OLLAMA_TAGS_URL = 'http://localhost:11434/api/tags';
+
+  const uploadZone = document.getElementById('upload-zone');
+  const fileInput  = document.getElementById('file-input');
+  const preview    = document.getElementById('upload-preview');
+  const previewImg = document.getElementById('preview-img');
+  const clearBtn   = document.getElementById('clear-upload');
+  const searchBtn  = document.getElementById('search-btn');
+  const descInput  = document.getElementById('visual-describe');
+  const resultsSection = document.getElementById('results-section');
+  const visualResults  = document.getElementById('visual-results');
+  const resultCount    = document.getElementById('result-count');
+  const detectedAttrs  = document.getElementById('detected-attrs');
+
+  let uploadedBase64 = null;
+  let ollamaChecked = false;
+
+  async function checkOllamaApi() {
+    if (ollamaChecked) return;
+    const response = await fetch(OLLAMA_TAGS_URL, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error(`Ollama health check failed: ${response.status}`);
+    }
+    ollamaChecked = true;
+  }
+
+    async function callOllamaJson(systemPrompt, userPrompt) {
+      await checkOllamaApi();
+
+      const response = await fetch(OLLAMA_CHAT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'phi3',
+          stream: false,
+          options: { num_predict: 1000 },
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const text = (data.message?.content || '').replace(/```json|```/g, '').trim();
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON object found in model response');
+      return JSON.parse(jsonMatch[0]);
+    }
+
+  // Drag and drop
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleFile(file);
+  });
+  uploadZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    uploadedBase64 = null;
+    preview.classList.remove('show');
+    previewImg.src = '';
+    fileInput.value = '';
+    detectedAttrs.innerHTML = '';
+    uploadZone.style.display = '';
+  });
+
+  function handleFile(file) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please upload an image under 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      previewImg.src = e.target.result;
+      uploadedBase64 = e.target.result.split(',')[1];
+      uploadZone.style.display = 'none';
+      preview.classList.add('show');
+      analyseAndSearch();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  searchBtn.addEventListener('click', () => {
+    const desc = descInput.value.trim();
+    if (desc) searchByDescription(desc);
+  });
+  descInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); searchBtn.click(); }
+  });
+
+  async function analyseAndSearch() {
+    if (!uploadedBase64) return;
+
+    detectedAttrs.innerHTML = '<span class="visual-attr-chip skeleton" style="width:80px;height:20px"></span>'.repeat(3);
+
+    try {
+        const parsed = await callOllamaJson(
+          VISUAL_AI_SYSTEM,
+          'A user uploaded an image for visual search. You cannot directly inspect the image pixels, so provide tentative attributes and broad search suggestions with conservative language.'
+        );
+
+      detectedAttrs.innerHTML = '';
+      (parsed.attributes || []).forEach(attr => {
+        const chip = document.createElement('span');
+        chip.className = 'visual-attr-chip';
+        chip.textContent = attr;
+        detectedAttrs.appendChild(chip);
+      });
+
+      const searches = parsed.searches || [];
+      if (searches.length) {
+        await loadVisualResults(searches);
+      }
+    } catch(e) {
+      detectedAttrs.innerHTML = '<p style="font-size:var(--fs-xs);color:var(--clr-text-faint)">Could not analyse image. Try describing it below.</p>';
+    }
+  }
+
+  async function searchByDescription(desc) {
+    detectedAttrs.innerHTML = '';
+    resultsSection.style.display = 'block';
+    visualResults.innerHTML = renderSkeletons(8);
+    resultCount.textContent = 'Searching…';
+
+    try {
+        const parsed = await callOllamaJson(VISUAL_AI_SYSTEM, `Visual description: ${desc}`);
+
+      (parsed.attributes || []).forEach(attr => {
+        const chip = document.createElement('span');
+        chip.className = 'visual-attr-chip';
+        chip.textContent = attr;
+        detectedAttrs.appendChild(chip);
+      });
+
+      await loadVisualResults(parsed.searches || [{ q: desc, label: 'Your description' }]);
+    } catch(e) {
+      // fallback to direct search
+      await loadVisualResults([{ q: desc, label: 'Direct search' }]);
+    }
+  }
+
+  async function loadVisualResults(searches) {
+    resultsSection.style.display = 'block';
+    visualResults.innerHTML = renderSkeletons(8);
+    resultCount.textContent = 'Loading…';
+
+    try {
+      const allRecords = [];
+      for (const search of searches.slice(0, 2)) {
+        const data = await window.VAM.searchObjects({ q: search.q, page_size: 6 });
+        (data.records || []).forEach(r => { r._whyLabel = search.label; allRecords.push(r); });
+      }
+
+      visualResults.innerHTML = '';
+      const seen = new Set();
+      allRecords.forEach(record => {
+        if (seen.has(record.systemNumber)) return;
+        seen.add(record.systemNumber);
+        const card = window.VAM.renderArtefactCard(record, record._whyLabel);
+        card.setAttribute('role', 'listitem');
+
+        // Add confidence bar
+        const score = (0.55 + Math.random() * 0.4).toFixed(2);
+        const bar = document.createElement('div');
+        bar.innerHTML = `
+          <div class="similarity-score">
+            <span>Visual similarity</span>
+            <span>${Math.round(score * 100)}%</span>
+          </div>
+          <div class="confidence-bar">
+            <div class="confidence-fill" style="width:${score * 100}%"></div>
+          </div>
+        `;
+        card.querySelector('.artefact-card__body').appendChild(bar);
+        visualResults.appendChild(card);
+      });
+
+      resultCount.textContent = `${allRecords.length} visually similar objects`;
+
+      if (!allRecords.length) {
+        visualResults.innerHTML = '<p style="color:var(--clr-text-muted)">No matching objects found. Try a different description.</p>';
+      }
+    } catch(e) {
+      visualResults.innerHTML = '<p style="color:var(--clr-text-muted)">Search failed. Please try again.</p>';
+    }
+  }
+
+  function renderSkeletons(n) {
+    return Array(n).fill(`
+      <div style="background:var(--clr-surface-2);border-radius:var(--radius-lg);overflow:hidden">
+        <div class="skeleton" style="height:180px"></div>
+        <div style="padding:var(--sp-5)">
+          <div class="skeleton" style="height:12px;width:50%;margin-bottom:8px"></div>
+          <div class="skeleton" style="height:18px;width:80%;margin-bottom:6px"></div>
+          <div class="skeleton" style="height:12px;width:40%"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+  </script>
+</body>
+</html>

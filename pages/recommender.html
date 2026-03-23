@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Discover artefacts personalised to your interests. Our bias-aware recommender surfaces unexpected connections across the V&A collection." />
+  <title>Discover — V&A AI Explorer</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    .discover-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 72px);
+    }
+    .discover-sidebar {
+      background: var(--clr-surface);
+      border-right: 1px solid var(--clr-border);
+      padding: var(--sp-6);
+      overflow-y: auto;
+      position: sticky;
+      top: 72px;
+      height: calc(100vh - 72px);
+    }
+    .discover-main {
+      padding: var(--sp-8) var(--sp-8);
+    }
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-6);
+      gap: var(--sp-4);
+    }
+    .results-count {
+      font-size: var(--fs-sm);
+      color: var(--clr-text-muted);
+    }
+    .serendipity-banner {
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-left: 3px solid var(--clr-accent);
+      border-radius: var(--radius-md);
+      padding: var(--sp-4) var(--sp-5);
+      margin-bottom: var(--sp-6);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-3);
+    }
+    .serendipity-banner__icon { color: var(--clr-accent); font-size: 1.2rem; flex-shrink: 0; }
+    .serendipity-banner h3 { font-size: var(--fs-sm); margin-bottom: var(--sp-1); }
+    .serendipity-banner p { font-size: var(--fs-xs); color: var(--clr-text-muted); line-height: var(--lh-loose); }
+    .why-recommended {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--clr-ai-badge-bg);
+      border-radius: var(--radius-sm);
+      font-size: var(--fs-xs);
+      color: var(--clr-text-muted);
+      margin-top: var(--sp-3);
+    }
+    .interest-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-1);
+      padding: var(--sp-1) var(--sp-3);
+      background: var(--clr-surface-3);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-full);
+      font-size: var(--fs-xs);
+      color: var(--clr-text-muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .interest-tag.selected {
+      background: var(--clr-accent-glow);
+      border-color: var(--clr-accent-dim);
+      color: var(--clr-accent);
+    }
+    .interest-tag:hover:not(.selected) { border-color: var(--clr-border-light); color: var(--clr-text); }
+    .interest-tag:focus-visible { outline: 2px solid var(--clr-accent); outline-offset: 2px; }
+    .discovery-mode {
+      display: flex;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-6);
+    }
+    .discovery-mode-btn {
+      flex: 1;
+      padding: var(--sp-3);
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      font-size: var(--fs-xs);
+      color: var(--clr-text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all var(--transition-fast);
+    }
+    .discovery-mode-btn.active {
+      border-color: var(--clr-accent-dim);
+      color: var(--clr-accent);
+      background: var(--clr-accent-glow);
+    }
+    .discovery-mode-btn:focus-visible { outline: 2px solid var(--clr-accent); outline-offset: 2px; }
+    .load-more-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: var(--sp-4);
+      margin-top: var(--sp-8);
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      color: var(--clr-text-muted);
+      font-size: var(--fs-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .load-more-btn:hover { background: var(--clr-surface-3); color: var(--clr-text); border-color: var(--clr-border-light); }
+    .load-more-btn:focus-visible { outline: 2px solid var(--clr-accent); outline-offset: 2px; }
+    @media (max-width: 1024px) {
+      .discover-layout { grid-template-columns: 1fr; }
+      .discover-sidebar { position: static; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
+        <span class="logo-vam">V&amp;A</span>
+        <span class="logo-divider" aria-hidden="true">|</span>
+        <span class="logo-sub">Collection Explorer</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul role="list">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="chatbot.html">Ask the Collection</a></li>
+          <li><a href="recommender.html" aria-current="page">Discover</a></li>
+          <li><a href="visual.html">Visual Search</a></li>
+          <li><a href="generative.html">Reimagine</a></li>
+          <li><a href="transparency.html">AI &amp; Trust</a></li>
+        </ul>
+      </nav>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="discover-layout">
+      <!-- Sidebar filters -->
+      <aside class="discover-sidebar" aria-label="Preferences and filters">
+        <div class="filter-panel" style="margin-bottom:var(--sp-5)">
+          <p class="filter-panel__title">Your interests</p>
+          <p style="font-size:var(--fs-xs);color:var(--clr-text-faint);margin-bottom:var(--sp-4);line-height:var(--lh-loose)">Select topics to shape your recommendations. Your choices stay on your device.</p>
+          <div class="filter-chips" id="interest-tags" role="group" aria-label="Interest topics"></div>
+        </div>
+
+        <div class="filter-panel" style="margin-bottom:var(--sp-5)">
+          <p class="filter-panel__title">Time period</p>
+          <div class="filter-chips" id="period-filters" role="group" aria-label="Time period filters"></div>
+        </div>
+
+        <div class="filter-panel" style="margin-bottom:var(--sp-5)">
+          <p class="filter-panel__title">Material</p>
+          <div class="filter-chips" id="material-filters" role="group" aria-label="Material filters"></div>
+        </div>
+
+        <div class="filter-panel">
+          <p class="filter-panel__title">Region / Origin</p>
+          <div class="filter-chips" id="region-filters" role="group" aria-label="Region filters"></div>
+        </div>
+
+        <button class="btn btn--primary" id="apply-filters" style="width:100%;margin-top:var(--sp-5);justify-content:center">
+          Apply filters
+        </button>
+        <button class="btn btn--ghost" id="reset-filters" style="width:100%;margin-top:var(--sp-2);justify-content:center">
+          Reset
+        </button>
+      </aside>
+
+      <!-- Main content -->
+      <div class="discover-main">
+        <div style="margin-bottom:var(--sp-6)">
+          <div class="ai-badge" style="margin-bottom:var(--sp-3)">✦ AI Tool — Recommender</div>
+          <h1 style="font-size:var(--fs-3xl);margin-bottom:var(--sp-2)">Discover the Collection</h1>
+          <p style="color:var(--clr-text-muted);max-width:560px">Personalised recommendations from 2.3 million objects. We surface unexpected connections and actively highlight under-represented collections.</p>
+        </div>
+
+        <!-- Discovery mode -->
+        <div class="discovery-mode" role="group" aria-label="Discovery mode">
+          <button class="discovery-mode-btn active" data-mode="personalised" type="button">✦ Personalised</button>
+          <button class="discovery-mode-btn" data-mode="serendipitous" type="button">🎲 Serendipitous</button>
+          <button class="discovery-mode-btn" data-mode="underrepresented" type="button">🌍 Underrepresented</button>
+        </div>
+
+        <div class="serendipity-banner" id="serendipity-banner" role="note">
+          <span class="serendipity-banner__icon">✦</span>
+          <div>
+            <h3>About these recommendations</h3>
+            <p>Recommendations are generated from the V&A API based on your selected interests. We deliberately include objects from less commonly viewed collections. <a href="transparency.html" style="color:var(--clr-accent-dim)">How this works →</a></p>
+          </div>
+        </div>
+
+        <div class="results-header">
+          <p class="results-count" id="results-count" aria-live="polite"></p>
+          <div style="display:flex;gap:var(--sp-2);">
+            <label for="sort-select" class="sr-only">Sort by</label>
+            <select id="sort-select" style="min-width:160px;padding:var(--sp-2) var(--sp-3);" aria-label="Sort results">
+              <option value="relevance">Sort: Relevance</option>
+              <option value="date_asc">Date: Oldest first</option>
+              <option value="date_desc">Date: Newest first</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="artefact-grid" id="results-grid" aria-label="Recommended artefacts" role="list">
+          <!-- populated by JS -->
+        </div>
+        <button class="load-more-btn" id="load-more" aria-label="Load more artefacts" style="display:none">
+          Load more objects ↓
+        </button>
+
+        <div class="bias-notice" style="margin-top:var(--sp-8)">
+          <span class="bias-notice__icon">ℹ</span>
+          <span>Our recommendations come from a dataset that may over-represent certain cultures or periods. We are actively working to improve this. <a href="transparency.html" style="color:var(--clr-accent-dim)">Read our bias statement.</a></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../main.js"></script>
+  <script>
+  'use strict';
+
+  const INTERESTS = [
+    { label: 'Fashion & Textiles', q: 'fashion textile' },
+    { label: 'Ceramics', q: 'ceramics pottery' },
+    { label: 'Jewellery', q: 'jewellery' },
+    { label: 'Furniture', q: 'furniture' },
+    { label: 'Prints & Drawings', q: 'print drawing' },
+    { label: 'Metalwork', q: 'metalwork silver gold' },
+    { label: 'Glass', q: 'glass' },
+    { label: 'Photography', q: 'photograph' },
+    { label: 'Sculpture', q: 'sculpture' },
+    { label: 'Architecture', q: 'architecture' },
+  ];
+
+  const PERIODS = [
+    { label: 'Medieval', range: [1000, 1500] },
+    { label: '16th–17th c.', range: [1500, 1700] },
+    { label: '18th century', range: [1700, 1800] },
+    { label: 'Victorian', range: [1837, 1901] },
+    { label: '20th century', range: [1900, 2000] },
+  ];
+
+  const MATERIALS = [
+    { label: 'Silk', id: 'AAT11029' },
+    { label: 'Glass', id: 'AAT10797' },
+    { label: 'Silver', id: 'AAT11029' },
+    { label: 'Porcelain', id: 'AAT7521' },
+    { label: 'Wool', id: 'AAT11011' },
+    { label: 'Ivory', id: 'AAT12309' },
+  ];
+
+  const REGIONS = [
+    { label: 'Britain', q: 'Britain' },
+    { label: 'Japan', q: 'Japan' },
+    { label: 'India', q: 'India' },
+    { label: 'China', q: 'China' },
+    { label: 'Italy', q: 'Italy' },
+    { label: 'Middle East', q: 'Middle East' },
+  ];
+
+  const MODES = {
+    personalised: { label: 'Personalised', info: 'Recommendations based on your selected interests, from V&A API data.' },
+    serendipitous: { label: 'Serendipitous', info: 'Random selection across the whole collection — expect the unexpected.' },
+    underrepresented: { label: 'Underrepresented', info: 'Deliberately surfaces objects from collections that are less commonly explored.' }
+  };
+
+  let selectedInterests = new Set();
+  let selectedPeriod = null;
+  let selectedMaterial = null;
+  let selectedRegion = null;
+  let currentMode = 'personalised';
+  let currentPage = 1;
+  let totalRecords = 0;
+
+  // Render filter chips
+  function renderChips(container, items, onSelect, type) {
+    container.innerHTML = '';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-chip';
+      btn.textContent = item.label;
+      btn.type = 'button';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.addEventListener('click', () => {
+        const isSelected = btn.classList.toggle('active');
+        btn.setAttribute('aria-pressed', String(isSelected));
+        onSelect(item, isSelected);
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  renderChips(document.getElementById('interest-tags'), INTERESTS,
+    (item, sel) => sel ? selectedInterests.add(item.q) : selectedInterests.delete(item.q), 'interest');
+
+  renderChips(document.getElementById('period-filters'), PERIODS,
+    (item, sel) => {
+      document.querySelectorAll('#period-filters .filter-chip').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed','false'); });
+      if (sel) { selectedPeriod = item; document.querySelector('#period-filters .filter-chip:focus-visible')?.classList.add('active'); }
+      else selectedPeriod = null;
+    }, 'period');
+
+  renderChips(document.getElementById('material-filters'), MATERIALS,
+    (item, sel) => selectedMaterial = sel ? item : null, 'material');
+
+  renderChips(document.getElementById('region-filters'), REGIONS,
+    (item, sel) => selectedRegion = sel ? item : null, 'region');
+
+  // Mode buttons
+  document.querySelectorAll('.discovery-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.discovery-mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMode = btn.dataset.mode;
+      updateBanner();
+      loadResults(true);
+    });
+  });
+
+  function updateBanner() {
+    const banner = document.getElementById('serendipity-banner');
+    banner.querySelector('h3').textContent = MODES[currentMode].label;
+    banner.querySelector('p').textContent = MODES[currentMode].info + ' ';
+    const link = document.createElement('a');
+    link.href = 'transparency.html';
+    link.style.color = 'var(--clr-accent-dim)';
+    link.textContent = 'How this works →';
+    banner.querySelector('p').appendChild(link);
+  }
+
+  document.getElementById('apply-filters').addEventListener('click', () => loadResults(true));
+  document.getElementById('reset-filters').addEventListener('click', () => {
+    selectedInterests.clear();
+    selectedMaterial = null;
+    selectedPeriod = null;
+    selectedRegion = null;
+    document.querySelectorAll('.filter-chip').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed','false'); });
+    loadResults(true);
+  });
+  document.getElementById('load-more').addEventListener('click', () => { currentPage++; loadResults(false); });
+
+  async function buildSearchParams() {
+    const params = { page_size: 12, page: currentPage };
+
+    if (currentMode === 'serendipitous') {
+      // Random letter/category
+      const letters = 'abcdefghijklmnoprstw';
+      params.q = letters[Math.floor(Math.random() * letters.length)];
+    } else if (currentMode === 'underrepresented') {
+      const underrep = ['Korea','Peru','Mali','Ethiopia','Indonesia','Mexico','Iran','Nigeria'];
+      params.q = underrep[Math.floor(Math.random() * underrep.length)];
+    } else {
+      const qs = Array.from(selectedInterests);
+      if (qs.length) params.q = qs.join(' ');
+      else params.q = 'art design';
+    }
+
+    if (selectedMaterial) params.id_material = selectedMaterial.id;
+    if (selectedRegion) params.q = (params.q || '') + ' ' + selectedRegion.q;
+    return params;
+  }
+
+  const WHY_LABELS = {
+    personalised: 'Matches your interests',
+    serendipitous: 'Random discovery',
+    underrepresented: 'Underrepresented collection',
+  };
+
+  async function loadResults(reset) {
+    if (reset) { currentPage = 1; }
+    const grid = document.getElementById('results-grid');
+    const loadMoreBtn = document.getElementById('load-more');
+    const countEl = document.getElementById('results-count');
+
+    if (reset) {
+      grid.innerHTML = '';
+      // Skeleton loading
+      for (let i = 0; i < 8; i++) {
+        const skel = document.createElement('div');
+        skel.style.cssText = 'background:var(--clr-surface-2);border-radius:var(--radius-lg);overflow:hidden;';
+        skel.innerHTML = '<div class="skeleton" style="height:180px"></div><div style="padding:var(--sp-5)"><div class="skeleton" style="height:12px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:18px;width:80%;margin-bottom:6px"></div><div class="skeleton" style="height:12px;width:40%"></div></div>';
+        grid.appendChild(skel);
+      }
+    }
+
+    try {
+      const params = await buildSearchParams();
+      const data = await window.VAM.searchObjects(params);
+      const records = data.records || [];
+      totalRecords = data.info?.record_count || 0;
+
+      if (reset) grid.innerHTML = '';
+
+      countEl.textContent = `Showing objects from ${totalRecords.toLocaleString()} results`;
+
+      const why = WHY_LABELS[currentMode];
+      records.forEach(record => {
+        const card = window.VAM.renderArtefactCard(record, why);
+        card.setAttribute('role', 'listitem');
+        grid.appendChild(card);
+      });
+
+      loadMoreBtn.style.display = (currentPage * 12 < totalRecords) ? 'flex' : 'none';
+
+    } catch(e) {
+      if (reset) {
+        grid.innerHTML = `<p style="color:var(--clr-text-muted);padding:var(--sp-8)">Unable to load results. Please check your connection.</p>`;
+      }
+    }
+  }
+
+  // Initial load
+  loadResults(true);
+  </script>
+</body>
+</html>

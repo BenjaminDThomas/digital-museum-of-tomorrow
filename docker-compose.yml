@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  vam-explorer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vam-ai-explorer
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - NGINX_ENTRYPOINT_QUIET_LOGS=1
+    labels:
+      - "com.museum.app=vam-ai-explorer"
+      - "com.museum.version=1.0.0"

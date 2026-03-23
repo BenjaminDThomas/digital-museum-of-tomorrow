@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Reimagine V&A artefacts through generative AI. Explore what an object might look like through different cultural lenses, periods, or artistic styles." />
+  <title>Reimagine — V&A AI Explorer</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    .reimagine-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-8);
+      min-height: 80vh;
+    }
+    .reimagine-input-panel {
+      padding: var(--sp-8) 0;
+    }
+    .reimagine-output-panel {
+      padding: var(--sp-8) 0;
+      border-left: 1px solid var(--clr-border);
+      padding-left: var(--sp-8);
+    }
+    .artefact-search-box {
+      position: relative;
+      margin-bottom: var(--sp-6);
+    }
+    .search-results-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      z-index: 50;
+      display: none;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .search-results-dropdown.open { display: block; }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      color: var(--clr-text);
+    }
+    .dropdown-item:hover, .dropdown-item:focus { background: var(--clr-surface-3); outline: none; }
+    .dropdown-item img { width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-sm); flex-shrink: 0; }
+    .dropdown-item__title { font-size: var(--fs-sm); }
+    .dropdown-item__meta { font-size: var(--fs-xs); color: var(--clr-text-muted); }
+    .selected-artefact {
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-5);
+      margin-bottom: var(--sp-6);
+      display: none;
+    }
+    .selected-artefact.show { display: flex; gap: var(--sp-4); align-items: flex-start; }
+    .selected-artefact img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md); flex-shrink: 0; }
+    .lens-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-6);
+    }
+    .lens-card {
+      padding: var(--sp-4);
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: left;
+    }
+    .lens-card.selected {
+      border-color: var(--clr-accent-dim);
+      background: var(--clr-accent-glow);
+    }
+    .lens-card:hover:not(.selected) { border-color: var(--clr-border-light); }
+    .lens-card:focus-visible { outline: 2px solid var(--clr-accent); outline-offset: 2px; }
+    .lens-card__icon { font-size: 1.5rem; margin-bottom: var(--sp-2); }
+    .lens-card__title { font-size: var(--fs-sm); font-weight: var(--fw-medium); margin-bottom: var(--sp-1); }
+    .lens-card__desc { font-size: var(--fs-xs); color: var(--clr-text-muted); line-height: var(--lh-snug); }
+    .generation-output {
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-8);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-4);
+    }
+    .generation-output.loading {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .generation-label {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      background: rgba(201, 168, 76, 0.08);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      border-radius: var(--radius-md);
+      font-size: var(--fs-xs);
+      color: var(--clr-text-muted);
+    }
+    .generation-label strong { color: var(--clr-accent); }
+    .generation-text {
+      font-family: var(--ff-display);
+      font-size: var(--fs-lg);
+      line-height: var(--lh-loose);
+      font-weight: var(--fw-light);
+      font-style: italic;
+    }
+    .generation-analysis {
+      font-size: var(--fs-sm);
+      color: var(--clr-text-muted);
+      line-height: var(--lh-loose);
+    }
+    .generation-connections h4 {
+      font-family: var(--ff-body);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-medium);
+      letter-spacing: var(--ls-wider);
+      text-transform: uppercase;
+      color: var(--clr-text-faint);
+      margin-bottom: var(--sp-3);
+    }
+    .connection-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+    .connection-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3);
+      background: var(--clr-surface-3);
+      border-radius: var(--radius-md);
+      font-size: var(--fs-sm);
+      color: var(--clr-text-muted);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .connection-item:hover { background: var(--clr-surface-2); color: var(--clr-text); }
+    .spinning { animation: spin 1.5s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 900px) {
+      .reimagine-layout { grid-template-columns: 1fr; }
+      .reimagine-output-panel { border-left: none; border-top: 1px solid var(--clr-border); padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
+        <span class="logo-vam">V&amp;A</span>
+        <span class="logo-divider" aria-hidden="true">|</span>
+        <span class="logo-sub">Collection Explorer</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul role="list">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="chatbot.html">Ask the Collection</a></li>
+          <li><a href="recommender.html">Discover</a></li>
+          <li><a href="visual.html">Visual Search</a></li>
+          <li><a href="generative.html" aria-current="page">Reimagine</a></li>
+          <li><a href="transparency.html">AI &amp; Trust</a></li>
+        </ul>
+      </nav>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container" style="padding-top:var(--sp-12)">
+      <div style="max-width:640px;margin-bottom:var(--sp-10)">
+        <div class="ai-badge" style="margin-bottom:var(--sp-4)">✦ AI Tool — Generative</div>
+        <h1 style="font-size:clamp(var(--fs-2xl),4vw,var(--fs-4xl));margin-bottom:var(--sp-4)">Reimagine an artefact</h1>
+        <p style="color:var(--clr-text-muted);line-height:var(--lh-loose)">Choose an object from the collection and a interpretive lens. AI will explore how the object connects to other cultures, periods, and ideas — always clearly labelled as AI interpretation, not fact.</p>
+      </div>
+
+      <div class="reimagine-layout">
+        <!-- Input panel -->
+        <section aria-label="Choose artefact and lens">
+          <!-- Step 1: Choose artefact -->
+          <div style="margin-bottom:var(--sp-8)">
+            <p class="section-eyebrow">Step 1 — Choose an artefact</p>
+            <div class="artefact-search-box">
+              <label for="artefact-search" class="sr-only">Search for an artefact</label>
+              <input type="search" id="artefact-search" placeholder="Search collection — e.g. 'Japanese vase', 'Victorian dress'…" />
+              <div class="search-results-dropdown" id="search-dropdown" role="listbox" aria-label="Artefact search results"></div>
+            </div>
+
+            <div class="selected-artefact" id="selected-artefact" aria-live="polite" aria-label="Selected artefact">
+              <img id="selected-img" src="" alt="" />
+              <div>
+                <p style="font-size:var(--fs-xs);color:var(--clr-text-faint);letter-spacing:var(--ls-wider);text-transform:uppercase;margin-bottom:var(--sp-1)">Selected</p>
+                <p id="selected-title" style="font-family:var(--ff-display);font-size:var(--fs-lg);font-weight:300"></p>
+                <p id="selected-date" style="font-size:var(--fs-xs);color:var(--clr-text-muted);margin-top:var(--sp-1)"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Choose lens -->
+          <div style="margin-bottom:var(--sp-8)">
+            <p class="section-eyebrow">Step 2 — Choose an interpretive lens</p>
+            <div class="lens-grid" role="radiogroup" aria-label="Interpretive lens options" id="lens-grid"></div>
+          </div>
+
+          <!-- Step 3: Custom prompt -->
+          <div style="margin-bottom:var(--sp-8)">
+            <p class="section-eyebrow">Step 3 — Add your own question (optional)</p>
+            <div class="field-group">
+              <label for="custom-prompt">Your question or focus</label>
+              <textarea id="custom-prompt" rows="2" placeholder="e.g. How might this design have influenced later movements? What materials could replace these today?"></textarea>
+            </div>
+          </div>
+
+          <button class="btn btn--primary" id="generate-btn" style="width:100%;justify-content:center" disabled>
+            ✦ Generate interpretation
+          </button>
+
+          <div class="bias-notice" style="margin-top:var(--sp-5)">
+            <span class="bias-notice__icon">⚠</span>
+            <span>All AI-generated interpretations are clearly labelled. They are creative and educational — not authoritative museum statements. Cultural interpretations may be incomplete or imperfect.</span>
+          </div>
+        </section>
+
+        <!-- Output panel -->
+        <section aria-label="Generated interpretation" aria-live="polite">
+          <p class="section-eyebrow" style="margin-bottom:var(--sp-4)">AI Interpretation</p>
+          <div class="generation-output" id="generation-output">
+            <p style="color:var(--clr-text-faint);text-align:center;font-style:italic;font-family:var(--ff-display);font-size:var(--fs-xl)">
+              Choose an artefact and lens to begin
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../main.js"></script>
+  <script>
+  'use strict';
+
+  const LENSES = [
+    { id: 'cultural', icon: '🌍', title: 'Cultural connections', desc: 'How does this object connect to similar traditions in other cultures?' },
+    { id: 'historical', icon: '⏳', title: 'Through time', desc: 'How would this object have been understood in different time periods?' },
+    { id: 'material', icon: '🔬', title: 'Material stories', desc: 'What journeys did the materials take to become this object?' },
+    { id: 'maker', icon: '🤲', title: 'The maker\'s hand', desc: 'Who made this and what was their world like?' },
+    { id: 'symbol', icon: '✦', title: 'Symbols and meaning', desc: 'What symbols, motifs, or hidden meanings does this carry?' },
+    { id: 'contemporary', icon: '🌱', title: 'Contemporary resonance', desc: 'How does this object speak to contemporary issues?' },
+  ];
+
+  const GENERATIVE_SYSTEM = `You are a thoughtful, imaginative museum educator at the Victoria & Albert Museum. Your role is to create engaging, accurate, and culturally sensitive interpretations of museum artefacts from specific perspectives.
+
+When given an artefact and an interpretive lens, you:
+1. Write a poetic, evocative opening passage (2-3 sentences) about the artefact from that lens
+2. Provide a substantive cultural/historical analysis (3-4 paragraphs) that is educational and nuanced
+3. Surface 3-4 specific connections to other V&A objects or broader cultural movements as search suggestions
+4. Always acknowledge limitations and areas where interpretation is uncertain
+
+Format your response as JSON:
+{
+  "opening": "Poetic opening passage",
+  "analysis": "Full educational analysis text",
+  "connections": [
+    {"label": "Connection title", "search": "V&A API search term", "reason": "Why this connects"},
+    ...
+  ],
+  "caveats": "Any important caveats about the interpretation"
+}
+
+Be culturally sensitive, avoid stereotypes, and acknowledge when historical accounts were written from a colonial or limited perspective. This content will be clearly labelled as AI interpretation.`;
+
+  const OLLAMA_CHAT_URL = 'http://localhost:11434/api/chat';
+  const OLLAMA_TAGS_URL = 'http://localhost:11434/api/tags';
+
+  let selectedArtefact = null;
+  let selectedLens = null;
+  let ollamaChecked = false;
+
+  async function checkOllamaApi() {
+    if (ollamaChecked) return;
+    const response = await fetch(OLLAMA_TAGS_URL, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error(`Ollama health check failed: ${response.status}`);
+    }
+    ollamaChecked = true;
+  }
+
+  async function callOllamaJson(systemPrompt, userPrompt) {
+    await checkOllamaApi();
+
+    const response = await fetch(OLLAMA_CHAT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'phi3',
+        stream: false,
+        options: { num_predict: 1000 },
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = (data.message?.content || '').replace(/```json|```/g, '').trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON object found in model response');
+    return JSON.parse(jsonMatch[0]);
+  }
+
+  // Render lens cards
+  const lensGrid = document.getElementById('lens-grid');
+  LENSES.forEach(lens => {
+    const card = document.createElement('button');
+    card.className = 'lens-card';
+    card.type = 'button';
+    card.setAttribute('aria-pressed', 'false');
+    card.dataset.id = lens.id;
+    card.innerHTML = `
+      <div class="lens-card__icon" aria-hidden="true">${lens.icon}</div>
+      <div class="lens-card__title">${lens.title}</div>
+      <div class="lens-card__desc">${lens.desc}</div>
+    `;
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.lens-card').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
+      card.classList.add('selected');
+      card.setAttribute('aria-pressed', 'true');
+      selectedLens = lens;
+      updateGenerateBtn();
+    });
+    lensGrid.appendChild(card);
+  });
+
+  // Artefact search
+  const artefactSearch = document.getElementById('artefact-search');
+  const dropdown = document.getElementById('search-dropdown');
+  let searchTimeout;
+
+  artefactSearch.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    const val = artefactSearch.value.trim();
+    if (val.length < 3) { dropdown.classList.remove('open'); return; }
+    searchTimeout = setTimeout(() => doArtefactSearch(val), 400);
+  });
+
+  artefactSearch.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { dropdown.classList.remove('open'); artefactSearch.focus(); }
+    if (e.key === 'ArrowDown') {
+      const first = dropdown.querySelector('.dropdown-item');
+      if (first) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!artefactSearch.closest('.artefact-search-box').contains(e.target)) dropdown.classList.remove('open');
+  });
+
+  async function doArtefactSearch(q) {
+    try {
+      const data = await window.VAM.searchObjects({ q, page_size: 5 });
+      const records = data.records || [];
+      dropdown.innerHTML = '';
+      if (!records.length) {
+        dropdown.innerHTML = '<p style="padding:var(--sp-4);font-size:var(--fs-sm);color:var(--clr-text-muted)">No results found</p>';
+        dropdown.classList.add('open');
+        return;
+      }
+      records.forEach(r => {
+        const item = document.createElement('button');
+        item.className = 'dropdown-item';
+        item.type = 'button';
+        item.setAttribute('role', 'option');
+        const imgUrl = window.VAM.getArtefactImageUrl(r, 'thumb');
+        const title = r._primaryTitle || r.objectType || 'Object';
+        const date = window.VAM.formatDateRange(r);
+        item.innerHTML = `
+          ${imgUrl ? `<img src="${imgUrl}" alt="" />` : '<div style="width:40px;height:40px;background:var(--clr-surface-3);border-radius:var(--radius-sm);flex-shrink:0"></div>'}
+          <div>
+            <div class="dropdown-item__title">${window.VAM.escHtml(title.slice(0,50))}</div>
+            <div class="dropdown-item__meta">${window.VAM.escHtml(r.objectType || '')} · ${window.VAM.escHtml(date)}</div>
+          </div>
+        `;
+        item.addEventListener('click', () => selectArtefact(r));
+        item.addEventListener('keydown', e => {
+          if (e.key === 'ArrowDown') { e.preventDefault(); item.nextElementSibling?.focus(); }
+          if (e.key === 'ArrowUp') { e.preventDefault(); item.previousElementSibling?.focus() || artefactSearch.focus(); }
+          if (e.key === 'Escape') { dropdown.classList.remove('open'); artefactSearch.focus(); }
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.classList.add('open');
+    } catch(e) {}
+  }
+
+  function selectArtefact(record) {
+    selectedArtefact = record;
+    dropdown.classList.remove('open');
+    const title = record._primaryTitle || record.objectType || 'Object';
+    artefactSearch.value = title;
+
+    const imgUrl = window.VAM.getArtefactImageUrl(record, 'medium');
+    const selEl = document.getElementById('selected-artefact');
+    const selImg = document.getElementById('selected-img');
+    const selTitle = document.getElementById('selected-title');
+    const selDate = document.getElementById('selected-date');
+
+    selTitle.textContent = title;
+    selDate.textContent = window.VAM.formatDateRange(record) + (record.objectType ? ' · ' + record.objectType : '');
+    if (imgUrl) { selImg.src = imgUrl; selImg.alt = title; selImg.style.display = 'block'; }
+    else selImg.style.display = 'none';
+    selEl.classList.add('show');
+    updateGenerateBtn();
+  }
+
+  function updateGenerateBtn() {
+    document.getElementById('generate-btn').disabled = !(selectedArtefact && selectedLens);
+  }
+
+  document.getElementById('generate-btn').addEventListener('click', generateInterpretation);
+
+  async function generateInterpretation() {
+    if (!selectedArtefact || !selectedLens) return;
+
+    const output = document.getElementById('generation-output');
+    output.className = 'generation-output loading';
+    output.innerHTML = `
+      <div style="font-size:2rem;display:inline-block" class="spinning" aria-hidden="true">✦</div>
+      <p style="color:var(--clr-text-muted);font-size:var(--fs-sm)">Generating interpretation…</p>
+    `;
+
+    const title = selectedArtefact._primaryTitle || selectedArtefact.objectType || 'Object';
+    const desc = selectedArtefact._primaryDescription?.[0]?.value || selectedArtefact.briefDescription || '';
+    const date = window.VAM.formatDateRange(selectedArtefact);
+    const customQ = document.getElementById('custom-prompt').value.trim();
+
+    const userPrompt = `
+Artefact: ${title}
+Type: ${selectedArtefact.objectType || 'Unknown'}
+Date: ${date}
+Description: ${desc}
+Lens: ${selectedLens.title} — ${selectedLens.desc}
+${customQ ? `Additional question: ${customQ}` : ''}
+
+Please generate an interpretation of this artefact through the "${selectedLens.title}" lens.`;
+
+    try {
+      const parsed = await callOllamaJson(GENERATIVE_SYSTEM, userPrompt);
+
+      output.className = 'generation-output';
+      output.innerHTML = `
+        <div class="generation-label">
+          <strong>✦ AI-generated interpretation</strong> — <span>Lens: ${selectedLens.icon} ${selectedLens.title}</span>
+        </div>
+        <div class="generation-text" id="gen-opening"></div>
+        <div class="generation-analysis" id="gen-analysis"></div>
+        ${parsed.caveats ? `<div class="bias-notice"><span class="bias-notice__icon">ℹ</span><span>${window.VAM.escHtml(parsed.caveats)}</span></div>` : ''}
+        ${parsed.connections?.length ? `
+          <div class="generation-connections">
+            <h4>Explore further</h4>
+            <div class="connection-list" id="connection-list"></div>
+          </div>` : ''}
+      `;
+
+      document.getElementById('gen-opening').textContent = parsed.opening || '';
+      document.getElementById('gen-analysis').textContent = parsed.analysis || '';
+
+      if (parsed.connections) {
+        const connList = document.getElementById('connection-list');
+        parsed.connections.forEach(conn => {
+          const item = document.createElement('button');
+          item.className = 'connection-item';
+          item.type = 'button';
+          item.innerHTML = `
+            <span style="font-size:1rem;flex-shrink:0">→</span>
+            <div>
+              <div style="font-size:var(--fs-sm);color:var(--clr-text)">${window.VAM.escHtml(conn.label)}</div>
+              <div style="font-size:var(--fs-xs)">${window.VAM.escHtml(conn.reason)}</div>
+            </div>
+          `;
+          item.addEventListener('click', () => {
+            window.open(`https://collections.vam.ac.uk/search/?q=${encodeURIComponent(conn.search)}`, '_blank', 'noopener,noreferrer');
+          });
+          connList?.appendChild(item);
+        });
+      }
+
+    } catch(e) {
+      output.className = 'generation-output';
+      output.innerHTML = '<p style="color:var(--clr-text-muted)">Could not generate interpretation. Please try again.</p>';
+    }
+  }
+  </script>
+</body>
+</html>

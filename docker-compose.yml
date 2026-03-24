@@ -14,3 +14,21 @@ services:
     labels:
       - "com.museum.app=vam-ai-explorer"
       - "com.museum.version=1.0.0"
+
+  sd-api:
+    build:
+      context: ./sd-server
+      dockerfile: Dockerfile
+    container_name: sd-api
+    ports:
+      - "7860:7860"
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - MODEL_ID=runwayml/stable-diffusion-v1-5

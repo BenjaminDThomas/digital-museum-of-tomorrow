@@ -91,12 +91,16 @@
 
         <!-- Output panel -->
         <section aria-label="Generated interpretation" aria-live="polite">
-          <p class="section-eyebrow" style="margin-bottom:var(--sp-4)">AI Interpretation</p>
+          <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4)">
+            <p class="section-eyebrow" style="margin-bottom:0">AI Interpretation</p>
+            <span class="sd-status-badge" id="sd-status-badge" aria-live="polite"></span>
+          </div>
           <div class="generation-output" id="generation-output">
             <p style="color:var(--clr-text-faint);text-align:center;font-style:italic;font-family:var(--ff-display);font-size:var(--fs-xl)">
               Choose an artefact and lens to begin
             </p>
           </div>
+          <div class="sd-output" id="sd-output" aria-live="polite" aria-label="Visual reimagining"></div>
         </section>
       </div>
     </div>
@@ -159,7 +163,8 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'phi3:mini',
+        model: 'llama3.2',
+        format: 'json',
         stream: false,
         options: { num_predict: 1000 },
         messages: [
@@ -175,9 +180,18 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
 
     const data = await response.json();
     const text = (data.message?.content || '').replace(/```json|```/g, '').trim();
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON object found in model response');
-    return JSON.parse(jsonMatch[0]);
+
+    try {
+      return JSON.parse(text);
+    } catch (_) {
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Text model did not return valid JSON.');
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch (parseErr) {
+        throw new Error(`Text model JSON parse failed: ${parseErr.message}`);
+      }
+    }
   }
 
   // Render lens cards
@@ -282,6 +296,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     else selImg.style.display = 'none';
     selEl.classList.add('show');
     updateGenerateBtn();
+    checkSdApi();
   }
 
   function updateGenerateBtn() {
@@ -292,6 +307,12 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
 
   async function generateInterpretation() {
     if (!selectedArtefact || !selectedLens) return;
+
+    // Clear previous SD output and fire visual reimagining in parallel with text
+    const sdOutputEl = document.getElementById('sd-output');
+    if (sdOutputEl) { sdOutputEl.innerHTML = ''; sdOutputEl.className = 'sd-output'; }
+    const customQForSd = document.getElementById('custom-prompt').value.trim();
+    runSdReimagining(selectedLens.id, customQForSd);
 
     const output = document.getElementById('generation-output');
     output.className = 'generation-output loading';
@@ -358,9 +379,121 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
 
     } catch(e) {
       output.className = 'generation-output';
-      output.innerHTML = '<p style="color:var(--clr-text-muted)">Could not generate interpretation. Please try again.</p>';
+      output.innerHTML = `
+        <p style="color:var(--clr-text-muted)">
+          <strong>Could not generate interpretation.</strong> ${window.VAM.escHtml(e?.message || 'Please try again.')}
+        </p>
+      `;
     }
   }
+
+    /* =============================================
+      Visual reimagining via AUTOMATIC1111 Stable Diffusion
+      Fires automatically alongside text interpretation.
+      The lens choice determines the visual style prompt.
+      Targets the SD WebUI REST API on port 7860.
+      ============================================= */
+    const SD_TXT2IMG_URL  = 'http://localhost:7860/sdapi/v1/txt2img';
+    const SD_MODELS_URL   = 'http://localhost:7860/sdapi/v1/sd-models';
+    const sdStatusBadge = document.getElementById('sd-status-badge');
+
+  // Maps each interpretive lens to a Stable Diffusion visual style
+  const SD_LENS_PROMPTS = {
+    cultural:    'cross-cultural artistic fusion, world art traditions, multicultural decorative motifs',
+    historical:  'historical period art style, period-accurate aesthetic, art history reimagining',
+    material:    'rich material texture detail, artisan craftsmanship, raw materials close-up',
+    maker:       'handcraft workshop aesthetic, traditional making technique, artisan detail',
+    symbol:      'ornate symbolic iconography, decorative motifs, sacred geometry patterns',
+    contemporary:'contemporary modern art reinterpretation, minimalist redesign, modern aesthetic',
+  };
+
+  async function checkSdApi() {
+    try {
+      const res = await fetch(SD_MODELS_URL, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const models = await res.json();
+        const ready = Array.isArray(models) && models.length > 0;
+        sdStatusBadge.textContent = ready ? '● Stable Diffusion ready' : '● No SD model loaded';
+        sdStatusBadge.className   = ready ? 'sd-status-badge sd-status-badge--online' : 'sd-status-badge sd-status-badge--offline';
+        return ready;
+      }
+    } catch (_) {}
+    sdStatusBadge.textContent = '● Stable Diffusion offline';
+    sdStatusBadge.className = 'sd-status-badge sd-status-badge--offline';
+    return false;
+  }
+
+  async function runSdReimagining(lensId, customQ) {
+    const sdOut = document.getElementById('sd-output');
+    if (!sdOut) return;
+
+    const lensStyle = SD_LENS_PROMPTS[lensId] || 'artistic reimagining';
+    const artefactTitle = selectedArtefact._primaryTitle || selectedArtefact.objectType || 'artefact';
+    const artefactDesc  = selectedArtefact._primaryDescription?.[0]?.value || selectedArtefact.briefDescription || '';
+    const descPart = artefactDesc ? `, ${artefactDesc.slice(0, 120)}` : '';
+    const customPart = customQ ? `, ${customQ}` : '';
+    const prompt = `${artefactTitle}${descPart}, ${lensStyle}${customPart}, museum quality, detailed, high resolution`;
+
+    sdOut.className = 'sd-output sd-output--loading';
+    sdOut.innerHTML = `
+      <div class="sd-output__spinner" aria-hidden="true">✦</div>
+      <p style="color:var(--clr-text-muted);font-size:var(--fs-sm)">Generating visual reimagining — this may take 20–60 seconds…</p>
+    `;
+
+    try {
+      const response = await fetch(SD_TXT2IMG_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: prompt,
+          negative_prompt: 'blurry, ugly, watermark, text, low quality, deformed',
+          steps: 20,
+          width: 512,
+          height: 512,
+          cfg_scale: 7,
+          sampler_name: 'Euler a'
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`Stable Diffusion error ${response.status}: ${errText.slice(0, 200)}`);
+      }
+
+      const data = await response.json();
+      const outputBase64 = data.images?.[0];
+      if (!outputBase64) {
+        throw new Error('Stable Diffusion returned no image data.');
+      }
+
+      const escapedTitle = window.VAM.escHtml(artefactTitle);
+
+      sdOut.className = 'sd-output sd-output--result';
+      sdOut.innerHTML = `
+        <div class="sd-result-label">✦ AI-generated visual — Stable Diffusion · ${window.VAM.escHtml(lensStyle)}</div>
+        <figure class="sd-figure sd-figure--single">
+          <img src="data:image/png;base64,${outputBase64}" alt="AI visual reimagining of ${escapedTitle}" />
+          <figcaption>${escapedTitle} — reimagined through ${window.VAM.escHtml(selectedLens.title)}</figcaption>
+        </figure>
+        <a class="btn btn--ghost sd-download-btn"
+           href="data:image/png;base64,${outputBase64}"
+           download="reimagined-artefact.png"
+           aria-label="Download reimagined image as PNG">
+          ↓ Download PNG
+        </a>
+      `;
+    } catch (err) {
+      sdOut.className = 'sd-output sd-output--error';
+      sdOut.innerHTML = `
+        <p style="color:var(--clr-text-muted);font-size:var(--fs-sm)">
+          <strong>Visual reimagining unavailable.</strong> ${window.VAM.escHtml(err.message)}
+        </p>
+      `;
+    }
+  }
+
+  // Initial health check on page load
+  checkSdApi();
   </script>
 </body>
 </html>

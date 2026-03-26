@@ -346,7 +346,7 @@ function initTransparencyPage() {
   const faqs = [
     {
       q: 'Is the AI making things up about artefacts?',
-      a: 'The chatbot draws on actual V&A Collections API data. However, large language models can sometimes combine information incorrectly or fill in gaps with plausible but inaccurate details — this is called "hallucination". Every AI response includes a disclaimer and links to the authoritative V&A record. Always verify important information with V&A curators or official collections pages.'
+      a: 'The chatbot draws on actual V&A Collections API data. However, large language models can sometimes combine information incorrectly or fill in gaps with plausible but inaccurate details — this is called "hallucination". Every AI response includes a disclaimer and links to the authoritative source record. This project is not affiliated with the V&A. Always verify important information with official collections pages.'
     },
     {
       q: 'Does the recommender create a filter bubble?',
@@ -354,7 +354,7 @@ function initTransparencyPage() {
     },
     {
       q: 'Why are some artefact descriptions in old or offensive language?',
-      a: 'The V&A holds records dating back to the 19th century. Some historical catalogue entries use terminology that is now considered outdated, disrespectful, or reflecting colonial viewpoints. We display this data as it exists in the API, but our AI tools are instructed to flag such language where possible. We are actively working with the museum to improve catalogue descriptions. If you spot something harmful, please report it using the link above.'
+      a: 'Collection records in the V&A Collections API date back to the 19th century. Some historical catalogue entries use terminology that is now considered outdated, disrespectful, or reflecting colonial viewpoints. We display this data as it exists in the API, but our AI tools are instructed to flag such language where possible. If you spot something harmful, please report it using the link above.'
     },
     {
       q: 'How is my data used?',
@@ -362,7 +362,7 @@ function initTransparencyPage() {
     },
     {
       q: 'Does the AI represent all cultures equally?',
-      a: 'No — and we are honest about this. The V&A\'s own collection is significantly weighted toward European, South Asian, and East Asian objects due to historical acquisition patterns. Our AI tools inherit this bias. In the Discover tool, we have an "Underrepresented" mode that specifically surfaces objects from collections that receive less traffic, including African, Latin American, and Oceanic holdings. This does not solve the underlying problem, but it is one active step we are taking. We publish a bias report updated quarterly.'
+      a: 'No — and we are honest about this. The source collection data is significantly weighted toward European, South Asian, and East Asian objects due to historical acquisition patterns. Our AI tools inherit this bias. In the Discover tool, we have an "Underrepresented" mode that specifically surfaces objects from collections that receive less traffic, including African, Latin American, and Oceanic holdings. This does not solve the underlying problem, but it is one active step we are taking. We publish a bias report updated quarterly.'
     },
     {
       q: 'How accessible are these tools?',
@@ -370,7 +370,7 @@ function initTransparencyPage() {
     },
     {
       q: 'Are the AI interpretations in the Reimagine tool accurate?',
-      a: 'The "Reimagine" tool is explicitly an interpretive and educational tool, not a source of authoritative museum information. Every output is clearly labelled as AI-generated interpretation. The AI is instructed to acknowledge uncertainty, flag when it is speculating, and note where cultural perspectives are incomplete or contested. Think of it as a starting point for exploration — always follow the links to real collection objects and curated V&A content to go deeper.'
+      a: 'The "Reimagine" tool is explicitly an interpretive and educational tool, not a source of authoritative museum information. Every output is clearly labelled as AI-generated interpretation. The AI is instructed to acknowledge uncertainty, flag when it is speculating, and note where cultural perspectives are incomplete or contested. Think of it as a starting point for exploration — always follow the links to real collection objects and curated source content to go deeper.'
     },
   ];
 

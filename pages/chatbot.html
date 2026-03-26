@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Ask questions about the V&A collection in natural language. Our AI chatbot surfaces relevant artefacts, contexts, and connections." />
-  <title>Ask the Collection — V&A AI Explorer</title>
+  <meta name="description" content="Ask questions about museum collection data in natural language. Our AI chatbot surfaces relevant artefacts, contexts, and connections using the V&A Collections API." />
+  <title>Ask the Collection — AI Explorer</title>
   <link rel="stylesheet" href="../css/tokens.css" />
   <link rel="stylesheet" href="../css/main.css" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -13,8 +13,8 @@
   <a href="#main" class="skip-link">Skip to main content</a>
   <header class="site-header" role="banner">
     <div class="header-inner">
-      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
-        <span class="logo-vam">V&amp;A</span>
+      <a href="../index.html" class="logo" aria-label="AI Collection Explorer home">
+        <span class="logo-vam">Museum</span>
         <span class="logo-divider" aria-hidden="true">|</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
@@ -48,7 +48,7 @@
         <div class="chat-sidebar-footer">
           <div class="bias-notice">
             <span class="bias-notice__icon">ℹ</span>
-            <span>AI responses are generated from V&amp;A catalogue data. Sources are shown with each answer. <a href="transparency.html" class="inline-link">Learn more.</a></span>
+            <span>AI responses are generated from V&amp;A Collections API data. This project is not affiliated with the V&amp;A. Sources are shown with each answer. <a href="transparency.html" class="inline-link">Learn more.</a></span>
           </div>
         </div>
       </aside>
@@ -59,7 +59,7 @@
           <div class="chat-welcome" id="chat-welcome">
             <div class="ai-badge">✦ AI Tool</div>
             <h2>Ask the Collection</h2>
-            <p>Ask anything about the V&A's 2.3 million objects. Try a broad question like "Tell me about Victorian glassware" or a specific one like "Find objects made in Japan using lacquer".</p>
+            <p>Ask anything about the available collection records. Try a broad question like "Tell me about Victorian glassware" or a specific one like "Find objects made in Japan using lacquer".</p>
             <div class="suggested-prompts" id="welcome-prompts"></div>
           </div>
         </div>
@@ -67,7 +67,7 @@
         <div class="chat-input-area">
           <div class="suggested-prompts" id="inline-prompts"></div>
           <div class="chat-input-wrapper">
-            <label for="chat-input" class="sr-only">Type your question about the V&A collection</label>
+            <label for="chat-input" class="sr-only">Type your question about the collection data</label>
             <textarea
               id="chat-input"
               rows="1"
@@ -82,7 +82,7 @@
             </button>
           </div>
           <p class="chat-disclaimer" aria-live="polite">
-            AI responses are generated from V&amp;A catalogue data and may contain errors. Always verify with the <a href="https://collections.vam.ac.uk" target="_blank" rel="noopener noreferrer">V&amp;A website</a>.
+            AI responses are generated from V&amp;A Collections API data and may contain errors. This project is not affiliated with the V&amp;A. Always verify with the <a href="https://collections.vam.ac.uk" target="_blank" rel="noopener noreferrer">official collections website</a>.
           </p>
         </div>
       </div>
@@ -114,7 +114,7 @@
   ];
 
   // System prompt for the AI
-  const SYSTEM_PROMPT = `You are a knowledgeable, friendly museum guide for the Victoria & Albert Museum in London. You help visitors explore the V&A's collections spanning 5,000 years of art, design, fashion, and culture from around the world.
+  const SYSTEM_PROMPT = `You are a knowledgeable, friendly museum data guide. You help visitors explore collection records spanning art, design, fashion, and culture from around the world.
 
 Your role:
 - Answer questions about artefacts, periods, styles, materials, makers, and cultural contexts

@@ -1,209 +1,320 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Our principles for responsible, transparent, and inclusive use of AI in the V&A collection. How we address bias, trust, privacy, and accessibility." />
-  <title>AI &amp; Trust — V&A AI Explorer</title>
-  <link rel="stylesheet" href="../css/tokens.css" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Our principles for responsible, transparent, and inclusive use of AI in the V&A collection. How we address bias, trust, privacy, and accessibility."
+    />
+    <title>AI &amp; Trust — V&A AI Explorer</title>
+    <link rel="stylesheet" href="../css/tokens.css" />
+    <link rel="stylesheet" href="../css/main.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a
+          href="../index.html"
+          class="logo"
+          aria-label="V&A AI Collection Explorer home"
+        >
+          <span class="logo-vam">V&amp;A</span>
+          <span class="logo-divider" aria-hidden="true">|</span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <ul role="list">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="chatbot.html">Ask the Collection</a></li>
+            <li><a href="recommender.html">Discover</a></li>
+            <li><a href="visual.html">Visual Search</a></li>
+            <li><a href="generative.html">Reimagine</a></li>
+            <li>
+              <a href="transparency.html" aria-current="page">AI &amp; Trust</a>
+            </li>
+          </ul>
+        </nav>
+        <button
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="main-nav"
+          aria-label="Open navigation"
+        >
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
 
-</head>
-<body>
-  <a href="#main" class="skip-link">Skip to main content</a>
-  <header class="site-header" role="banner">
-    <div class="header-inner">
-      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
-        <span class="logo-vam">V&amp;A</span>
-        <span class="logo-divider" aria-hidden="true">|</span>
-      </a>
-      <nav class="main-nav" aria-label="Main navigation">
-        <ul role="list">
-          <li><a href="../index.html">Home</a></li>
-          <li><a href="chatbot.html">Ask the Collection</a></li>
-          <li><a href="recommender.html">Discover</a></li>
-          <li><a href="visual.html">Visual Search</a></li>
-          <li><a href="generative.html">Reimagine</a></li>
-          <li><a href="transparency.html" aria-current="page">AI &amp; Trust</a></li>
-        </ul>
-      </nav>
-      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+    <main id="main">
+      <div class="container">
+        <!-- Hero -->
+        <section
+          class="transparency-hero"
+          aria-labelledby="transparency-heading"
+        >
+          <div class="ai-badge transparency-hero__badge">AI &amp; Trust</div>
+          <h1 id="transparency-heading" class="transparency-hero__title">
+            How we use AI — honestly, inclusively, and with accountability
+          </h1>
+          <p class="transparency-hero__body">
+            These AI tools are designed to open new pathways into the V&A
+            collection — not replace curatorial expertise. We are committed to
+            transparency about what AI can and cannot do, who these tools serve,
+            and how we mitigate their harms.
+          </p>
+        </section>
 
-  <main id="main">
-    <div class="container">
+        <!-- Principles -->
+        <section
+          class="transparency-section"
+          aria-labelledby="principles-heading"
+        >
+          <header class="section-header transparency-section-header">
+            <p class="section-eyebrow">Our commitments</p>
+            <h2 id="principles-heading" class="transparency-principles-title">
+              Six guiding principles
+            </h2>
+          </header>
 
-      <!-- Hero -->
-      <section class="transparency-hero" aria-labelledby="transparency-heading">
-        <div class="ai-badge transparency-hero__badge">AI &amp; Trust</div>
-        <h1 id="transparency-heading" class="transparency-hero__title">How we use AI — honestly, inclusively, and with accountability</h1>
-        <p class="transparency-hero__body">
-          These AI tools are designed to open new pathways into the V&A collection — not replace curatorial expertise. We are committed to transparency about what AI can and cannot do, who these tools serve, and how we mitigate their harms.
-        </p>
-      </section>
+          <div class="principles-grid">
+            <article class="principle-card">
+              <div class="principle-card__number">01</div>
+              <h3>Transparency</h3>
+              <p>
+                Every AI-generated element is clearly labelled. We show you
+                <em>why</em> an object was recommended, what data was used, and
+                where our sources come from.
+              </p>
+              <ul>
+                <li>All recommendations show reasoning</li>
+                <li>Sources cited in chatbot responses</li>
+                <li>Similarity scores shown on visual search</li>
+                <li>Generative content clearly marked AI-created</li>
+              </ul>
+            </article>
 
-      <!-- Principles -->
-      <section class="transparency-section" aria-labelledby="principles-heading">
-        <header class="section-header transparency-section-header">
-          <p class="section-eyebrow">Our commitments</p>
-          <h2 id="principles-heading" class="transparency-principles-title">Six guiding principles</h2>
-        </header>
+            <article class="principle-card">
+              <div class="principle-card__number">02</div>
+              <h3>Bias awareness</h3>
+              <p>
+                Museum collections reflect historical power structures. The
+                V&A's holdings over-represent certain cultures, periods, and
+                acquisition contexts. We acknowledge this openly.
+              </p>
+              <ul>
+                <li>Underrepresented collections deliberately surfaced</li>
+                <li>Bias notices shown throughout tools</li>
+                <li>Ongoing audit of recommendation diversity</li>
+                <li>Historical language flagged where found</li>
+              </ul>
+            </article>
 
-        <div class="principles-grid">
-          <article class="principle-card">
-            <div class="principle-card__number">01</div>
-            <h3>Transparency</h3>
-            <p>Every AI-generated element is clearly labelled. We show you <em>why</em> an object was recommended, what data was used, and where our sources come from.</p>
-            <ul>
-              <li>All recommendations show reasoning</li>
-              <li>Sources cited in chatbot responses</li>
-              <li>Similarity scores shown on visual search</li>
-              <li>Generative content clearly marked AI-created</li>
-            </ul>
-          </article>
+            <article class="principle-card">
+              <div class="principle-card__number">03</div>
+              <h3>Inclusion</h3>
+              <p>
+                These tools are designed for everyone — regardless of prior
+                knowledge, disability, age, or cultural background.
+              </p>
+              <ul>
+                <li>Full keyboard navigation throughout</li>
+                <li>Screen reader compatible (ARIA, semantic HTML)</li>
+                <li>Large text and high contrast modes</li>
+                <li>Plain language throughout — no jargon</li>
+                <li>Preference controls stored locally only</li>
+              </ul>
+            </article>
 
-          <article class="principle-card">
-            <div class="principle-card__number">02</div>
-            <h3>Bias awareness</h3>
-            <p>Museum collections reflect historical power structures. The V&A's holdings over-represent certain cultures, periods, and acquisition contexts. We acknowledge this openly.</p>
-            <ul>
-              <li>Underrepresented collections deliberately surfaced</li>
-              <li>Bias notices shown throughout tools</li>
-              <li>Ongoing audit of recommendation diversity</li>
-              <li>Historical language flagged where found</li>
-            </ul>
-          </article>
+            <article class="principle-card">
+              <div class="principle-card__number">04</div>
+              <h3>Privacy</h3>
+              <p>
+                We do not track individuals, create persistent profiles, or
+                share your data. Your preferences are stored in your browser
+                only.
+              </p>
+              <ul>
+                <li>No user accounts or login required</li>
+                <li>No personal data sent to external servers</li>
+                <li>Interest preferences stored locally only</li>
+                <li>Chat history not retained after session</li>
+              </ul>
+            </article>
 
-          <article class="principle-card">
-            <div class="principle-card__number">03</div>
-            <h3>Inclusion</h3>
-            <p>These tools are designed for everyone — regardless of prior knowledge, disability, age, or cultural background.</p>
-            <ul>
-              <li>Full keyboard navigation throughout</li>
-              <li>Screen reader compatible (ARIA, semantic HTML)</li>
-              <li>Large text and high contrast modes</li>
-              <li>Plain language throughout — no jargon</li>
-              <li>Preference controls stored locally only</li>
-            </ul>
-          </article>
+            <article class="principle-card">
+              <div class="principle-card__number">05</div>
+              <h3>Accuracy &amp; humility</h3>
+              <p>
+                AI can be wrong. We always include caveats, point back to
+                authoritative sources, and never present AI output as definitive
+                museum statements.
+              </p>
+              <ul>
+                <li>Chatbot responses cite V&A API data</li>
+                <li>AI interpretations framed as explorations</li>
+                <li>Links to authoritative V&A records</li>
+                <li>Clear error states and fallback messaging</li>
+              </ul>
+            </article>
 
-          <article class="principle-card">
-            <div class="principle-card__number">04</div>
-            <h3>Privacy</h3>
-            <p>We do not track individuals, create persistent profiles, or share your data. Your preferences are stored in your browser only.</p>
-            <ul>
-              <li>No user accounts or login required</li>
-              <li>No personal data sent to external servers</li>
-              <li>Interest preferences stored locally only</li>
-              <li>Chat history not retained after session</li>
-            </ul>
-          </article>
+            <article class="principle-card">
+              <div class="principle-card__number">06</div>
+              <h3>Human centrality</h3>
+              <p>
+                AI is a guide, not a gatekeeper. You are always in control.
+                These tools supplement — never replace — human curiosity,
+                curatorial knowledge, and museum expertise.
+              </p>
+              <ul>
+                <li>You can always bypass AI tools entirely</li>
+                <li>Direct links to V&A collections provided</li>
+                <li>No filter bubbles — serendipity mode available</li>
+                <li>Feedback mechanism for AI errors</li>
+              </ul>
+            </article>
+          </div>
+        </section>
 
-          <article class="principle-card">
-            <div class="principle-card__number">05</div>
-            <h3>Accuracy &amp; humility</h3>
-            <p>AI can be wrong. We always include caveats, point back to authoritative sources, and never present AI output as definitive museum statements.</p>
-            <ul>
-              <li>Chatbot responses cite V&A API data</li>
-              <li>AI interpretations framed as explorations</li>
-              <li>Links to authoritative V&A records</li>
-              <li>Clear error states and fallback messaging</li>
-            </ul>
-          </article>
+        <!-- Per-tool breakdown -->
+        <section
+          class="transparency-section"
+          aria-labelledby="tool-breakdown-heading"
+        >
+          <p class="section-eyebrow">Tool by tool</p>
+          <h2 id="tool-breakdown-heading" class="transparency-section-title">
+            How each AI tool works
+          </h2>
+          <div
+            class="tool-breakdown"
+            role="region"
+            aria-label="AI tool details"
+          >
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Tool</th>
+                  <th scope="col">What AI does</th>
+                  <th scope="col">Data used</th>
+                  <th scope="col">Transparency measures</th>
+                  <th scope="col">Bias mitigations</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Ask the Collection</td>
+                  <td>
+                    Natural language processing; generates contextual
+                    explanations; maps user questions to V&A API queries
+                  </td>
+                  <td>V&A Collections API; local Ollama phi3 model</td>
+                  <td>
+                    Every response labels AI content; sources shown; links to
+                    V&A records
+                  </td>
+                  <td>
+                    Prompts instruct AI to flag uncertain claims and dated
+                    terminology
+                  </td>
+                </tr>
+                <tr>
+                  <td>Discover</td>
+                  <td>
+                    Matches user interest tags to V&A API search parameters;
+                    includes serendipitous and underrepresented modes
+                  </td>
+                  <td>
+                    V&A Collections API; locally-stored interest preferences
+                  </td>
+                  <td>
+                    <span class="status-badge status-badge--on"
+                      >✓ Why shown</span
+                    ><br />
+                    Similarity reasoning displayed per card
+                  </td>
+                  <td>
+                    Underrepresented mode actively surfaces less-visited
+                    collections; bias notice shown
+                  </td>
+                </tr>
+                <tr>
+                  <td>Visual Search</td>
+                  <td>
+                    Analyses image or text description to extract visual
+                    attributes; generates V&A API queries
+                  </td>
+                  <td>
+                    Uploaded images (not stored); V&A Collections API; local
+                    Ollama phi3 model
+                  </td>
+                  <td>
+                    Similarity confidence scores shown; AI attributes listed;
+                    uploaded images not retained
+                  </td>
+                  <td>
+                    Notice that AI may miss cultural/symbolic meaning;
+                    confidence scores allow user judgment
+                  </td>
+                </tr>
+                <tr>
+                  <td>Reimagine</td>
+                  <td>
+                    Generates interpretive text through a chosen lens; suggests
+                    collection connections
+                  </td>
+                  <td>V&A API object data; local Ollama phi3 model</td>
+                  <td>
+                    <span class="status-badge status-badge--on"
+                      >✓ AI label required</span
+                    ><br />
+                    All output labelled as AI interpretation, not authoritative
+                    statement
+                  </td>
+                  <td>
+                    System prompt instructs cultural sensitivity; caveats
+                    generated with each output; connections link to real objects
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-          <article class="principle-card">
-            <div class="principle-card__number">06</div>
-            <h3>Human centrality</h3>
-            <p>AI is a guide, not a gatekeeper. You are always in control. These tools supplement — never replace — human curiosity, curatorial knowledge, and museum expertise.</p>
-            <ul>
-              <li>You can always bypass AI tools entirely</li>
-              <li>Direct links to V&A collections provided</li>
-              <li>No filter bubbles — serendipity mode available</li>
-              <li>Feedback mechanism for AI errors</li>
-            </ul>
-          </article>
-        </div>
-      </section>
+        <!-- FAQ -->
+        <section class="faq-section" aria-labelledby="faq-heading">
+          <p class="section-eyebrow">Common questions</p>
+          <h2 id="faq-heading" class="transparency-section-title">
+            Frequently asked questions
+          </h2>
 
-      <!-- Per-tool breakdown -->
-      <section class="transparency-section" aria-labelledby="tool-breakdown-heading">
-        <p class="section-eyebrow">Tool by tool</p>
-        <h2 id="tool-breakdown-heading" class="transparency-section-title">How each AI tool works</h2>
-        <div class="tool-breakdown" role="region" aria-label="AI tool details">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Tool</th>
-                <th scope="col">What AI does</th>
-                <th scope="col">Data used</th>
-                <th scope="col">Transparency measures</th>
-                <th scope="col">Bias mitigations</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Ask the Collection</td>
-                <td>Natural language processing; generates contextual explanations; maps user questions to V&A API queries</td>
-                <td>V&A Collections API; local Ollama phi3 model</td>
-                <td>Every response labels AI content; sources shown; links to V&A records</td>
-                <td>Prompts instruct AI to flag uncertain claims and dated terminology</td>
-              </tr>
-              <tr>
-                <td>Discover</td>
-                <td>Matches user interest tags to V&A API search parameters; includes serendipitous and underrepresented modes</td>
-                <td>V&A Collections API; locally-stored interest preferences</td>
-                <td>
-                  <span class="status-badge status-badge--on">✓ Why shown</span><br>
-                  Similarity reasoning displayed per card
-                </td>
-                <td>Underrepresented mode actively surfaces less-visited collections; bias notice shown</td>
-              </tr>
-              <tr>
-                <td>Visual Search</td>
-                <td>Analyses image or text description to extract visual attributes; generates V&A API queries</td>
-                <td>Uploaded images (not stored); V&A Collections API; local Ollama phi3 model</td>
-                <td>Similarity confidence scores shown; AI attributes listed; uploaded images not retained</td>
-                <td>Notice that AI may miss cultural/symbolic meaning; confidence scores allow user judgment</td>
-              </tr>
-              <tr>
-                <td>Reimagine</td>
-                <td>Generates interpretive text through a chosen lens; suggests collection connections</td>
-                <td>V&A API object data; local Ollama phi3 model</td>
-                <td>
-                  <span class="status-badge status-badge--on">✓ AI label required</span><br>
-                  All output labelled as AI interpretation, not authoritative statement
-                </td>
-                <td>System prompt instructs cultural sensitivity; caveats generated with each output; connections link to real objects</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+          <div id="faq-list" role="list"></div>
+        </section>
 
-      <!-- FAQ -->
-      <section class="faq-section" aria-labelledby="faq-heading">
-        <p class="section-eyebrow">Common questions</p>
-        <h2 id="faq-heading" class="transparency-section-title">Frequently asked questions</h2>
+        <!-- Contact -->
+        <section class="contact-section" aria-labelledby="contact-heading">
+          <h2 id="contact-heading">Something not right?</h2>
+          <p>
+            If you encounter AI-generated content that feels inaccurate,
+            offensive, or culturally insensitive, please let us know. Feedback
+            directly improves these tools.
+          </p>
+          <div class="transparency-contact-actions">
+            <a
+              href="https://www.vam.ac.uk"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn--ghost"
+              >V&A website ↗</a
+            >
+          </div>
+        </section>
+      </div>
+    </main>
 
-        <div id="faq-list" role="list"></div>
-      </section>
-
-      <!-- Contact -->
-      <section class="contact-section" aria-labelledby="contact-heading">
-        <h2 id="contact-heading">Something not right?</h2>
-        <p>If you encounter AI-generated content that feels inaccurate, offensive, or culturally insensitive, please let us know. Feedback directly improves these tools.</p>
-        <div class="transparency-contact-actions">
-          <a href="https://www.vam.ac.uk" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">V&A website ↗</a>
-        </div>
-      </section>
-
-    </div>
-  </main>
-
-  <script src="../main.js"></script>
-</body>
+    <script src="../main.js"></script>
+  </body>
 </html>

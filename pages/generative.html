@@ -1,110 +1,179 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Reimagine V&A artefacts through generative AI. Explore what an object might look like through different cultural lenses, periods, or artistic styles." />
-  <title>Reimagine — V&A AI Explorer</title>
-  <link rel="stylesheet" href="../css/tokens.css" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-</head>
-<body>
-  <a href="#main" class="skip-link">Skip to main content</a>
-  <header class="site-header" role="banner">
-    <div class="header-inner">
-      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
-        <span class="logo-vam">V&amp;A</span>
-        <span class="logo-divider" aria-hidden="true">|</span>
-      </a>
-      <nav class="main-nav" aria-label="Main navigation">
-        <ul role="list">
-          <li><a href="../index.html">Home</a></li>
-          <li><a href="chatbot.html">Ask the Collection</a></li>
-          <li><a href="recommender.html">Discover</a></li>
-          <li><a href="visual.html">Visual Search</a></li>
-          <li><a href="generative.html" aria-current="page">Reimagine</a></li>
-          <li><a href="transparency.html">AI &amp; Trust</a></li>
-        </ul>
-      </nav>
-      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-
-  <main id="main">
-    <div class="container generative-page">
-      <div class="generative-page__intro">
-        <div class="ai-badge generative-page__badge">✦ AI Tool — Generative</div>
-        <h1 class="generative-page__title">Reimagine an artefact</h1>
-        <p class="generative-page__body">Choose an object from the collection and a interpretive lens. AI will explore how the object connects to other cultures, periods, and ideas — always clearly labelled as AI interpretation, not fact.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Reimagine V&A artefacts through generative AI. Explore what an object might look like through different cultural lenses, periods, or artistic styles."
+    />
+    <title>Reimagine — V&A AI Explorer</title>
+    <link rel="stylesheet" href="../css/tokens.css" />
+    <link rel="stylesheet" href="../css/main.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a
+          href="../index.html"
+          class="logo"
+          aria-label="V&A AI Collection Explorer home"
+        >
+          <span class="logo-vam">V&amp;A</span>
+          <span class="logo-divider" aria-hidden="true">|</span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <ul role="list">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="chatbot.html">Ask the Collection</a></li>
+            <li><a href="recommender.html">Discover</a></li>
+            <li><a href="visual.html">Visual Search</a></li>
+            <li><a href="generative.html" aria-current="page">Reimagine</a></li>
+            <li><a href="transparency.html">AI &amp; Trust</a></li>
+          </ul>
+        </nav>
+        <button
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="main-nav"
+          aria-label="Open navigation"
+        >
+          <span></span><span></span><span></span>
+        </button>
       </div>
+    </header>
 
-      <div class="reimagine-layout">
-        <!-- Input panel -->
-        <section aria-label="Choose artefact and lens">
-          <!-- Step 1: Choose artefact -->
-          <div class="generative-step-block">
-            <p class="section-eyebrow">Step 1 — Choose an artefact</p>
-            <div class="artefact-search-box">
-              <label for="artefact-search" class="sr-only">Search for an artefact</label>
-              <input type="search" id="artefact-search" placeholder="Search collection — e.g. 'Japanese vase', 'Victorian dress'…" />
-              <div class="search-results-dropdown" id="search-dropdown" role="listbox" aria-label="Artefact search results"></div>
-            </div>
+    <main id="main">
+      <div class="container generative-page">
+        <div class="generative-page__intro">
+          <div class="ai-badge generative-page__badge">
+            ✦ AI Tool — Generative
+          </div>
+          <h1 class="generative-page__title">Reimagine an artefact</h1>
+          <p class="generative-page__body">
+            Choose an object from the collection and a interpretive lens. AI
+            will explore how the object connects to other cultures, periods, and
+            ideas — always clearly labelled as AI interpretation, not fact.
+          </p>
+        </div>
 
-            <div class="selected-artefact" id="selected-artefact" aria-live="polite" aria-label="Selected artefact">
-              <img id="selected-img" src="" alt="" />
-              <div>
-                <p class="selected-artefact__label">Selected</p>
-                <p id="selected-title" class="selected-artefact__title"></p>
-                <p id="selected-date" class="selected-artefact__date"></p>
+        <div class="reimagine-layout">
+          <!-- Input panel -->
+          <section aria-label="Choose artefact and lens">
+            <!-- Step 1: Choose artefact -->
+            <div class="generative-step-block">
+              <p class="section-eyebrow">Step 1 — Choose an artefact</p>
+              <div class="artefact-search-box">
+                <label for="artefact-search" class="sr-only"
+                  >Search for an artefact</label
+                >
+                <input
+                  type="search"
+                  id="artefact-search"
+                  placeholder="Search collection — e.g. 'Japanese vase', 'Victorian dress'…"
+                />
+                <div
+                  class="search-results-dropdown"
+                  id="search-dropdown"
+                  role="listbox"
+                  aria-label="Artefact search results"
+                ></div>
+              </div>
+
+              <div
+                class="selected-artefact"
+                id="selected-artefact"
+                aria-live="polite"
+                aria-label="Selected artefact"
+              >
+                <img id="selected-img" src="" alt="" />
+                <div>
+                  <p class="selected-artefact__label">Selected</p>
+                  <p id="selected-title" class="selected-artefact__title"></p>
+                  <p id="selected-date" class="selected-artefact__date"></p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Step 2: Choose lens -->
-          <div class="generative-step-block">
-            <p class="section-eyebrow">Step 2 — Choose an interpretive lens</p>
-            <div class="lens-grid" role="radiogroup" aria-label="Interpretive lens options" id="lens-grid"></div>
-          </div>
-
-          <!-- Step 3: Custom prompt -->
-          <div class="generative-step-block">
-            <p class="section-eyebrow">Step 3 — Add your own question (optional)</p>
-            <div class="field-group">
-              <label for="custom-prompt">Your question or focus</label>
-              <textarea id="custom-prompt" rows="2" placeholder="e.g. How might this design have influenced later movements? What materials could replace these today?"></textarea>
+            <!-- Step 2: Choose lens -->
+            <div class="generative-step-block">
+              <p class="section-eyebrow">
+                Step 2 — Choose an interpretive lens
+              </p>
+              <div
+                class="lens-grid"
+                role="radiogroup"
+                aria-label="Interpretive lens options"
+                id="lens-grid"
+              ></div>
             </div>
-          </div>
 
-          <button class="btn btn--primary generative-generate-btn" id="generate-btn" disabled>
-            ✦ Generate interpretation
-          </button>
+            <!-- Step 3: Custom prompt -->
+            <div class="generative-step-block">
+              <p class="section-eyebrow">
+                Step 3 — Add your own question (optional)
+              </p>
+              <div class="field-group">
+                <label for="custom-prompt">Your question or focus</label>
+                <textarea
+                  id="custom-prompt"
+                  rows="2"
+                  placeholder="e.g. How might this design have influenced later movements? What materials could replace these today?"
+                ></textarea>
+              </div>
+            </div>
 
-          <div class="bias-notice generative-bias-notice">
-            <span class="bias-notice__icon">⚠</span>
-            <span>All AI-generated interpretations are clearly labelled. They are creative and educational — not authoritative museum statements. Cultural interpretations may be incomplete or imperfect.</span>
-          </div>
-        </section>
+            <button
+              class="btn btn--primary generative-generate-btn"
+              id="generate-btn"
+              disabled
+            >
+              ✦ Generate interpretation
+            </button>
 
-        <!-- Output panel -->
-        <section aria-label="Generated interpretation" aria-live="polite">
-          <div class="generative-output-header">
-            <p class="section-eyebrow generative-output-header__eyebrow">AI Interpretation</p>
-            <span class="sd-status-badge" id="sd-status-badge" aria-live="polite"></span>
-          </div>
-          <div class="generation-output" id="generation-output">
-            <p class="generation-output__placeholder">
-              Choose an artefact and lens to begin
-            </p>
-          </div>
-          <div class="sd-output" id="sd-output" aria-live="polite" aria-label="Visual reimagining"></div>
-        </section>
+            <div class="bias-notice generative-bias-notice">
+              <span class="bias-notice__icon">⚠</span>
+              <span
+                >All AI-generated interpretations are clearly labelled. They are
+                creative and educational — not authoritative museum statements.
+                Cultural interpretations may be incomplete or imperfect.</span
+              >
+            </div>
+          </section>
+
+          <!-- Output panel -->
+          <section aria-label="Generated interpretation" aria-live="polite">
+            <div class="generative-output-header">
+              <p class="section-eyebrow generative-output-header__eyebrow">
+                AI Interpretation
+              </p>
+              <span
+                class="sd-status-badge"
+                id="sd-status-badge"
+                aria-live="polite"
+              ></span>
+            </div>
+            <div class="generation-output" id="generation-output">
+              <p class="generation-output__placeholder">
+                Choose an artefact and lens to begin
+              </p>
+            </div>
+            <div
+              class="sd-output"
+              id="sd-output"
+              aria-live="polite"
+              aria-label="Visual reimagining"
+            ></div>
+          </section>
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <script src="../main.js"></script>
-</body>
+    <script src="../main.js"></script>
+  </body>
 </html>

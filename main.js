@@ -1,5 +1,5 @@
 /* =========================================
-   MAIN JS — V&A AI Collection Explorer
+   MAIN JS — A2BC AI Explorer
    ========================================= */
 
 'use strict';
@@ -313,7 +313,7 @@ function openArtefactModal(record, systemNumber) {
             <span class="bias-notice__icon">ℹ</span>
             <span>This record is from the V&A Collections API. Descriptions reflect historical cataloguing and may contain dated terminology. <a href="pages/transparency.html" class="link-accent-dim">Learn more about our approach.</a></span>
           </div>
-          ${systemNumber ? `<a href="https://collections.vam.ac.uk/item/${systemNumber}/" target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn-mt-6">View on V&A website ↗</a>` : ''}
+          ${systemNumber ? `<a href="https://collections.vam.ac.uk/item/${systemNumber}/" target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn-mt-6">View source record ↗</a>` : ''}
         </div>
       </div>
     </div>
@@ -439,7 +439,7 @@ function initRecommenderPage() {
     { label: 'Middle East', q: 'Middle East' },
   ];
   const modes = {
-    personalised: { label: 'Personalised', info: 'Recommendations based on your selected interests, from V&A API data.' },
+    personalised: { label: 'Personalised', info: 'Recommendations based on your selected interests, from V&A Collections API data.' },
     serendipitous: { label: 'Serendipitous', info: 'Random selection across the whole collection — expect the unexpected.' },
     underrepresented: { label: 'Underrepresented', info: 'Deliberately surfaces objects from collections that are less commonly explored.' }
   };
@@ -998,7 +998,7 @@ function initChatbotPage() {
     'Objects connected to India',
     'Jewellery from the Renaissance'
   ];
-  const systemPrompt = `You are a knowledgeable, friendly museum guide for the Victoria & Albert Museum in London. You help visitors explore the V&A's collections spanning 5,000 years of art, design, fashion, and culture from around the world.
+  const systemPrompt = `You are a knowledgeable, friendly museum data guide for A2BC. You help visitors explore collection records spanning 5,000 years of art, design, fashion, and culture from around the world.
 
 Your role:
 - Answer questions about artefacts, periods, styles, materials, makers, and cultural contexts
@@ -1220,9 +1220,9 @@ function initVisualSearchPage() {
   const uploadZone = document.getElementById('upload-zone');
   if (!uploadZone) return;
 
-  const visualAiSystem = `You are a visual analysis assistant for the Victoria & Albert Museum. Your task is to analyse an image description or uploaded image and:
+  const visualAiSystem = `You are a visual analysis assistant for A2BC. Your task is to analyse an image description or uploaded image and:
 1. Extract 3-5 key visual attributes (colour palette, patterns, materials, style period, object type)
-2. Generate 2-3 optimal V&A collection search queries that would find visually similar objects
+2. Generate 2-3 optimal collection search queries that would find visually similar objects
 3. List the detected attributes as a JSON array
 
 Respond ONLY with valid JSON in this format:

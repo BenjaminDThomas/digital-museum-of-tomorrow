@@ -346,7 +346,7 @@ function initTransparencyPage() {
   const faqs = [
     {
       q: 'Is the AI making things up about artefacts?',
-      a: 'The chatbot draws on actual V&A Collections API data. However, large language models can sometimes combine information incorrectly or fill in gaps with plausible but inaccurate details — this is called "hallucination". Every AI response includes a disclaimer and links to the authoritative source record. This project is not affiliated with the V&A. Always verify important information with official collections pages.'
+      a: 'The chatbot draws on actual V&A Collections API data. However, large language models can sometimes combine information incorrectly or fill in gaps with plausible but inaccurate details — this is called "hallucination". Every AI response includes a disclaimer and links to the authoritative source record. A2BC is not affiliated with the V&A. Always verify important information with official collections pages.'
     },
     {
       q: 'Does the recommender create a filter bubble?',
@@ -602,12 +602,12 @@ function initGenerativePage() {
     { id: 'symbol', icon: '✦', title: 'Symbols and meaning', desc: 'What symbols, motifs, or hidden meanings does this carry?' },
     { id: 'contemporary', icon: '🌱', title: 'Contemporary resonance', desc: 'How does this object speak to contemporary issues?' },
   ];
-  const generativeSystem = `You are a thoughtful, imaginative museum educator at the Victoria & Albert Museum. Your role is to create engaging, accurate, and culturally sensitive interpretations of museum artefacts from specific perspectives.
+  const generativeSystem = `You are a thoughtful, imaginative museum educator at A2BC. Your role is to create engaging, accurate, and culturally sensitive interpretations of museum artefacts from specific perspectives.
 
 When given an artefact and an interpretive lens, you:
 1. Write a poetic, evocative opening passage (2-3 sentences) about the artefact from that lens
 2. Provide a substantive cultural/historical analysis (3-4 paragraphs) that is educational and nuanced
-3. Surface 3-4 specific connections to other V&A objects or broader cultural movements as search suggestions
+3. Surface 3-4 specific connections to other A2BC objects or broader cultural movements as search suggestions
 4. Always acknowledge limitations and areas where interpretation is uncertain
 
 Format your response as JSON:

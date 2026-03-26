@@ -360,10 +360,6 @@ h4 {
   display: none;
 }
 
-.results-section-active {
-  display: block;
-}
-
 .results-header {
   display: flex;
   align-items: center;

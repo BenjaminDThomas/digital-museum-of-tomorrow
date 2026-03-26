@@ -1,116 +1,275 @@
-# V&A AI Collection Explorer
+# Digital Museum of Tomorrow
 
-A multi-tool AI-powered interface for exploring the Victoria & Albert Museum's collection of 2.3 million objects, designed with transparency, inclusion, and cultural sensitivity at its core.
+Digital Museum of Tomorrow is a browser-based prototype for exploring the Victoria and Albert Museum collection through a mix of public collection data, local language models, and local image generation. The project combines a static front end with a small Stable Diffusion API service for visual reimagining.
 
-## Tools
+As of March 26, 2026, the live feature set in this repository includes:
 
-| Tool | Purpose |
-|------|---------|
-| **Ask the Collection** | Conversational AI chatbot powered by V&A API + local Ollama phi3 |
-| **Discover** | Bias-aware personalised recommender with serendipity and underrepresented modes |
-| **Visual Search** | Upload or describe an image to find visually similar artefacts |
-| **Reimagine** | Generative AI interpretations through cultural, historical, and thematic lenses |
-| **AI & Trust** | Full transparency page covering principles, bias, accessibility, and FAQs |
+- Ask the Collection: a chat interface backed by the V&A Collections API and a local Ollama model
+- Discover: a recommendation experience with personalised, serendipitous, and underrepresented collection modes
+- Visual Search: image-led or text-led discovery assisted by a local Ollama model
+- Reimagine: text interpretation plus AI-generated visual reimagining for selected artefacts
+- AI and Trust: documentation about transparency, accessibility, bias, and limitations
 
-## Running with Docker
+## Project structure
 
-### Prerequisites
-- Docker and Docker Compose installed
-
-### Quick start
-
-```bash
-# Clone / copy the project directory
-cd museum-ai
-
-# Build and run
-docker-compose up --build -d
-
-# Access at http://localhost:8080
-```
-
-### Stop
-```bash
-docker-compose down
-```
-
-### Rebuild after changes
-```bash
-docker-compose up --build -d
-```
-
-## Running without Docker
-
-Simply open `index.html` in a browser, or serve with any static file server:
-
-```bash
-# Python
-python3 -m http.server 8080
-
-# Node.js
-npx serve .
-
-# VS Code Live Server — right-click index.html > Open with Live Server
-```
-
-## API Notes
-
-### V&A Collections API
-All artefact data is fetched live from the free, public [V&A Collections API v2](https://api.vam.ac.uk/v2/). No API key required.
-
-Key endpoints used:
-- `GET /v2/objects/search` — search with filters (material, technique, place, person, etc.)
-- `GET /v2/object/{id}` — fetch single object detail
-
-### Local Ollama (phi3)
-The chatbot, visual analysis, and generative tools call a local Ollama container via `http://localhost:11434/api/chat` using model `phi3`.
-
-If your UI runs inside Docker and Ollama runs on the host, update the endpoint to a reachable host name for your setup (for example `http://host.docker.internal:11434/api/chat` when supported).
-
-## Design System
-
-The project uses a token-based CSS design system (`css/tokens.css`) with:
-- **Fonts:** Cormorant Garamond (display) + DM Sans (body)
-- **Palette:** Warm dark editorial — charcoal backgrounds, amber/gold accent
-- **Accessibility:** WCAG 2.1 AA compliant contrast ratios throughout
-
-## Accessibility Features
-- Semantic HTML5 with ARIA landmarks
-- Full keyboard navigation
-- Screen reader compatible
-- Skip-to-content link
-- Built-in large text mode (bottom-right toolbar)
-- Built-in high contrast mode (bottom-right toolbar)
-- Preferences saved to localStorage
-- Reduced motion support via `prefers-reduced-motion`
-
-## Design Decisions (from persona research)
-
-Based on the Steve Johnson persona (digital researcher, overwhelmed by large collections, curious about connections, concerned about AI trust):
-
-- **Discovery over search:** All tools emphasise exploration rather than requiring users to know what to search for
-- **Transparency everywhere:** AI content is clearly labelled; reasoning shown; sources cited
-- **Bias acknowledgement:** Explicit bias notices and an underrepresented collections mode
-- **Trust building:** Full AI & Trust page; caveats inline; links to authoritative V&A records
-- **No filter bubbles:** Serendipitous and underrepresented discovery modes
-
-## File Structure
-
-```
-museum-ai/
-├── index.html              # Homepage
+```text
+digital-museum-of-tomorrow/
+├── index.html
+├── main.js
 ├── Dockerfile
 ├── docker-compose.yml
 ├── nginx.conf
+├── README.md
 ├── css/
-│   ├── tokens.css          # Design tokens
-│   └── main.css            # All styles
-├── js/
-│   └── main.js             # Shared utilities, V&A API helpers, modal
-└── pages/
-    ├── chatbot.html         # Ask the Collection
-    ├── recommender.html     # Discover
-    ├── visual.html          # Visual Search
-    ├── generative.html      # Reimagine
-    └── transparency.html    # AI & Trust
+│   ├── main.css
+│   └── tokens.css
+├── pages/
+│   ├── chatbot.html
+│   ├── generative.html
+│   ├── recommender.html
+│   ├── transparency.html
+│   └── visual.html
+├── design/
+├── desk research/
+└── sd-server/
+    ├── app.py
+    └── Dockerfile
 ```
+
+## Current architecture
+
+The site is split into two parts:
+
+1. A static front end served by Nginx on port `8080`
+2. A local Stable Diffusion API service on port `7860`
+
+The front end also calls two external or host-local services directly:
+
+- V&A Collections API: `https://api.vam.ac.uk/v2`
+- Ollama chat API: `http://localhost:11434/api/chat`
+
+## Features
+
+### Ask the Collection
+
+- Uses the V&A Collections API for collection grounding
+- Uses Ollama at `http://localhost:11434/api/chat`
+- Current model in the codebase: `phi3:mini`
+- Supports streamed responses in the chat UI
+- Can suggest related collection searches from the response
+
+### Discover
+
+- Builds recommendations from live V&A API search results
+- Supports three discovery modes:
+    - Personalised
+    - Serendipitous
+    - Underrepresented
+- Includes client-side filters for interests, materials, regions, and time period
+- Adds AI-style explanation tags to recommendation cards
+
+### Visual Search
+
+- Accepts an uploaded image or a text description
+- Uses Ollama with `phi3:mini` to propose tentative attributes and search suggestions
+- Falls back to direct V&A API search when model-assisted parsing fails
+- Keeps uploads in-browser only; there is no storage layer in this repository
+
+### Reimagine
+
+- Uses Ollama with `phi3:mini` for structured JSON interpretation output
+- Generates text through interpretive lenses such as cultural, historical, material, symbolic, maker, and contemporary
+- Triggers Stable Diffusion image generation in parallel with the text interpretation
+- Calls the local Stable Diffusion API at `http://localhost:7860/sdapi/v1/txt2img`
+- Checks Stable Diffusion readiness through `http://localhost:7860/sdapi/v1/sd-models`
+
+### AI and Trust
+
+- Explains the role of AI in each tool
+- Documents caveats, accessibility support, and bias limitations
+- Frames generated outputs as interpretation rather than authoritative museum fact
+
+## Front-end behavior
+
+Shared logic in `main.js` currently provides:
+
+- responsive navigation behavior
+- accessibility controls for large text and high contrast
+- localStorage persistence for accessibility preferences
+- V&A API request throttling and daily quota tracking in the browser
+- short-lived response caching for API calls
+- artefact card rendering and object detail modal behavior
+
+## Dependencies and services
+
+### V&A Collections API
+
+The site uses the public V&A API for search and object detail retrieval.
+
+Common endpoints used by the UI:
+
+- `GET /v2/objects/search`
+- `GET /v2/object/{id}`
+
+### Ollama
+
+The current repository code expects a local Ollama instance listening on:
+
+- `http://localhost:11434/api/chat`
+- `http://localhost:11434/api/tags`
+
+Current model references in the site:
+
+- `phi3:mini` for chatbot
+- `phi3:mini` for visual search
+- `phi3:mini` for generative interpretation
+
+If you run the front end inside Docker but Ollama on the Windows host, you may need to replace `localhost` with a host-accessible name such as `host.docker.internal`, depending on your setup.
+
+### Stable Diffusion service
+
+The `sd-server` service is a FastAPI app built from a CUDA-enabled PyTorch image:
+
+- Base image: `pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime`
+- App entrypoint: `uvicorn app:app --host 0.0.0.0 --port 7860`
+- Default model: `runwayml/stable-diffusion-v1-5`
+
+Current API routes exposed by `sd-server/app.py`:
+
+- `GET /sdapi/v1/sd-models`
+- `POST /sdapi/v1/txt2img`
+
+The app automatically uses CUDA when available:
+
+- `torch.cuda.is_available()` selects `cuda`
+- `float16` is used on GPU
+- attention slicing is enabled when running on CUDA
+
+## Docker setup
+
+### Services in docker-compose
+
+`docker-compose.yml` currently defines:
+
+- `vam-explorer`: the static site, exposed on port `8080`
+- `sd-api`: the Stable Diffusion API, exposed on port `7860`
+
+The current compose file configures GPU access for the `sd-api` service with:
+
+- `gpus: all`
+- `runtime: nvidia`
+
+This repository has been verified on a Windows machine with Docker, NVIDIA runtime support, and an NVIDIA GPU available to the container.
+
+### Start with Docker
+
+From the project root:
+
+```powershell
+docker-compose up --build -d
+```
+
+Static site:
+
+- `http://localhost:8080`
+
+Stable Diffusion API:
+
+- `http://localhost:7860/sdapi/v1/sd-models`
+
+Stop the stack:
+
+```powershell
+docker-compose down
+```
+
+Rebuild after changes:
+
+```powershell
+docker-compose up --build -d
+```
+
+### GPU requirements for image generation
+
+For GPU-backed Stable Diffusion generation, you need:
+
+- Docker Desktop or Docker Engine working on the host
+- NVIDIA drivers installed on the host
+- NVIDIA container runtime available to Docker
+- a compatible NVIDIA GPU
+
+If GPU access is not available, the PyTorch image may still run in CPU mode, but image generation will be much slower.
+
+## Running without Docker
+
+You can run the static front end without Docker using any static file server.
+
+Examples:
+
+```powershell
+python -m http.server 8080
+```
+
+```powershell
+npx serve .
+```
+
+You will still need separate local services for:
+
+- Ollama on port `11434`
+- Stable Diffusion API on port `7860` if you want the Reimagine image generation feature to work
+
+Opening `index.html` directly in the browser may work for basic navigation, but a local server is the safer option for development and service integration.
+
+## Accessibility
+
+The current site includes:
+
+- semantic page structure and ARIA labeling
+- keyboard-accessible navigation and controls
+- skip link for main content
+- large text mode
+- high contrast mode
+- saved user accessibility preferences in localStorage
+- status and live regions in AI-heavy interfaces
+
+## Design system
+
+The visual system is built around:
+
+- `css/tokens.css` for design tokens
+- `css/main.css` for shared styling
+- Cormorant Garamond for display typography
+- DM Sans for body typography
+
+The current look and feel is editorial, museum-inspired, and dark-toned, with clear AI labelling and trust messaging across the interface.
+
+## Known implementation notes
+
+- The compose file still includes a top-level `version` key, and modern Docker Compose warns that it is obsolete and ignored.
+- Ollama is expected to be reachable at `localhost:11434` from the browser, which may require adjustment depending on how you host the UI.
+- The Stable Diffusion model downloads on first startup, so the first run can take noticeably longer.
+- The Visual Search page currently uses a text model to infer search suggestions rather than true image embedding similarity.
+
+## Verified current state
+
+As of March 26, 2026, the repository has been aligned to the following runtime behavior:
+
+- generative interpretation uses `phi3:mini` instead of the removed `llama3.2` reference
+- the Stable Diffusion Docker service is configured to run with NVIDIA GPU access
+- the `sd-api` service responds on port `7860`
+- the Stable Diffusion model route returns `runwayml/stable-diffusion-v1-5`
+
+## Development notes
+
+If you change Ollama model names, update the hardcoded model values in:
+
+- `pages/chatbot.html`
+- `pages/visual.html`
+- `pages/generative.html`
+
+If you change the Stable Diffusion service location or port, update the endpoints in:
+
+- `pages/generative.html`
+- `docker-compose.yml`
+- `sd-server/app.py` if the backend behavior changes

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -89,29 +89,29 @@
     </div>
   </main>
 
-  <script src="../main.js"></script>
-  <script>
-  'use strict';
+    <script src="../main.js"></script>
+    <script>
+      "use strict";
 
-  const TOPICS = [
-    'Victorian fashion',
-    'Japanese ceramics',
-    'Islamic geometric art',
-    'Tudor jewellery',
-    'Arts and Crafts movement',
-    'Ancient Egyptian objects',
-    'William Morris designs',
-    'Medieval manuscripts'
-  ];
+      const TOPICS = [
+        "Victorian fashion",
+        "Japanese ceramics",
+        "Islamic geometric art",
+        "Tudor jewellery",
+        "Arts and Crafts movement",
+        "Ancient Egyptian objects",
+        "William Morris designs",
+        "Medieval manuscripts",
+      ];
 
-  const PROMPTS = [
-    'Show me objects made of silk',
-    'What did people wear in 1870s England?',
-    'Find pottery from the Tang dynasty',
-    'Tell me about the Arts and Crafts movement',
-    'Objects connected to India',
-    'Jewellery from the Renaissance'
-  ];
+      const PROMPTS = [
+        "Show me objects made of silk",
+        "What did people wear in 1870s England?",
+        "Find pottery from the Tang dynasty",
+        "Tell me about the Arts and Crafts movement",
+        "Objects connected to India",
+        "Jewellery from the Renaissance",
+      ];
 
   // System prompt for the AI
   const SYSTEM_PROMPT = `You are a knowledgeable, friendly museum data guide. You help visitors explore collection records spanning art, design, fashion, and culture from around the world.
@@ -129,271 +129,297 @@ When suggesting V&A API searches, format them as JSON at the end of your respons
 
 Be inclusive, curious, and celebratory of human creativity across all cultures and time periods.`;
 
-  const chatMessages = document.getElementById('chat-messages');
-  const chatInput    = document.getElementById('chat-input');
-  const sendBtn      = document.getElementById('send-btn');
-  const chatWelcome  = document.getElementById('chat-welcome');
-  const welcomePrompts = document.getElementById('welcome-prompts');
-  const inlinePrompts  = document.getElementById('inline-prompts');
-  const chatHistory    = document.getElementById('chat-history');
-  const topicSuggestions = document.getElementById('topic-suggestions');
-  const OLLAMA_CHAT_URL = 'http://localhost:11434/api/chat';
-  const OLLAMA_TAGS_URL = 'http://localhost:11434/api/tags';
+      const chatMessages = document.getElementById("chat-messages");
+      const chatInput = document.getElementById("chat-input");
+      const sendBtn = document.getElementById("send-btn");
+      const chatWelcome = document.getElementById("chat-welcome");
+      const welcomePrompts = document.getElementById("welcome-prompts");
+      const inlinePrompts = document.getElementById("inline-prompts");
+      const chatHistory = document.getElementById("chat-history");
+      const topicSuggestions = document.getElementById("topic-suggestions");
+      const OLLAMA_CHAT_URL = "http://localhost:11434/api/chat";
+      const OLLAMA_TAGS_URL = "http://localhost:11434/api/tags";
 
-  let conversationHistory = [];
-  let currentSearchParams = null;
-  let ollamaChecked = false;
+      let conversationHistory = [];
+      let currentSearchParams = null;
+      let ollamaChecked = false;
 
-  async function checkOllamaApi() {
-    if (ollamaChecked) return;
-    const response = await fetch(OLLAMA_TAGS_URL, { method: 'GET' });
-    if (!response.ok) {
-      throw new Error(`Ollama health check failed: ${response.status}`);
-    }
-    ollamaChecked = true;
-  }
-
-  // Render topics in sidebar
-  TOPICS.forEach(topic => {
-    const btn = document.createElement('button');
-    btn.className = 'chat-history-item';
-    btn.textContent = topic;
-    btn.type = 'button';
-    btn.addEventListener('click', () => sendMessage(topic));
-    topicSuggestions.appendChild(btn);
-  });
-
-  // Render welcome prompts
-  PROMPTS.slice(0, 4).forEach(p => {
-    const btn = createPromptBtn(p, welcomePrompts);
-    welcomePrompts.appendChild(btn);
-  });
-
-  // After first message — inline prompts
-  function showInlinePrompts() {
-    inlinePrompts.innerHTML = '';
-    PROMPTS.slice(0, 3).forEach(p => {
-      inlinePrompts.appendChild(createPromptBtn(p, inlinePrompts));
-    });
-  }
-
-  function createPromptBtn(text, container) {
-    const btn = document.createElement('button');
-    btn.className = 'suggested-prompt';
-    btn.textContent = text;
-    btn.type = 'button';
-    btn.addEventListener('click', () => sendMessage(text));
-    return btn;
-  }
-
-  // Auto-resize textarea
-  chatInput.addEventListener('input', () => {
-    chatInput.style.height = 'auto';
-    chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + 'px';
-    sendBtn.disabled = chatInput.value.trim().length === 0;
-  });
-
-  chatInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (!sendBtn.disabled) sendMessage(chatInput.value.trim());
-    }
-  });
-  sendBtn.addEventListener('click', () => {
-    if (!sendBtn.disabled) sendMessage(chatInput.value.trim());
-  });
-
-  function appendMessage(role, content, extras = {}) {
-    if (chatWelcome) chatWelcome.style.display = 'none';
-    const msg = document.createElement('div');
-    msg.className = `message message--${role === 'user' ? 'user' : 'ai'}`;
-    msg.innerHTML = `
-      <div class="message__avatar" aria-hidden="true">${role === 'user' ? '👤' : '✦'}</div>
-      <div class="message__bubble">
-        <div class="message__text">${escHtml(content).replace(/\n/g, '<br>')}</div>
-        ${extras.source ? `<div class="message__source"><span>📖</span> Source: ${extras.source}</div>` : ''}
-      </div>
-    `;
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return msg;
-  }
-
-  async function sendMessage(text) {
-    if (!text.trim()) return;
-
-    chatInput.value = '';
-    chatInput.style.height = 'auto';
-    sendBtn.disabled = true;
-
-    appendMessage('user', text);
-    conversationHistory.push({ role: 'user', content: text });
-
-    // Add to recent history
-    const histItem = document.createElement('div');
-    histItem.className = 'chat-history-item';
-    histItem.textContent = text.slice(0, 50) + (text.length > 50 ? '…' : '');
-    histItem.setAttribute('tabindex', '0');
-    chatHistory.prepend(histItem);
-
-    // Create an empty assistant message we'll update incrementally
-    const assistantMessageDiv = appendMessage('', 'assistant');
-    let fullResponse = '';
-
-    try {
-      await checkOllamaApi();
-
-      const response = await fetch(OLLAMA_CHAT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'phi3:mini',
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            ...conversationHistory
-          ],
-          stream: true  // This enables streaming!
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      async function checkOllamaApi() {
+        if (ollamaChecked) return;
+        const response = await fetch(OLLAMA_TAGS_URL, { method: "GET" });
+        if (!response.ok) {
+          throw new Error(`Ollama health check failed: ${response.status}`);
+        }
+        ollamaChecked = true;
       }
 
-      // Get a reader for the response body stream
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      // Render topics in sidebar
+      TOPICS.forEach((topic) => {
+        const btn = document.createElement("button");
+        btn.className = "chat-history-item";
+        btn.textContent = topic;
+        btn.type = "button";
+        btn.addEventListener("click", () => sendMessage(topic));
+        topicSuggestions.appendChild(btn);
+      });
 
-      while (true) {
-        // Read a chunk from the stream
-        const { done, value } = await reader.read();
+      // Render welcome prompts
+      PROMPTS.slice(0, 4).forEach((p) => {
+        const btn = createPromptBtn(p, welcomePrompts);
+        welcomePrompts.appendChild(btn);
+      });
 
-        // Exit if stream is complete
-        if (done) break;
+      // After first message — inline prompts
+      function showInlinePrompts() {
+        inlinePrompts.innerHTML = "";
+        PROMPTS.slice(0, 3).forEach((p) => {
+          inlinePrompts.appendChild(createPromptBtn(p, inlinePrompts));
+        });
+      }
 
-        // Convert bytes to text
-        const chunk = decoder.decode(value);
+      function createPromptBtn(text, container) {
+        const btn = document.createElement("button");
+        btn.className = "suggested-prompt";
+        btn.textContent = text;
+        btn.type = "button";
+        btn.addEventListener("click", () => sendMessage(text));
+        return btn;
+      }
 
-        // Split into lines (each line is separate JSON)
-        const lines = chunk.split('\n').filter(line => line.trim());
+      // Auto-resize textarea
+      chatInput.addEventListener("input", () => {
+        chatInput.style.height = "auto";
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + "px";
+        sendBtn.disabled = chatInput.value.trim().length === 0;
+      });
 
-        for (const line of lines) {
-          try {
-            // Parse the JSON
-            const data = JSON.parse(line);
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          if (!sendBtn.disabled) sendMessage(chatInput.value.trim());
+        }
+      });
+      sendBtn.addEventListener("click", () => {
+        if (!sendBtn.disabled) sendMessage(chatInput.value.trim());
+      });
 
-            // Check if this chunk contains content
-            if (data.message && data.message.content) {
-              // Append to our full response
-              fullResponse += data.message.content;
+      function appendMessage(role, content, extras = {}) {
+        if (chatWelcome) chatWelcome.style.display = "none";
+        const msg = document.createElement("div");
+        msg.className = `message message--${role === "user" ? "user" : "ai"}`;
+        msg.innerHTML = `
+      <div class="message__avatar" aria-hidden="true">${role === "user" ? "👤" : "✦"}</div>
+      <div class="message__bubble">
+        <div class="message__text">${escHtml(content).replace(/\n/g, "<br>")}</div>
+        ${extras.source ? `<div class="message__source"><span>📖</span> Source: ${extras.source}</div>` : ""}
+      </div>
+    `;
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return msg;
+      }
 
-              // Update the displayed message
-              assistantMessageDiv.querySelector('.message__text').innerHTML = escHtml(fullResponse).replace(/\n/g, '<br>');
+      async function sendMessage(text) {
+        if (!text.trim()) return;
 
-              // Keep the latest message visible
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-          } catch (e) {
-            // Skip lines that aren't valid JSON
+        chatInput.value = "";
+        chatInput.style.height = "auto";
+        sendBtn.disabled = true;
+
+        appendMessage("user", text);
+        conversationHistory.push({ role: "user", content: text });
+
+        // Add to recent history
+        const histItem = document.createElement("div");
+        histItem.className = "chat-history-item";
+        histItem.textContent =
+          text.slice(0, 50) + (text.length > 50 ? "…" : "");
+        histItem.setAttribute("tabindex", "0");
+        chatHistory.prepend(histItem);
+
+        // Create an empty assistant message we'll update incrementally
+        const assistantMessageDiv = appendMessage("", "assistant");
+        let fullResponse = "";
+
+        try {
+          await checkOllamaApi();
+
+          const response = await fetch(OLLAMA_CHAT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "phi3:mini",
+              messages: [
+                { role: "system", content: SYSTEM_PROMPT },
+                ...conversationHistory,
+              ],
+              stream: true, // This enables streaming!
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
+
+          // Get a reader for the response body stream
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+
+          while (true) {
+            // Read a chunk from the stream
+            const { done, value } = await reader.read();
+
+            // Exit if stream is complete
+            if (done) break;
+
+            // Convert bytes to text
+            const chunk = decoder.decode(value);
+
+            // Split into lines (each line is separate JSON)
+            const lines = chunk.split("\n").filter((line) => line.trim());
+
+            for (const line of lines) {
+              try {
+                // Parse the JSON
+                const data = JSON.parse(line);
+
+                // Check if this chunk contains content
+                if (data.message && data.message.content) {
+                  // Append to our full response
+                  fullResponse += data.message.content;
+
+                  // Update the displayed message
+                  assistantMessageDiv.querySelector(
+                    ".message__text",
+                  ).innerHTML = escHtml(fullResponse).replace(/\n/g, "<br>");
+
+                  // Keep the latest message visible
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+              } catch (e) {
+                // Skip lines that aren't valid JSON
+              }
+            }
+          }
+
+          // Once streaming is complete, add to history
+          conversationHistory.push({
+            role: "assistant",
+            content: fullResponse,
+          });
+
+          // Extract any search params
+          let cleanText = fullResponse;
+          let searchParams = null;
+          const jsonMatch = fullResponse.match(
+            /\{"vam_search":\s*(\{[^}]+\})\}/,
+          );
+          if (jsonMatch) {
+            try {
+              const parsed = JSON.parse(jsonMatch[0]);
+              searchParams = parsed.vam_search;
+              cleanText = fullResponse.replace(jsonMatch[0], "").trim();
+              // Update the displayed message without the JSON
+              assistantMessageDiv.querySelector(".message__text").innerHTML =
+                escHtml(cleanText).replace(/\n/g, "<br>");
+            } catch (e) {}
+          }
+
+          // Add source info
+          const sourceDiv = document.createElement("div");
+          sourceDiv.className = "message__source";
+          sourceDiv.innerHTML =
+            "<span>📖</span> Source: V&A Collections API + AI";
+          assistantMessageDiv
+            .querySelector(".message__bubble")
+            .appendChild(sourceDiv);
+
+          // If AI suggested a search, run it
+          if (searchParams) {
+            await appendRelatedObjects(
+              assistantMessageDiv.querySelector(".message__bubble"),
+              searchParams,
+            );
+          }
+
+          showInlinePrompts();
+        } catch (error) {
+          assistantMessageDiv.querySelector(".message__text").textContent =
+            `Error: ${error.message}. Make sure OLLAMA is running.`;
+          console.error("Error:", error);
+        } finally {
+          // Re-enable controls
+          sendBtn.disabled = false;
+          chatInput.focus();
         }
       }
 
-      // Once streaming is complete, add to history
-      conversationHistory.push({
-        role: 'assistant',
-        content: fullResponse
-      });
-
-      // Extract any search params
-      let cleanText = fullResponse;
-      let searchParams = null;
-      const jsonMatch = fullResponse.match(/\{"vam_search":\s*(\{[^}]+\})\}/);
-      if (jsonMatch) {
+      async function appendRelatedObjects(container, params) {
         try {
-          const parsed = JSON.parse(jsonMatch[0]);
-          searchParams = parsed.vam_search;
-          cleanText = fullResponse.replace(jsonMatch[0], '').trim();
-          // Update the displayed message without the JSON
-          assistantMessageDiv.querySelector('.message__text').innerHTML = escHtml(cleanText).replace(/\n/g, '<br>');
-        } catch(e) {}
-      }
+          const data = await window.VAM.searchObjects({
+            ...params,
+            page_size: 4,
+          });
+          const records = data.records || [];
+          if (!records.length) return;
 
-      // Add source info
-      const sourceDiv = document.createElement('div');
-      sourceDiv.className = 'message__source';
-      sourceDiv.innerHTML = '<span>📖</span> Source: V&A Collections API + AI';
-      assistantMessageDiv.querySelector('.message__bubble').appendChild(sourceDiv);
+          const section = document.createElement("div");
+          section.className = "related-objects";
+          section.innerHTML = `<h4>Related objects from the collection</h4><div class="related-objects-grid" id="related-grid"></div>`;
+          container.appendChild(section);
+          const grid = section.querySelector("#related-grid");
+          grid.id = "";
 
-      // If AI suggested a search, run it
-      if (searchParams) {
-        await appendRelatedObjects(assistantMessageDiv.querySelector('.message__bubble'), searchParams);
-      }
-
-      showInlinePrompts();
-
-    } catch (error) {
-      assistantMessageDiv.querySelector('.message__text').textContent =
-        `Error: ${error.message}. Make sure OLLAMA is running.`;
-      console.error('Error:', error);
-    } finally {
-      // Re-enable controls
-      sendBtn.disabled = false;
-      chatInput.focus();
-    }
-  }
-
-  async function appendRelatedObjects(container, params) {
-    try {
-      const data = await window.VAM.searchObjects({ ...params, page_size: 4 });
-      const records = data.records || [];
-      if (!records.length) return;
-
-      const section = document.createElement('div');
-      section.className = 'related-objects';
-      section.innerHTML = `<h4>Related objects from the collection</h4><div class="related-objects-grid" id="related-grid"></div>`;
-      container.appendChild(section);
-      const grid = section.querySelector('#related-grid');
-      grid.id = '';
-
-      records.forEach(record => {
-        const mini = document.createElement('div');
-        mini.className = 'related-mini-card';
-        mini.setAttribute('tabindex', '0');
-        mini.setAttribute('role', 'button');
-        const imgUrl = window.VAM.getArtefactImageUrl(record, 'thumb');
-        const title = record._primaryTitle || record.objectType || 'Object';
-        mini.innerHTML = `
+          records.forEach((record) => {
+            const mini = document.createElement("div");
+            mini.className = "related-mini-card";
+            mini.setAttribute("tabindex", "0");
+            mini.setAttribute("role", "button");
+            const imgUrl = window.VAM.getArtefactImageUrl(record, "thumb");
+            const title = record._primaryTitle || record.objectType || "Object";
+            mini.innerHTML = `
           ${imgUrl ? `<img src="${imgUrl}" alt="${window.VAM.escHtml(title)}" loading="lazy"/>` : '<div class="artefact-placeholder">🏺</div>'}
-          <p>${window.VAM.escHtml(title.slice(0, 40))}${title.length > 40 ? '…' : ''}</p>
+          <p>${window.VAM.escHtml(title.slice(0, 40))}${title.length > 40 ? "…" : ""}</p>
         `;
-        mini.addEventListener('click', () => window.VAM.renderArtefactCard && openArtefactModalFromRecord(record));
-        mini.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openArtefactModalFromRecord(record); }});
-        grid.appendChild(mini);
+            mini.addEventListener(
+              "click",
+              () =>
+                window.VAM.renderArtefactCard &&
+                openArtefactModalFromRecord(record),
+            );
+            mini.addEventListener("keydown", (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openArtefactModalFromRecord(record);
+              }
+            });
+            grid.appendChild(mini);
+          });
+        } catch (e) {
+          // Silent fail — don't disrupt the chat
+        }
+      }
+
+      function openArtefactModalFromRecord(record) {
+        // Reuse modal from main.js
+        window.VAM.renderArtefactCard(record); // triggers the side-effect-free render
+        // Instead, open modal directly
+        const evt = new CustomEvent("openArtefact", { detail: record });
+        document.dispatchEvent(evt);
+      }
+
+      function escHtml(str) {
+        return window.VAM
+          ? window.VAM.escHtml(str)
+          : String(str).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      // Listen for modal open events
+      document.addEventListener("openArtefact", (e) => {
+        window.VAM && window.VAM.renderArtefactCard && null; // modal injected via main.js
       });
-    } catch(e) {
-      // Silent fail — don't disrupt the chat
-    }
-  }
-
-  function openArtefactModalFromRecord(record) {
-    // Reuse modal from main.js
-    window.VAM.renderArtefactCard(record); // triggers the side-effect-free render
-    // Instead, open modal directly
-    const evt = new CustomEvent('openArtefact', { detail: record });
-    document.dispatchEvent(evt);
-  }
-
-  function escHtml(str) {
-    return window.VAM ? window.VAM.escHtml(str) : String(str).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  // Listen for modal open events
-  document.addEventListener('openArtefact', e => {
-    window.VAM && window.VAM.renderArtefactCard && null; // modal injected via main.js
-  });
-  </script>
-</body>
+    </script>
+  </body>
 </html>

@@ -16,6 +16,7 @@
       <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
         <span class="logo-vam">V&amp;A</span>
         <span class="logo-divider" aria-hidden="true">|</span>
+        <span class="logo-sub">Collection Explorer</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
         <ul role="list">
@@ -39,6 +40,7 @@
         <div class="ai-badge">✦ AI Tool — Visual Search</div>
         <h1>Search by sight</h1>
         <p>Upload an image or describe what you see — shape, colour, pattern, material. Our AI finds visually similar artefacts from the V&A collection.</p>
+        <p class="visual-search-hero__hint">Best for: patterns, decorative motifs, colours, silhouettes, and objects you cannot name yet.</p>
       </div>
 
       <!-- Upload zone -->
@@ -64,6 +66,7 @@
           <input type="text" id="visual-describe" placeholder="e.g. blue floral pattern on white porcelain, geometric gold border…" />
           <button class="btn btn--primary" id="search-btn" type="button" aria-label="Search by description">Search</button>
         </div>
+        <p class="visual-search-helper">Try describing colour, texture, pattern, object type, or probable material for better matches.</p>
 
         <div class="bias-notice bias-notice--spaced">
           <span class="bias-notice__icon">ℹ</span>
@@ -83,236 +86,5 @@
   </main>
 
   <script src="../main.js"></script>
-  <script>
-  'use strict';
-
-  const VISUAL_AI_SYSTEM = `You are a visual analysis assistant for the Victoria & Albert Museum. Your task is to analyse an image description or uploaded image and:
-1. Extract 3-5 key visual attributes (colour palette, patterns, materials, style period, object type)
-2. Generate 2-3 optimal V&A collection search queries that would find visually similar objects
-3. List the detected attributes as a JSON array
-
-Respond ONLY with valid JSON in this format:
-{
-  "attributes": ["attribute1", "attribute2", "attribute3"],
-  "searches": [
-    {"q": "search term", "label": "Why this search"},
-    {"q": "another search", "label": "Why this search"}
-  ]
-}`;
-
-  const OLLAMA_CHAT_URL = 'http://localhost:11434/api/chat';
-  const OLLAMA_TAGS_URL = 'http://localhost:11434/api/tags';
-
-  const uploadZone = document.getElementById('upload-zone');
-  const fileInput  = document.getElementById('file-input');
-  const preview    = document.getElementById('upload-preview');
-  const previewImg = document.getElementById('preview-img');
-  const clearBtn   = document.getElementById('clear-upload');
-  const searchBtn  = document.getElementById('search-btn');
-  const descInput  = document.getElementById('visual-describe');
-  const resultsSection = document.getElementById('results-section');
-  const visualResults  = document.getElementById('visual-results');
-  const resultCount    = document.getElementById('result-count');
-  const detectedAttrs  = document.getElementById('detected-attrs');
-
-  let uploadedBase64 = null;
-  let ollamaChecked = false;
-
-  async function checkOllamaApi() {
-    if (ollamaChecked) return;
-    const response = await fetch(OLLAMA_TAGS_URL, { method: 'GET' });
-    if (!response.ok) {
-      throw new Error(`Ollama health check failed: ${response.status}`);
-    }
-    ollamaChecked = true;
-  }
-
-    async function callOllamaJson(systemPrompt, userPrompt) {
-      await checkOllamaApi();
-
-      const response = await fetch(OLLAMA_CHAT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'phi3:mini',
-          stream: false,
-          options: { num_predict: 1000 },
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ]
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Ollama request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const text = (data.message?.content || '').replace(/```json|```/g, '').trim();
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON object found in model response');
-      return JSON.parse(jsonMatch[0]);
-    }
-
-  // Drag and drop
-  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-  uploadZone.addEventListener('drop', e => {
-    e.preventDefault();
-    uploadZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) handleFile(file);
-  });
-  uploadZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
-
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files[0]) handleFile(fileInput.files[0]);
-  });
-
-  clearBtn.addEventListener('click', () => {
-    uploadedBase64 = null;
-    preview.classList.remove('show');
-    previewImg.src = '';
-    fileInput.value = '';
-    detectedAttrs.innerHTML = '';
-    uploadZone.style.display = '';
-  });
-
-  function handleFile(file) {
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Please upload an image under 5MB.');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = e => {
-      previewImg.src = e.target.result;
-      uploadedBase64 = e.target.result.split(',')[1];
-      uploadZone.style.display = 'none';
-      preview.classList.add('show');
-      analyseAndSearch();
-    };
-    reader.readAsDataURL(file);
-  }
-
-  searchBtn.addEventListener('click', () => {
-    const desc = descInput.value.trim();
-    if (desc) searchByDescription(desc);
-  });
-  descInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); searchBtn.click(); }
-  });
-
-  async function analyseAndSearch() {
-    if (!uploadedBase64) return;
-
-    detectedAttrs.innerHTML = '<span class="visual-attr-chip skeleton"></span>'.repeat(3);
-
-    try {
-        const parsed = await callOllamaJson(
-          VISUAL_AI_SYSTEM,
-          'A user uploaded an image for visual search. You cannot directly inspect the image pixels, so provide tentative attributes and broad search suggestions with conservative language.'
-        );
-
-      detectedAttrs.innerHTML = '';
-      (parsed.attributes || []).forEach(attr => {
-        const chip = document.createElement('span');
-        chip.className = 'visual-attr-chip';
-        chip.textContent = attr;
-        detectedAttrs.appendChild(chip);
-      });
-
-      const searches = parsed.searches || [];
-      if (searches.length) {
-        await loadVisualResults(searches);
-      }
-    } catch(e) {
-      detectedAttrs.innerHTML = '<p class="visual-error">Could not analyse image. Try describing it below.</p>';
-    }
-  }
-
-  async function searchByDescription(desc) {
-    detectedAttrs.innerHTML = '';
-    resultsSection.style.display = 'block';
-    visualResults.innerHTML = renderSkeletons(8);
-    resultCount.textContent = 'Searching…';
-
-    try {
-        const parsed = await callOllamaJson(VISUAL_AI_SYSTEM, `Visual description: ${desc}`);
-
-      (parsed.attributes || []).forEach(attr => {
-        const chip = document.createElement('span');
-        chip.className = 'visual-attr-chip';
-        chip.textContent = attr;
-        detectedAttrs.appendChild(chip);
-      });
-
-      await loadVisualResults(parsed.searches || [{ q: desc, label: 'Your description' }]);
-    } catch(e) {
-      // fallback to direct search
-      await loadVisualResults([{ q: desc, label: 'Direct search' }]);
-    }
-  }
-
-  async function loadVisualResults(searches) {
-    resultsSection.style.display = 'block';
-    visualResults.innerHTML = renderSkeletons(8);
-    resultCount.textContent = 'Loading…';
-
-    try {
-      const allRecords = [];
-      for (const search of searches.slice(0, 2)) {
-        const data = await window.VAM.searchObjects({ q: search.q, page_size: 6 });
-        (data.records || []).forEach(r => { r._whyLabel = search.label; allRecords.push(r); });
-      }
-
-      visualResults.innerHTML = '';
-      const seen = new Set();
-      allRecords.forEach(record => {
-        if (seen.has(record.systemNumber)) return;
-        seen.add(record.systemNumber);
-        const card = window.VAM.renderArtefactCard(record, record._whyLabel);
-        card.setAttribute('role', 'listitem');
-
-        // Add confidence bar
-        const score = (0.55 + Math.random() * 0.4).toFixed(2);
-        const bar = document.createElement('div');
-        bar.innerHTML = `
-          <div class="similarity-score">
-            <span>Visual similarity</span>
-            <span>${Math.round(score * 100)}%</span>
-          </div>
-          <div class="confidence-bar">
-            <div class="confidence-fill"></div>
-          </div>
-        `;
-        bar.querySelector('.confidence-fill').style.width = `${score * 100}%`;
-        card.querySelector('.artefact-card__body').appendChild(bar);
-        visualResults.appendChild(card);
-      });
-
-      resultCount.textContent = `${allRecords.length} visually similar objects`;
-
-      if (!allRecords.length) {
-        visualResults.innerHTML = '<p class="results-status-message">No matching objects found. Try a different description.</p>';
-      }
-    } catch(e) {
-      visualResults.innerHTML = '<p class="results-status-message">Search failed. Please try again.</p>';
-    }
-  }
-
-  function renderSkeletons(n) {
-    return Array(n).fill(`
-      <div class="result-skeleton-card">
-        <div class="skeleton result-skeleton-card__image"></div>
-        <div class="result-skeleton-card__body">
-          <div class="skeleton result-skeleton-card__line result-skeleton-card__line--short"></div>
-          <div class="skeleton result-skeleton-card__line result-skeleton-card__line--long"></div>
-          <div class="skeleton result-skeleton-card__line result-skeleton-card__line--medium"></div>
-        </div>
-      </div>
-    `).join('');
-  }
-  </script>
 </body>
 </html>

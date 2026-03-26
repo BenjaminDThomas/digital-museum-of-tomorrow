@@ -190,6 +190,12 @@ h4 {
   margin: 0;
 }
 
+.visual-search-hero__hint {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--clr-text-faint);
+}
+
 .visual-content-wrap {
   max-width: 640px;
   margin: 0 auto var(--sp-10);
@@ -268,6 +274,17 @@ h4 {
 .describe-input-wrapper {
   display: flex;
   gap: var(--sp-3);
+}
+
+.visual-search-helper {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-xs);
+  color: var(--clr-text-faint);
+  line-height: var(--lh-loose);
+}
+
+.upload-zone--hidden {
+  display: none;
 }
 .results-section {
   padding: var(--sp-12) 0;
@@ -585,6 +602,14 @@ body.high-contrast .logo-divider {
   margin-bottom: var(--sp-10);
 }
 
+.hero-supporting-note {
+  margin-top: var(--sp-5);
+  max-width: 560px;
+  font-size: var(--fs-sm);
+  color: var(--clr-text-faint);
+  line-height: var(--lh-loose);
+}
+
 .hero-cta-group {
   display: flex;
   gap: var(--sp-4);
@@ -736,6 +761,13 @@ body.high-contrast .logo-divider {
 .tool-card__link {
   margin-top: auto;
   align-self: flex-start;
+}
+
+.tool-card__prompt {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-xs);
+  color: var(--clr-text-faint);
+  line-height: var(--lh-loose);
 }
 
 /* ====================================
@@ -1074,6 +1106,20 @@ select:focus {
 .chat-welcome p {
   color: var(--clr-text-muted);
   margin-bottom: var(--sp-8);
+  line-height: var(--lh-loose);
+}
+
+.chat-welcome__hint {
+  margin-top: calc(var(--sp-6) * -1);
+  margin-bottom: var(--sp-6);
+  font-size: var(--fs-sm);
+  color: var(--clr-text-faint);
+}
+
+.chat-input-helper {
+  margin-bottom: var(--sp-3);
+  font-size: var(--fs-xs);
+  color: var(--clr-text-faint);
   line-height: var(--lh-loose);
 }
 .related-objects {
@@ -2051,6 +2097,12 @@ body.high-contrast .logo-divider {
   color: var(--clr-text-muted);
   max-width: 560px;
 }
+
+.discover-intro__hint {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--clr-text-faint);
+}
 .discover-inline-link {
   color: var(--clr-accent-dim);
 }
@@ -2157,6 +2209,12 @@ body.high-contrast .logo-divider {
 .generative-page__body {
   color: var(--clr-text-muted);
   line-height: var(--lh-loose);
+}
+
+.generative-page__hint {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--clr-text-faint);
 }
 .generative-step-block {
   margin-bottom: var(--sp-8);

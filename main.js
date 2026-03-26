@@ -999,14 +999,13 @@ function initChatbotPage() {
 
 Your role:
 - Answer questions about artefacts, periods, styles, materials, makers, and cultural contexts
-- Suggest relevant search terms and filters for the V&A API (e.g. material IDs, technique IDs, place IDs)
 - Make connections between objects, periods, and cultures in an engaging, accessible way
 - Be honest when you don't know something or when data may be incomplete
 - Flag if descriptions may use dated terminology and suggest respectful alternatives
 - Keep responses concise but rich — this is a museum context, not an academic paper
+- When mentioning specific objects or types of objects, name them clearly so the user can explore further
 
-When suggesting V&A API searches, format them as JSON at the end of your response like this:
-{"vam_search": {"q": "search term", "id_material": "AAT12345"}}
+Do NOT output any JSON, code blocks, or raw data. Write in natural, conversational prose only.
 
 Be inclusive, curious, and celebratory of human creativity across all cultures and time periods.`;
   const ollamaChatUrl = 'http://localhost:11434/api/chat';
@@ -1066,7 +1065,7 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
     try {
       const data = await window.VAM.searchObjects({ ...params, page_size: 4 });
       const records = data.records || [];
-      if (!records.length) return;
+      if (!records.length) return [];
 
       const section = document.createElement('div');
       section.className = 'related-objects';
@@ -1094,8 +1093,51 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
         });
         grid.appendChild(mini);
       });
+      return records;
     } catch (_) {
       // Ignore related object failures.
+      return [];
+    }
+  }
+
+  function extractSearchQuery(userText, aiText) {
+    // Build a search query from the user's question stripped of common question words.
+    const stopWords = new Set([
+      'show','me','find','tell','about','what','the','is','are','was','were','a','an',
+      'of','in','and','or','to','for','from','with','that','this','it','can','you',
+      'do','does','did','how','why','where','when','which','who','some','any','i',
+      'like','please','give','get','have','has','had','be','been','would','could',
+      'should','will','shall','may','might','also','very','really','just','know',
+      'think','look','see','want','need','let','make','much','many','more','most'
+    ]);
+    const words = userText.toLowerCase().replace(/[^a-z0-9\s'-]/g, ' ').split(/\s+/)
+      .filter(w => w.length > 2 && !stopWords.has(w));
+    if (words.length === 0) return null;
+    return words.slice(0, 5).join(' ');
+  }
+
+  async function aiExtractSearchQuery(userText, aiResponse) {
+    // Ask a second AI call to pick the best museum collection search query
+    try {
+      const response = await fetch(ollamaChatUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'phi3:mini',
+          messages: [
+            { role: 'system', content: 'You are a museum collection search assistant. Given a conversation between a user and a museum guide, extract the single best short search query (2-5 words) to find the most relevant artefacts in a museum API. Respond with ONLY the search query text, nothing else. No quotes, no explanation.' },
+            { role: 'user', content: `User asked: "${userText}"\n\nMuseum guide answered: "${aiResponse.slice(0, 500)}"\n\nWhat is the best search query to find relevant artefacts?` }
+          ],
+          stream: false
+        })
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      const query = (data.message?.content || '').trim().replace(/["']/g, '');
+      if (query.length > 2 && query.length < 80) return query;
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 
@@ -1156,27 +1198,39 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
       }
 
       conversationHistory.push({ role: 'assistant', content: fullResponse });
-      let cleanText = fullResponse;
-      let searchParams = null;
-      const jsonMatch = fullResponse.match(/\{"vam_search":\s*(\{[^}]+\})\}/);
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[0]);
-          searchParams = parsed.vam_search;
-          cleanText = fullResponse.replace(jsonMatch[0], '').trim();
-          assistantMessage.querySelector('.message__text').innerHTML = escHtml(cleanText).replace(/\n/g, '<br>');
-        } catch (_) {
-          // Ignore invalid trailing JSON.
-        }
+
+      // Strip any accidental JSON the model may have produced
+      const cleanText = fullResponse.replace(/\{[\s\S]*?"vam_search"[\s\S]*?\}/g, '').trim();
+      if (cleanText !== fullResponse) {
+        assistantMessage.querySelector('.message__text').innerHTML = escHtml(cleanText).replace(/\n/g, '<br>');
       }
 
       const source = document.createElement('div');
       source.className = 'message__source';
-      source.innerHTML = '<span>📖</span> Source: V&A Collections API + AI';
+      source.innerHTML = '<span>📖</span> Sources: ';
       assistantMessage.querySelector('.message__bubble').appendChild(source);
 
-      if (searchParams) {
-        await appendRelatedObjects(assistantMessage.querySelector('.message__bubble'), searchParams);
+      // Use a second AI call to pick the best search query; fall back to keyword extraction
+      let searchQuery = await aiExtractSearchQuery(text, cleanText);
+      if (!searchQuery) {
+        searchQuery = extractSearchQuery(text, cleanText);
+      }
+      let citedRecords = [];
+      if (searchQuery) {
+        citedRecords = await appendRelatedObjects(assistantMessage.querySelector('.message__bubble'), { q: searchQuery, page_size: 4 });
+      }
+
+      // Build clickable citation links from the fetched records
+      if (citedRecords.length > 0) {
+        const citations = citedRecords
+          .filter(r => r.systemNumber)
+          .map((r, i) => {
+            const title = (r._primaryTitle || r.objectType || 'Object').slice(0, 50);
+            return `<a href="https://collections.vam.ac.uk/item/${encodeURIComponent(r.systemNumber)}/" target="_blank" rel="noopener noreferrer" class="citation-link">[${i + 1}] ${escHtml(title)}</a>`;
+          });
+        source.innerHTML = `<span>📖</span> Sources: ${citations.join(' &middot; ')}`;
+      } else {
+        source.innerHTML = '<span>📖</span> Source: V&A Collections API + AI';
       }
       showInlinePrompts();
     } catch (error) {

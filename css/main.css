@@ -1263,8 +1263,23 @@ select:focus {
   font-size: var(--fs-xs);
   color: var(--clr-text-muted); /* improved contrast for readability */
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--sp-2);
+  flex-wrap: wrap;
+  line-height: 1.6;
+}
+
+.citation-link {
+  color: var(--clr-accent, #6e8efb);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.citation-link:hover,
+.citation-link:focus {
+  text-decoration-color: currentColor;
 }
 
 .chat-input-area {
@@ -2640,6 +2655,11 @@ body.high-contrast .logo-divider {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
 }
 
 .artefact-modal::backdrop {

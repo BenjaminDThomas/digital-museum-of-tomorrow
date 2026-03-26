@@ -283,9 +283,10 @@ Respond ONLY with valid JSON in this format:
             <span>${Math.round(score * 100)}%</span>
           </div>
           <div class="confidence-bar">
-            <div class="confidence-fill" style="width:${score * 100}%"></div>
+            <div class="confidence-fill"></div>
           </div>
         `;
+        bar.querySelector('.confidence-fill').style.width = `${score * 100}%`;
         card.querySelector('.artefact-card__body').appendChild(bar);
         visualResults.appendChild(card);
       });
@@ -293,21 +294,21 @@ Respond ONLY with valid JSON in this format:
       resultCount.textContent = `${allRecords.length} visually similar objects`;
 
       if (!allRecords.length) {
-        visualResults.innerHTML = '<p style="color:var(--clr-text-muted)">No matching objects found. Try a different description.</p>';
+        visualResults.innerHTML = '<p class="results-status-message">No matching objects found. Try a different description.</p>';
       }
     } catch(e) {
-      visualResults.innerHTML = '<p style="color:var(--clr-text-muted)">Search failed. Please try again.</p>';
+      visualResults.innerHTML = '<p class="results-status-message">Search failed. Please try again.</p>';
     }
   }
 
   function renderSkeletons(n) {
     return Array(n).fill(`
-      <div style="background:var(--clr-surface-2);border-radius:var(--radius-lg);overflow:hidden">
-        <div class="skeleton" style="height:180px"></div>
-        <div style="padding:var(--sp-5)">
-          <div class="skeleton" style="height:12px;width:50%;margin-bottom:8px"></div>
-          <div class="skeleton" style="height:18px;width:80%;margin-bottom:6px"></div>
-          <div class="skeleton" style="height:12px;width:40%"></div>
+      <div class="result-skeleton-card">
+        <div class="skeleton result-skeleton-card__image"></div>
+        <div class="result-skeleton-card__body">
+          <div class="skeleton result-skeleton-card__line result-skeleton-card__line--short"></div>
+          <div class="skeleton result-skeleton-card__line result-skeleton-card__line--long"></div>
+          <div class="skeleton result-skeleton-card__line result-skeleton-card__line--medium"></div>
         </div>
       </div>
     `).join('');

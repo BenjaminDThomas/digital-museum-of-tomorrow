@@ -34,18 +34,18 @@
   </header>
 
   <main id="main">
-    <div class="container" style="padding-top:var(--sp-12)">
-      <div style="max-width:640px;margin-bottom:var(--sp-10)">
-        <div class="ai-badge" style="margin-bottom:var(--sp-4)">✦ AI Tool — Generative</div>
-        <h1 style="font-size:clamp(var(--fs-2xl),4vw,var(--fs-4xl));margin-bottom:var(--sp-4)">Reimagine an artefact</h1>
-        <p style="color:var(--clr-text-muted);line-height:var(--lh-loose)">Choose an object from the collection and a interpretive lens. AI will explore how the object connects to other cultures, periods, and ideas — always clearly labelled as AI interpretation, not fact.</p>
+    <div class="container generative-page">
+      <div class="generative-page__intro">
+        <div class="ai-badge generative-page__badge">✦ AI Tool — Generative</div>
+        <h1 class="generative-page__title">Reimagine an artefact</h1>
+        <p class="generative-page__body">Choose an object from the collection and a interpretive lens. AI will explore how the object connects to other cultures, periods, and ideas — always clearly labelled as AI interpretation, not fact.</p>
       </div>
 
       <div class="reimagine-layout">
         <!-- Input panel -->
         <section aria-label="Choose artefact and lens">
           <!-- Step 1: Choose artefact -->
-          <div style="margin-bottom:var(--sp-8)">
+          <div class="generative-step-block">
             <p class="section-eyebrow">Step 1 — Choose an artefact</p>
             <div class="artefact-search-box">
               <label for="artefact-search" class="sr-only">Search for an artefact</label>
@@ -56,21 +56,21 @@
             <div class="selected-artefact" id="selected-artefact" aria-live="polite" aria-label="Selected artefact">
               <img id="selected-img" src="" alt="" />
               <div>
-                <p style="font-size:var(--fs-xs);color:var(--clr-text-faint);letter-spacing:var(--ls-wider);text-transform:uppercase;margin-bottom:var(--sp-1)">Selected</p>
-                <p id="selected-title" style="font-family:var(--ff-display);font-size:var(--fs-lg);font-weight:300"></p>
-                <p id="selected-date" style="font-size:var(--fs-xs);color:var(--clr-text-muted);margin-top:var(--sp-1)"></p>
+                <p class="selected-artefact__label">Selected</p>
+                <p id="selected-title" class="selected-artefact__title"></p>
+                <p id="selected-date" class="selected-artefact__date"></p>
               </div>
             </div>
           </div>
 
           <!-- Step 2: Choose lens -->
-          <div style="margin-bottom:var(--sp-8)">
+          <div class="generative-step-block">
             <p class="section-eyebrow">Step 2 — Choose an interpretive lens</p>
             <div class="lens-grid" role="radiogroup" aria-label="Interpretive lens options" id="lens-grid"></div>
           </div>
 
           <!-- Step 3: Custom prompt -->
-          <div style="margin-bottom:var(--sp-8)">
+          <div class="generative-step-block">
             <p class="section-eyebrow">Step 3 — Add your own question (optional)</p>
             <div class="field-group">
               <label for="custom-prompt">Your question or focus</label>
@@ -78,11 +78,11 @@
             </div>
           </div>
 
-          <button class="btn btn--primary" id="generate-btn" style="width:100%;justify-content:center" disabled>
+          <button class="btn btn--primary generative-generate-btn" id="generate-btn" disabled>
             ✦ Generate interpretation
           </button>
 
-          <div class="bias-notice" style="margin-top:var(--sp-5)">
+          <div class="bias-notice generative-bias-notice">
             <span class="bias-notice__icon">⚠</span>
             <span>All AI-generated interpretations are clearly labelled. They are creative and educational — not authoritative museum statements. Cultural interpretations may be incomplete or imperfect.</span>
           </div>
@@ -90,12 +90,12 @@
 
         <!-- Output panel -->
         <section aria-label="Generated interpretation" aria-live="polite">
-          <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4)">
-            <p class="section-eyebrow" style="margin-bottom:0">AI Interpretation</p>
+          <div class="generative-output-header">
+            <p class="section-eyebrow generative-output-header__eyebrow">AI Interpretation</p>
             <span class="sd-status-badge" id="sd-status-badge" aria-live="polite"></span>
           </div>
           <div class="generation-output" id="generation-output">
-            <p style="color:var(--clr-text-faint);text-align:center;font-style:italic;font-family:var(--ff-display);font-size:var(--fs-xl)">
+            <p class="generation-output__placeholder">
               Choose an artefact and lens to begin
             </p>
           </div>
@@ -246,7 +246,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
       const records = data.records || [];
       dropdown.innerHTML = '';
       if (!records.length) {
-        dropdown.innerHTML = '<p style="padding:var(--sp-4);font-size:var(--fs-sm);color:var(--clr-text-muted)">No results found</p>';
+        dropdown.innerHTML = '<p class="search-results-dropdown__empty">No results found</p>';
         dropdown.classList.add('open');
         return;
       }
@@ -259,7 +259,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
         const title = r._primaryTitle || r.objectType || 'Object';
         const date = window.VAM.formatDateRange(r);
         item.innerHTML = `
-          ${imgUrl ? `<img src="${imgUrl}" alt="" />` : '<div style="width:40px;height:40px;background:var(--clr-surface-3);border-radius:var(--radius-sm);flex-shrink:0"></div>'}
+          ${imgUrl ? `<img src="${imgUrl}" alt="" />` : '<div class="dropdown-item__placeholder"></div>'}
           <div>
             <div class="dropdown-item__title">${window.VAM.escHtml(title.slice(0,50))}</div>
             <div class="dropdown-item__meta">${window.VAM.escHtml(r.objectType || '')} · ${window.VAM.escHtml(date)}</div>
@@ -316,8 +316,8 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     const output = document.getElementById('generation-output');
     output.className = 'generation-output loading';
     output.innerHTML = `
-      <div style="font-size:2rem;display:inline-block" class="spinning" aria-hidden="true">✦</div>
-      <p style="color:var(--clr-text-muted);font-size:var(--fs-sm)">Generating interpretation…</p>
+      <div class="spinning generation-output__spinner" aria-hidden="true">✦</div>
+      <p class="generation-output__status">Generating interpretation…</p>
     `;
 
     const title = selectedArtefact._primaryTitle || selectedArtefact.objectType || 'Object';
@@ -363,10 +363,10 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
           item.className = 'connection-item';
           item.type = 'button';
           item.innerHTML = `
-            <span style="font-size:1rem;flex-shrink:0">→</span>
+            <span class="connection-item__arrow">→</span>
             <div>
-              <div style="font-size:var(--fs-sm);color:var(--clr-text)">${window.VAM.escHtml(conn.label)}</div>
-              <div style="font-size:var(--fs-xs)">${window.VAM.escHtml(conn.reason)}</div>
+              <div class="connection-item__title">${window.VAM.escHtml(conn.label)}</div>
+              <div class="connection-item__reason">${window.VAM.escHtml(conn.reason)}</div>
             </div>
           `;
           item.addEventListener('click', () => {
@@ -379,7 +379,7 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
     } catch(e) {
       output.className = 'generation-output';
       output.innerHTML = `
-        <p style="color:var(--clr-text-muted)">
+        <p class="generation-output__error">
           <strong>Could not generate interpretation.</strong> ${window.VAM.escHtml(e?.message || 'Please try again.')}
         </p>
       `;
@@ -436,7 +436,7 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
     sdOut.className = 'sd-output sd-output--loading';
     sdOut.innerHTML = `
       <div class="sd-output__spinner" aria-hidden="true">✦</div>
-      <p style="color:var(--clr-text-muted);font-size:var(--fs-sm)">Generating visual reimagining — this may take 20–60 seconds…</p>
+      <p class="sd-output__status">Generating visual reimagining — this may take 20–60 seconds…</p>
     `;
 
     try {
@@ -484,7 +484,7 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
     } catch (err) {
       sdOut.className = 'sd-output sd-output--error';
       sdOut.innerHTML = `
-        <p style="color:var(--clr-text-muted);font-size:var(--fs-sm)">
+        <p class="sd-output__error-message">
           <strong>Visual reimagining unavailable.</strong> ${window.VAM.escHtml(err.message)}
         </p>
       `;

@@ -2570,3 +2570,70 @@ body.high-contrast .logo-divider {
     overflow-x: auto;
   }
 }
+
+.artefact-card {
+  cursor: pointer;
+}
+
+.artefact-modal {
+  padding: 0;
+  border: 1px solid var(--clr-border-light);
+  border-radius: var(--radius-xl);
+  background: var(--clr-surface);
+  color: var(--clr-text);
+  max-width: 880px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.artefact-modal::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.artefact-modal__inner {
+  position: relative;
+  padding: var(--sp-8);
+}
+
+.artefact-modal__close {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-surface-3);
+  border: 1px solid var(--clr-border);
+  border-radius: 50%;
+  color: var(--clr-text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.artefact-modal__close:hover {
+  background: var(--clr-surface-2);
+  color: var(--clr-text);
+}
+
+.artefact-modal__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-8);
+}
+
+.artefact-modal__image img {
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 640px) {
+  .artefact-modal__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,89 +1,159 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Search the V&A collection visually. Describe what you see or upload an image to find visually similar artefacts." />
-  <title>Visual Search — V&A AI Explorer</title>
-  <link rel="stylesheet" href="../css/tokens.css" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-</head>
-<body>
-  <a href="#main" class="skip-link">Skip to main content</a>
-  <header class="site-header" role="banner">
-    <div class="header-inner">
-      <a href="../index.html" class="logo" aria-label="V&A AI Collection Explorer home">
-        <span class="logo-vam">V&amp;A</span>
-        <span class="logo-divider" aria-hidden="true">|</span>
-        <span class="logo-sub">Collection Explorer</span>
-      </a>
-      <nav class="main-nav" aria-label="Main navigation">
-        <ul role="list">
-          <li><a href="../index.html">Home</a></li>
-          <li><a href="chatbot.html">Ask the Collection</a></li>
-          <li><a href="recommender.html">Discover</a></li>
-          <li><a href="visual.html" aria-current="page">Visual Search</a></li>
-          <li><a href="generative.html">Reimagine</a></li>
-          <li><a href="transparency.html">AI &amp; Trust</a></li>
-        </ul>
-      </nav>
-      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-
-  <main id="main">
-    <div class="container">
-      <div class="visual-search-hero">
-        <div class="ai-badge">✦ AI Tool — Visual Search</div>
-        <h1>Search by sight</h1>
-        <p>Upload an image or describe what you see — shape, colour, pattern, material. Our AI finds visually similar artefacts from the V&A collection.</p>
-        <p class="visual-search-hero__hint">Best for: patterns, decorative motifs, colours, silhouettes, and objects you cannot name yet.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Search the V&A collection visually. Describe what you see or upload an image to find visually similar artefacts."
+    />
+    <title>Visual Search — V&A AI Explorer</title>
+    <link rel="stylesheet" href="../css/tokens.css" />
+    <link rel="stylesheet" href="../css/main.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a
+          href="../index.html"
+          class="logo"
+          aria-label="V&A AI Collection Explorer home"
+        >
+          <span class="logo-vam">V&amp;A</span>
+          <span class="logo-divider" aria-hidden="true">|</span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <ul role="list">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="chatbot.html">Ask the Collection</a></li>
+            <li><a href="recommender.html">Discover</a></li>
+            <li><a href="visual.html" aria-current="page">Visual Search</a></li>
+            <li><a href="generative.html">Reimagine</a></li>
+            <li><a href="transparency.html">AI &amp; Trust</a></li>
+          </ul>
+        </nav>
+        <button
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="main-nav"
+          aria-label="Open navigation"
+        >
+          <span></span><span></span><span></span>
+        </button>
       </div>
+    </header>
 
-      <!-- Upload zone -->
-      <div class="visual-content-wrap">
-        <div class="upload-zone" id="upload-zone" role="button" aria-label="Upload an image or drag and drop" tabindex="0">
-          <input type="file" id="file-input" accept="image/*" aria-label="Upload image file" />
-          <div class="upload-zone__icon" aria-hidden="true">🖼</div>
-          <h2 class="upload-zone__title">Drop an image here</h2>
-          <p class="upload-zone__sub">or click to browse — JPG, PNG, GIF up to 5MB</p>
-          <button class="btn btn--ghost btn--ghost-disabled" type="button" tabindex="-1" aria-hidden="true">Browse files</button>
+    <main id="main">
+      <div class="container">
+        <div class="visual-search-hero">
+          <div class="ai-badge">✦ AI Tool — Visual Search</div>
+          <h1>Search by sight</h1>
+          <p>
+            Upload an image or describe what you see — shape, colour, pattern,
+            material. Our AI finds visually similar artefacts from the V&A
+            collection.
+          </p>
         </div>
 
-        <div class="upload-preview" id="upload-preview">
-          <img id="preview-img" src="" alt="Uploaded image preview" />
-          <div class="visual-attributes" id="detected-attrs" aria-label="Detected visual attributes" aria-live="polite"></div>
-          <button class="btn btn--ghost" id="clear-upload">Clear image ✕</button>
+        <!-- Upload zone -->
+        <div class="visual-content-wrap">
+          <div
+            class="upload-zone"
+            id="upload-zone"
+            role="button"
+            aria-label="Upload an image or drag and drop"
+            tabindex="0"
+          >
+            <input
+              type="file"
+              id="file-input"
+              accept="image/*"
+              aria-label="Upload image file"
+            />
+            <div class="upload-zone__icon" aria-hidden="true">🖼</div>
+            <h2 class="upload-zone__title">Drop an image here</h2>
+            <p class="upload-zone__sub">
+              or click to browse — JPG, PNG, GIF up to 5MB
+            </p>
+            <button
+              class="btn btn--ghost btn--ghost-disabled"
+              type="button"
+              tabindex="-1"
+              aria-hidden="true"
+            >
+              Browse files
+            </button>
+          </div>
+
+          <div class="upload-preview" id="upload-preview">
+            <img id="preview-img" src="" alt="Uploaded image preview" />
+            <div
+              class="visual-attributes"
+              id="detected-attrs"
+              aria-label="Detected visual attributes"
+              aria-live="polite"
+            ></div>
+            <button class="btn btn--ghost" id="clear-upload">
+              Clear image ✕
+            </button>
+          </div>
+
+          <div class="or-divider" aria-hidden="true">or describe it</div>
+
+          <div class="describe-input-wrapper">
+            <label for="visual-describe" class="sr-only"
+              >Describe what you are looking for visually</label
+            >
+            <input
+              type="text"
+              id="visual-describe"
+              placeholder="e.g. blue floral pattern on white porcelain, geometric gold border…"
+            />
+            <button
+              class="btn btn--primary"
+              id="search-btn"
+              type="button"
+              aria-label="Search by description"
+            >
+              Search
+            </button>
+          </div>
+
+          <div class="bias-notice bias-notice--spaced">
+            <span class="bias-notice__icon">ℹ</span>
+            <span
+              >Visual AI analyses shape, colour, and pattern. Results show
+              <strong>similarity confidence scores</strong> so you can judge
+              relevance yourself. AI may not recognise cultural or symbolic
+              significance.</span
+            >
+          </div>
         </div>
 
-        <div class="or-divider" aria-hidden="true">or describe it</div>
-
-        <div class="describe-input-wrapper">
-          <label for="visual-describe" class="sr-only">Describe what you are looking for visually</label>
-          <input type="text" id="visual-describe" placeholder="e.g. blue floral pattern on white porcelain, geometric gold border…" />
-          <button class="btn btn--primary" id="search-btn" type="button" aria-label="Search by description">Search</button>
-        </div>
-        <p class="visual-search-helper">Try describing colour, texture, pattern, object type, or probable material for better matches.</p>
-
-        <div class="bias-notice bias-notice--spaced">
-          <span class="bias-notice__icon">ℹ</span>
-          <span>Visual AI analyses shape, colour, and pattern. Results show <strong>similarity confidence scores</strong> so you can judge relevance yourself. AI may not recognise cultural or symbolic significance.</span>
-        </div>
+        <!-- Results -->
+        <section
+          class="results-section"
+          id="results-section"
+          aria-label="Visual search results"
+        >
+          <div class="results-header">
+            <h2 id="results-heading">Visually similar artefacts</h2>
+            <p id="result-count" aria-live="polite"></p>
+          </div>
+          <div
+            class="artefact-grid"
+            id="visual-results"
+            role="list"
+            aria-label="Visual search results"
+          ></div>
+        </section>
       </div>
-
-      <!-- Results -->
-      <section class="results-section" id="results-section" aria-label="Visual search results">
-        <div class="results-header">
-          <h2 id="results-heading">Visually similar artefacts</h2>
-          <p id="result-count" aria-live="polite"></p>
-        </div>
-        <div class="artefact-grid" id="visual-results" role="list" aria-label="Visual search results"></div>
-      </section>
-    </div>
-  </main>
+    </main>
 
   <script src="../main.js"></script>
 </body>

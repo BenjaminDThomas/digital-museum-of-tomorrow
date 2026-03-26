@@ -1049,7 +1049,7 @@ select:focus {
 .chat-history-item {
   padding: var(--sp-3) var(--sp-4);
   margin-bottom: 5px;
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   font-size: var(--fs-sm);
   color: var(--clr-text-muted);
   cursor: pointer;

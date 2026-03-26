@@ -1634,6 +1634,7 @@ body.high-contrast .logo-divider {
     background: var(--clr-surface);
     border-bottom: 1px solid var(--clr-border);
     padding: var(--sp-4);
+    margin-top: 10px;
   }
   .main-nav.open {
     display: block;

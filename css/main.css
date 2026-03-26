@@ -2137,7 +2137,7 @@ body.high-contrast .logo-divider {
 .transparency-contact-actions {
   display: flex;
   gap: var(--sp-4);
-  justify-content: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
 }
 .generative-page {
@@ -2560,6 +2560,7 @@ body.high-contrast .logo-divider {
   max-width: 480px;
   margin: 0 auto var(--sp-8);
   line-height: var(--lh-loose);
+  text-align: left;
 }
 @media (max-width: 768px) {
   .principles-grid {

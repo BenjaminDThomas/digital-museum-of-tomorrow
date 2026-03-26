@@ -39,18 +39,18 @@
     <div class="discover-layout">
       <!-- Sidebar filters -->
       <aside class="discover-sidebar" aria-label="Preferences and filters">
-        <div class="filter-panel" style="margin-bottom:var(--sp-5)">
+        <div class="filter-panel discover-filter-panel">
           <p class="filter-panel__title">Your interests</p>
-          <p style="font-size:var(--fs-xs);color:var(--clr-text-faint);margin-bottom:var(--sp-4);line-height:var(--lh-loose)">Select topics to shape your recommendations. Your choices stay on your device.</p>
+          <p class="discover-filter-help">Select topics to shape your recommendations. Your choices stay on your device.</p>
           <div class="filter-chips" id="interest-tags" role="group" aria-label="Interest topics"></div>
         </div>
 
-        <div class="filter-panel" style="margin-bottom:var(--sp-5)">
+        <div class="filter-panel discover-filter-panel">
           <p class="filter-panel__title">Time period</p>
           <div class="filter-chips" id="period-filters" role="group" aria-label="Time period filters"></div>
         </div>
 
-        <div class="filter-panel" style="margin-bottom:var(--sp-5)">
+        <div class="filter-panel discover-filter-panel">
           <p class="filter-panel__title">Material</p>
           <div class="filter-chips" id="material-filters" role="group" aria-label="Material filters"></div>
         </div>
@@ -60,20 +60,20 @@
           <div class="filter-chips" id="region-filters" role="group" aria-label="Region filters"></div>
         </div>
 
-        <button class="btn btn--primary" id="apply-filters" style="width:100%;margin-top:var(--sp-5);justify-content:center">
+        <button class="btn btn--primary discover-sidebar-btn discover-sidebar-btn--primary" id="apply-filters">
           Apply filters
         </button>
-        <button class="btn btn--ghost" id="reset-filters" style="width:100%;margin-top:var(--sp-2);justify-content:center">
+        <button class="btn btn--ghost discover-sidebar-btn discover-sidebar-btn--secondary" id="reset-filters">
           Reset
         </button>
       </aside>
 
       <!-- Main content -->
       <div class="discover-main">
-        <div style="margin-bottom:var(--sp-6)">
-          <div class="ai-badge" style="margin-bottom:var(--sp-3)">✦ AI Tool — Recommender</div>
-          <h1 style="font-size:var(--fs-3xl);margin-bottom:var(--sp-2)">Discover the Collection</h1>
-          <p style="color:var(--clr-text-muted);max-width:560px">Personalised recommendations from 2.3 million objects. We surface unexpected connections and actively highlight under-represented collections.</p>
+        <div class="discover-intro">
+          <div class="ai-badge discover-intro__badge">✦ AI Tool — Recommender</div>
+          <h1 class="discover-intro__title">Discover the Collection</h1>
+          <p class="discover-intro__body">Personalised recommendations from 2.3 million objects. We surface unexpected connections and actively highlight under-represented collections.</p>
         </div>
 
         <!-- Discovery mode -->
@@ -87,15 +87,15 @@
           <span class="serendipity-banner__icon">✦</span>
           <div>
             <h3>About these recommendations</h3>
-            <p>Recommendations are generated from the V&A API based on your selected interests. We deliberately include objects from less commonly viewed collections. <a href="transparency.html" style="color:var(--clr-accent-dim)">How this works →</a></p>
+            <p>Recommendations are generated from the V&A API based on your selected interests. We deliberately include objects from less commonly viewed collections. <a href="transparency.html" class="discover-inline-link">How this works →</a></p>
           </div>
         </div>
 
         <div class="results-header">
           <p class="results-count" id="results-count" aria-live="polite"></p>
-          <div style="display:flex;gap:var(--sp-2);">
+          <div class="discover-results-controls">
             <label for="sort-select" class="sr-only">Sort by</label>
-            <select id="sort-select" style="min-width:160px;padding:var(--sp-2) var(--sp-3);" aria-label="Sort results">
+            <select id="sort-select" class="discover-sort-select" aria-label="Sort results">
               <option value="relevance">Sort: Relevance</option>
               <option value="date_asc">Date: Oldest first</option>
               <option value="date_desc">Date: Newest first</option>
@@ -106,13 +106,13 @@
         <div class="artefact-grid" id="results-grid" aria-label="Recommended artefacts" role="list">
           <!-- populated by JS -->
         </div>
-        <button class="load-more-btn" id="load-more" aria-label="Load more artefacts" style="display:none">
+        <button class="load-more-btn" id="load-more" aria-label="Load more artefacts">
           Load more objects ↓
         </button>
 
-        <div class="bias-notice" style="margin-top:var(--sp-8)">
+        <div class="bias-notice discover-bias-notice">
           <span class="bias-notice__icon">ℹ</span>
-          <span>Our recommendations come from a dataset that may over-represent certain cultures or periods. We are actively working to improve this. <a href="transparency.html" style="color:var(--clr-accent-dim)">Read our bias statement.</a></span>
+          <span>Our recommendations come from a dataset that may over-represent certain cultures or periods. We are actively working to improve this. <a href="transparency.html" class="discover-inline-link">Read our bias statement.</a></span>
         </div>
       </div>
     </div>
@@ -280,8 +280,8 @@
       // Skeleton loading
       for (let i = 0; i < 8; i++) {
         const skel = document.createElement('div');
-        skel.style.cssText = 'background:var(--clr-surface-2);border-radius:var(--radius-lg);overflow:hidden;';
-        skel.innerHTML = '<div class="skeleton" style="height:180px"></div><div style="padding:var(--sp-5)"><div class="skeleton" style="height:12px;width:50%;margin-bottom:8px"></div><div class="skeleton" style="height:18px;width:80%;margin-bottom:6px"></div><div class="skeleton" style="height:12px;width:40%"></div></div>';
+        skel.className = 'result-skeleton-card';
+        skel.innerHTML = '<div class="skeleton result-skeleton-card__image"></div><div class="result-skeleton-card__body"><div class="skeleton result-skeleton-card__line result-skeleton-card__line--short"></div><div class="skeleton result-skeleton-card__line result-skeleton-card__line--long"></div><div class="skeleton result-skeleton-card__line result-skeleton-card__line--medium"></div></div>';
         grid.appendChild(skel);
       }
     }
@@ -307,7 +307,7 @@
 
     } catch(e) {
       if (reset) {
-        grid.innerHTML = `<p style="color:var(--clr-text-muted);padding:var(--sp-8)">Unable to load results. Please check your connection.</p>`;
+        grid.innerHTML = '<p class="results-status-message results-status-message--padded">Unable to load results. Please check your connection.</p>';
       }
     }
   }

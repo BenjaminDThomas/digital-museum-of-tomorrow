@@ -2690,4 +2690,34 @@ body.high-contrast .logo-divider {
   .artefact-modal__grid {
     grid-template-columns: 1fr;
   }
+
+  .hero {
+    min-height: 60vh;
+    padding: var(--sp-12) var(--sp-4);
+  }
+
+  .hero-heading {
+    font-size: clamp(var(--fs-2xl), 8vw, var(--fs-4xl));
+    margin-bottom: var(--sp-6);
+  }
+
+  .hero-body {
+    font-size: var(--fs-base);
+    max-width: none;
+    margin-bottom: var(--sp-8);
+  }
+
+  .hero-supporting-note {
+    max-width: none;
+    font-size: var(--fs-xs);
+  }
+
+  .hero-eyebrow {
+    margin-bottom: var(--sp-4);
+  }
+
+  .hero-glow {
+    width: 80vw;
+    height: 50vh;
+  }
 }

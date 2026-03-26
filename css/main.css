@@ -1049,7 +1049,7 @@ select:focus {
 .chat-history-item {
   padding: var(--sp-3) var(--sp-4);
   margin-bottom: 5px;
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   font-size: var(--fs-sm);
   color: var(--clr-text-muted);
   cursor: pointer;
@@ -1634,6 +1634,7 @@ body.high-contrast .logo-divider {
     background: var(--clr-surface);
     border-bottom: 1px solid var(--clr-border);
     padding: var(--sp-4);
+    margin-top: 10px;
   }
   .main-nav.open {
     display: block;

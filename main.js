@@ -450,7 +450,6 @@ function initRecommenderPage() {
   };
 
   let selectedInterests = new Set();
-  let selectedPeriod = null;
   let selectedMaterial = null;
   let selectedRegion = null;
   let currentMode = 'personalised';
@@ -480,7 +479,6 @@ function initRecommenderPage() {
       chip.classList.remove('active');
       chip.setAttribute('aria-pressed', 'false');
     });
-    selectedPeriod = selected ? item : null;
   });
   renderChips(document.getElementById('material-filters'), materials, (item, selected) => {
     selectedMaterial = selected ? item : null;
@@ -573,7 +571,6 @@ function initRecommenderPage() {
   document.getElementById('reset-filters').addEventListener('click', () => {
     selectedInterests.clear();
     selectedMaterial = null;
-    selectedPeriod = null;
     selectedRegion = null;
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.classList.remove('active');
@@ -1441,7 +1438,6 @@ Respond ONLY with valid JSON in this format:
 // ---- Exports for sub-pages ----
 window.VAM = {
   searchObjects,
-  getObject,
   checkVamApi,
   getArtefactImageUrl,
   renderArtefactCard,

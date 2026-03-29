@@ -4,6 +4,15 @@ function initRecommenderPage() {
   const interestTags = document.getElementById('interest-tags');
   if (!interestTags) return;
 
+  const resultsGrid = document.getElementById('results-grid');
+  const resultsCount = document.getElementById('results-count');
+  const sortSelect = document.getElementById('sort-select');
+  const feedStatus = document.getElementById('discover-feed-status');
+  const feedSentinel = document.getElementById('discover-feed-sentinel');
+
+  const PAGE_SIZE = 12;
+  const PREFETCH_ROOT_MARGIN = '1100px 0px';
+
   const interests = [
     { label: 'Fashion & Textiles', q: 'fashion textile' },
     { label: 'Ceramics', q: 'ceramics pottery' },
@@ -18,7 +27,7 @@ function initRecommenderPage() {
   ];
   const periods = [
     { label: 'Medieval', range: [1000, 1500] },
-    { label: '16th\u201317th c.', range: [1500, 1700] },
+    { label: '16th-17th c.', range: [1500, 1700] },
     { label: '18th century', range: [1700, 1800] },
     { label: 'Victorian', range: [1837, 1901] },
     { label: '20th century', range: [1900, 2000] },
@@ -41,8 +50,8 @@ function initRecommenderPage() {
   ];
   const modes = {
     personalised: { label: 'Personalised', info: 'Recommendations based on your selected interests, from V&A Collections API data.' },
-    serendipitous: { label: 'Serendipitous', info: 'Random selection across the whole collection — expect the unexpected.' },
-    underrepresented: { label: 'Underrepresented', info: 'Deliberately surfaces objects from collections that are less commonly explored.' }
+    serendipitous: { label: 'Serendipitous', info: 'Random selection across the whole collection - expect the unexpected.' },
+    underrepresented: { label: 'Underrepresented', info: 'Deliberately surfaces objects from collections that are less commonly explored.' },
   };
   const whyLabels = {
     personalised: 'Matches your interests',
@@ -55,18 +64,30 @@ function initRecommenderPage() {
   let selectedMaterial = null;
   let selectedRegion = null;
   let currentMode = 'personalised';
-  let currentPage = 1;
+
+  let nextPage = 1;
   let totalRecords = 0;
+  let loadedCount = 0;
+  let isLoading = false;
+  let hasMore = true;
+  let filterVersion = 0;
+  const seenKeys = new Set();
+
+  function setFeedStatus(text) {
+    if (feedStatus) feedStatus.textContent = text;
+  }
 
   function renderChips(container, items, onSelect, options = {}) {
     const { singleSelect = false } = options;
     container.innerHTML = '';
+
     items.forEach(item => {
       const button = document.createElement('button');
       button.className = 'filter-chip';
       button.textContent = item.label;
       button.type = 'button';
       button.setAttribute('aria-pressed', 'false');
+
       button.addEventListener('click', () => {
         if (singleSelect) {
           const wasSelected = button.classList.contains('active');
@@ -80,28 +101,51 @@ function initRecommenderPage() {
             button.classList.add('active');
             button.setAttribute('aria-pressed', 'true');
           }
+
           onSelect(item, isSelected);
+          markFeedFiltersUpdated(true);
           return;
         }
 
         const isSelected = button.classList.toggle('active');
         button.setAttribute('aria-pressed', String(isSelected));
         onSelect(item, isSelected);
+        markFeedFiltersUpdated(true);
       });
+
       container.appendChild(button);
     });
   }
 
-  renderChips(interestTags, interests, (item, selected) => selected ? selectedInterests.add(item.q) : selectedInterests.delete(item.q));
-  renderChips(document.getElementById('period-filters'), periods, (item, selected) => {
-    selectedPeriod = selected ? item : null;
-  }, { singleSelect: true });
-  renderChips(document.getElementById('material-filters'), materials, (item, selected) => {
-    selectedMaterial = selected ? item : null;
-  }, { singleSelect: true });
-  renderChips(document.getElementById('region-filters'), regions, (item, selected) => {
-    selectedRegion = selected ? item : null;
-  }, { singleSelect: true });
+  renderChips(
+    interestTags,
+    interests,
+    (item, selected) => (selected ? selectedInterests.add(item.q) : selectedInterests.delete(item.q))
+  );
+  renderChips(
+    document.getElementById('period-filters'),
+    periods,
+    (item, selected) => {
+      selectedPeriod = selected ? item : null;
+    },
+    { singleSelect: true }
+  );
+  renderChips(
+    document.getElementById('material-filters'),
+    materials,
+    (item, selected) => {
+      selectedMaterial = selected ? item : null;
+    },
+    { singleSelect: true }
+  );
+  renderChips(
+    document.getElementById('region-filters'),
+    regions,
+    (item, selected) => {
+      selectedRegion = selected ? item : null;
+    },
+    { singleSelect: true }
+  );
 
   document.querySelectorAll('.discovery-mode-btn').forEach(button => {
     button.addEventListener('click', () => {
@@ -109,47 +153,81 @@ function initRecommenderPage() {
       button.classList.add('active');
       currentMode = button.dataset.mode;
       updateBanner();
-      loadResults(true);
+      markFeedFiltersUpdated(true);
     });
   });
+
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      markFeedFiltersUpdated(true);
+    });
+  }
 
   function updateBanner() {
     const banner = document.getElementById('serendipity-banner');
     const paragraph = banner.querySelector('p');
     banner.querySelector('h3').textContent = modes[currentMode].label;
     paragraph.textContent = `${modes[currentMode].info} `;
+
     const link = document.createElement('a');
     link.href = 'transparency.html';
     link.className = 'discover-inline-link';
-    link.textContent = 'How this works \u2192';
+    link.textContent = 'How this works ->';
     paragraph.appendChild(link);
   }
 
-  async function buildSearchParams() {
-    const params = { page_size: 12, page: currentPage };
-
-    if (currentMode === 'serendipitous') {
-      const letters = 'abcdefghijklmnoprstw';
-      params.q = letters[Math.floor(Math.random() * letters.length)];
-    } else if (currentMode === 'underrepresented') {
-      const underrepresented = ['Korea', 'Peru', 'Mali', 'Ethiopia', 'Indonesia', 'Mexico', 'Iran', 'Nigeria'];
-      params.q = underrepresented[Math.floor(Math.random() * underrepresented.length)];
-    } else {
-      const queries = Array.from(selectedInterests);
-      params.q = queries.length ? queries.join(' ') : 'art design';
-    }
-
-    if (selectedMaterial) {
-      params.id_material = selectedMaterial.id;
-      params.q = `${params.q || ''} ${selectedMaterial.label}`.trim();
-    }
-    if (selectedRegion) params.q = `${params.q || ''} ${selectedRegion.q}`.trim();
-    return params;
+  function getFilterSnapshot() {
+    return {
+      mode: currentMode,
+      interests: Array.from(selectedInterests),
+      period: selectedPeriod,
+      material: selectedMaterial,
+      region: selectedRegion,
+      sort: sortSelect ? sortSelect.value : 'relevance',
+    };
   }
 
-  function filterBySelectedPeriod(records) {
-    if (!selectedPeriod) return records;
-    const [startYear, endYear] = selectedPeriod.range;
+  function describeSnapshot(snapshot) {
+    const parts = [];
+
+    parts.push(modes[snapshot.mode].label);
+    if (snapshot.interests.length) parts.push(`${snapshot.interests.length} interests`);
+    if (snapshot.period) parts.push(snapshot.period.label);
+    if (snapshot.material) parts.push(snapshot.material.label);
+    if (snapshot.region) parts.push(snapshot.region.label);
+
+    return parts.join(' • ');
+  }
+
+  function markFeedFiltersUpdated(tryAutoload) {
+    filterVersion += 1;
+    const snapshot = getFilterSnapshot();
+    updateResultsCount();
+    setFeedStatus(`Updated. Next tiles will use: ${describeSnapshot(snapshot)}.`);
+
+    if (tryAutoload && shouldLoadSoon()) {
+      loadNextBatch();
+    }
+  }
+
+  function shouldLoadSoon() {
+    const pixelsFromBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+    return pixelsFromBottom < 1200;
+  }
+
+  function sortRecords(records, sortMode) {
+    if (sortMode === 'date_asc') {
+      return records.slice().sort((a, b) => Number(a.object_begin_date || 99999) - Number(b.object_begin_date || 99999));
+    }
+    if (sortMode === 'date_desc') {
+      return records.slice().sort((a, b) => Number(b.object_begin_date || -99999) - Number(a.object_begin_date || -99999));
+    }
+    return records;
+  }
+
+  function filterByPeriod(records, period) {
+    if (!period) return records;
+    const [startYear, endYear] = period.range;
 
     return records.filter(record => {
       const begin = Number(record.object_begin_date);
@@ -168,65 +246,152 @@ function initRecommenderPage() {
     });
   }
 
-  async function loadResults(reset) {
-    if (reset) currentPage = 1;
-    const grid = document.getElementById('results-grid');
-    const loadMoreButton = document.getElementById('load-more');
-    const count = document.getElementById('results-count');
+  function buildSearchParams(snapshot, page) {
+    const params = { page_size: PAGE_SIZE, page };
 
-    if (reset) {
-      grid.innerHTML = '';
-      for (let index = 0; index < 8; index += 1) {
-        const skeleton = document.createElement('div');
-        skeleton.className = 'result-skeleton-card';
-        skeleton.innerHTML = '<div class="skeleton result-skeleton-card__image"></div><div class="result-skeleton-card__body"><div class="skeleton result-skeleton-card__line result-skeleton-card__line--short"></div><div class="skeleton result-skeleton-card__line result-skeleton-card__line--long"></div><div class="skeleton result-skeleton-card__line result-skeleton-card__line--medium"></div></div>';
-        grid.appendChild(skeleton);
-      }
+    if (snapshot.mode === 'serendipitous') {
+      const letters = 'abcdefghijklmnoprstw';
+      params.q = letters[Math.floor(Math.random() * letters.length)];
+    } else if (snapshot.mode === 'underrepresented') {
+      const underrepresented = ['Korea', 'Peru', 'Mali', 'Ethiopia', 'Indonesia', 'Mexico', 'Iran', 'Nigeria'];
+      params.q = underrepresented[Math.floor(Math.random() * underrepresented.length)];
+    } else {
+      params.q = snapshot.interests.length ? snapshot.interests.join(' ') : 'art design';
     }
 
+    if (snapshot.material) {
+      params.id_material = snapshot.material.id;
+      params.q = `${params.q || ''} ${snapshot.material.label}`.trim();
+    }
+    if (snapshot.region) {
+      params.q = `${params.q || ''} ${snapshot.region.q}`.trim();
+    }
+
+    return params;
+  }
+
+  function appendRecords(records, mode) {
+    let appended = 0;
+
+    records.forEach(record => {
+      const key = record.systemNumber || record.id || record.pk;
+      if (!key || seenKeys.has(key)) return;
+      seenKeys.add(key);
+
+      const card = window.VAM.renderArtefactCard(record, whyLabels[mode]);
+      card.setAttribute('role', 'listitem');
+      resultsGrid.appendChild(card);
+      appended += 1;
+    });
+
+    loadedCount += appended;
+    return appended;
+  }
+
+  function updateResultsCount() {
+    const periodSummary = selectedPeriod ? ` (${selectedPeriod.label})` : '';
+    resultsCount.textContent = `Loaded ${loadedCount.toLocaleString()} tiles${periodSummary}. Filter changes affect upcoming tiles only.`;
+  }
+
+  async function loadNextBatch() {
+    if (isLoading || !hasMore) return;
+
+    const snapshot = getFilterSnapshot();
+    const requestVersion = filterVersion;
+    isLoading = true;
+    setFeedStatus('Loading more tiles...');
+
+    let appended = 0;
+    let attempts = 0;
+
     try {
-      const params = await buildSearchParams();
-      const data = await window.VAM.searchObjects(params);
-      const records = filterBySelectedPeriod(data.records || []);
-      totalRecords = data.info?.record_count || 0;
+      while (hasMore && appended < 6 && attempts < 5) {
+        const params = buildSearchParams(snapshot, nextPage);
+        nextPage += 1;
+        attempts += 1;
 
-      if (reset) grid.innerHTML = '';
+        const data = await window.VAM.searchObjects(params);
+        const rawRecords = data.records || [];
+        totalRecords = data.info?.record_count || totalRecords;
 
-      const filterSummary = selectedPeriod ? ` (${selectedPeriod.label})` : '';
-      count.textContent = `Showing ${records.length.toLocaleString()} objects${filterSummary} from ${totalRecords.toLocaleString()} results`;
-      records.forEach(record => {
-        const card = window.VAM.renderArtefactCard(record, whyLabels[currentMode]);
-        card.setAttribute('role', 'listitem');
-        grid.appendChild(card);
-      });
+        if (!rawRecords.length) {
+          hasMore = false;
+          break;
+        }
 
-      loadMoreButton.style.display = currentPage * 12 < totalRecords ? 'flex' : 'none';
-    } catch (_) {
-      if (reset) {
-        grid.innerHTML = '<p class="results-status-message results-status-message--padded">Unable to load results. Please check your connection.</p>';
+        const periodFiltered = filterByPeriod(rawRecords, snapshot.period);
+        const sorted = sortRecords(periodFiltered, snapshot.sort);
+        appended += appendRecords(sorted, snapshot.mode);
+
+        if (rawRecords.length < PAGE_SIZE) {
+          hasMore = false;
+          break;
+        }
       }
+
+      updateResultsCount();
+
+      if (!loadedCount) {
+        resultsGrid.innerHTML = '<p class="results-status-message results-status-message--padded">No objects matched these filters yet. Keep scrolling or change filters for upcoming tiles.</p>';
+      }
+
+      if (!hasMore) {
+        setFeedStatus('You reached the end of this feed.');
+      } else if (requestVersion !== filterVersion) {
+        setFeedStatus('Loaded. New filter settings will apply to upcoming tiles.');
+      } else {
+        setFeedStatus(`Showing ${loadedCount.toLocaleString()} of ${totalRecords.toLocaleString()} available results.`);
+      }
+    } catch (_) {
+      setFeedStatus('Unable to load more tiles right now.');
+      if (!loadedCount) {
+        resultsGrid.innerHTML = '<p class="results-status-message results-status-message--padded">Unable to load results. Please check your connection.</p>';
+      }
+    } finally {
+      isLoading = false;
     }
   }
 
-  document.getElementById('apply-filters').addEventListener('click', () => loadResults(true));
+  function setupInfiniteScroll() {
+    if (!feedSentinel) return;
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          loadNextBatch();
+        }
+      }, { root: null, rootMargin: PREFETCH_ROOT_MARGIN });
+
+      observer.observe(feedSentinel);
+      return;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (shouldLoadSoon()) {
+        loadNextBatch();
+      }
+    }, { passive: true });
+  }
+
   document.getElementById('reset-filters').addEventListener('click', () => {
-    selectedInterests.clear();
+    selectedInterests = new Set();
     selectedPeriod = null;
     selectedMaterial = null;
     selectedRegion = null;
+
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.classList.remove('active');
       chip.setAttribute('aria-pressed', 'false');
     });
-    loadResults(true);
-  });
-  document.getElementById('load-more').addEventListener('click', () => {
-    currentPage += 1;
-    loadResults(false);
+
+    markFeedFiltersUpdated(true);
   });
 
   updateBanner();
-  loadResults(true);
+  updateResultsCount();
+  setupInfiniteScroll();
+  loadNextBatch();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

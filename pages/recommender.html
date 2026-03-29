@@ -57,8 +57,8 @@
           <div class="filter-panel discover-filter-panel">
             <p class="filter-panel__title">Your interests</p>
             <p class="discover-filter-help">
-              Select topics to shape your recommendations. Your choices stay on
-              your device.
+              Select topics to shape upcoming recommendations while you scroll.
+              Existing tiles stay in place.
             </p>
             <div
               class="filter-chips"
@@ -99,16 +99,10 @@
           </div>
 
           <button
-            class="btn btn--primary discover-sidebar-btn discover-sidebar-btn--primary"
-            id="apply-filters"
-          >
-            Apply filters
-          </button>
-          <button
             class="btn btn--ghost discover-sidebar-btn discover-sidebar-btn--secondary"
             id="reset-filters"
           >
-            Reset
+            Clear filters for next tiles
           </button>
         </aside>
 
@@ -183,20 +177,17 @@
           </div>
 
           <div
-            class="artefact-grid"
+            class="artefact-grid discover-feed-grid"
             id="results-grid"
             aria-label="Recommended artefacts"
             role="list"
           >
             <!-- populated by JS -->
           </div>
-          <button
-            class="load-more-btn"
-            id="load-more"
-            aria-label="Load more artefacts"
-          >
-            Load more objects ↓
-          </button>
+          <div class="discover-feed-meta" aria-live="polite">
+            <p class="discover-feed-status" id="discover-feed-status"></p>
+            <div class="discover-feed-sentinel" id="discover-feed-sentinel" aria-hidden="true"></div>
+          </div>
 
           <div class="bias-notice discover-bias-notice">
             <span class="bias-notice__icon">ℹ</span>

@@ -51,13 +51,15 @@ function initRecommenderPage() {
   };
 
   let selectedInterests = new Set();
+  let selectedPeriod = null;
   let selectedMaterial = null;
   let selectedRegion = null;
   let currentMode = 'personalised';
   let currentPage = 1;
   let totalRecords = 0;
 
-  function renderChips(container, items, onSelect) {
+  function renderChips(container, items, onSelect, options = {}) {
+    const { singleSelect = false } = options;
     container.innerHTML = '';
     items.forEach(item => {
       const button = document.createElement('button');
@@ -66,6 +68,22 @@ function initRecommenderPage() {
       button.type = 'button';
       button.setAttribute('aria-pressed', 'false');
       button.addEventListener('click', () => {
+        if (singleSelect) {
+          const wasSelected = button.classList.contains('active');
+          container.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.classList.remove('active');
+            chip.setAttribute('aria-pressed', 'false');
+          });
+
+          const isSelected = !wasSelected;
+          if (isSelected) {
+            button.classList.add('active');
+            button.setAttribute('aria-pressed', 'true');
+          }
+          onSelect(item, isSelected);
+          return;
+        }
+
         const isSelected = button.classList.toggle('active');
         button.setAttribute('aria-pressed', String(isSelected));
         onSelect(item, isSelected);
@@ -76,17 +94,14 @@ function initRecommenderPage() {
 
   renderChips(interestTags, interests, (item, selected) => selected ? selectedInterests.add(item.q) : selectedInterests.delete(item.q));
   renderChips(document.getElementById('period-filters'), periods, (item, selected) => {
-    document.querySelectorAll('#period-filters .filter-chip').forEach(chip => {
-      chip.classList.remove('active');
-      chip.setAttribute('aria-pressed', 'false');
-    });
-  });
+    selectedPeriod = selected ? item : null;
+  }, { singleSelect: true });
   renderChips(document.getElementById('material-filters'), materials, (item, selected) => {
     selectedMaterial = selected ? item : null;
-  });
+  }, { singleSelect: true });
   renderChips(document.getElementById('region-filters'), regions, (item, selected) => {
     selectedRegion = selected ? item : null;
-  });
+  }, { singleSelect: true });
 
   document.querySelectorAll('.discovery-mode-btn').forEach(button => {
     button.addEventListener('click', () => {
@@ -124,9 +139,33 @@ function initRecommenderPage() {
       params.q = queries.length ? queries.join(' ') : 'art design';
     }
 
-    if (selectedMaterial) params.id_material = selectedMaterial.id;
+    if (selectedMaterial) {
+      params.id_material = selectedMaterial.id;
+      params.q = `${params.q || ''} ${selectedMaterial.label}`.trim();
+    }
     if (selectedRegion) params.q = `${params.q || ''} ${selectedRegion.q}`.trim();
     return params;
+  }
+
+  function filterBySelectedPeriod(records) {
+    if (!selectedPeriod) return records;
+    const [startYear, endYear] = selectedPeriod.range;
+
+    return records.filter(record => {
+      const begin = Number(record.object_begin_date);
+      const end = Number(record.object_end_date);
+
+      if (!Number.isNaN(begin) && !Number.isNaN(end)) {
+        return !(end < startYear || begin > endYear);
+      }
+      if (!Number.isNaN(begin)) {
+        return begin >= startYear && begin <= endYear;
+      }
+      if (!Number.isNaN(end)) {
+        return end >= startYear && end <= endYear;
+      }
+      return false;
+    });
   }
 
   async function loadResults(reset) {
@@ -148,12 +187,13 @@ function initRecommenderPage() {
     try {
       const params = await buildSearchParams();
       const data = await window.VAM.searchObjects(params);
-      const records = data.records || [];
+      const records = filterBySelectedPeriod(data.records || []);
       totalRecords = data.info?.record_count || 0;
 
       if (reset) grid.innerHTML = '';
 
-      count.textContent = `Showing objects from ${totalRecords.toLocaleString()} results`;
+      const filterSummary = selectedPeriod ? ` (${selectedPeriod.label})` : '';
+      count.textContent = `Showing ${records.length.toLocaleString()} objects${filterSummary} from ${totalRecords.toLocaleString()} results`;
       records.forEach(record => {
         const card = window.VAM.renderArtefactCard(record, whyLabels[currentMode]);
         card.setAttribute('role', 'listitem');
@@ -171,6 +211,7 @@ function initRecommenderPage() {
   document.getElementById('apply-filters').addEventListener('click', () => loadResults(true));
   document.getElementById('reset-filters').addEventListener('click', () => {
     selectedInterests.clear();
+    selectedPeriod = null;
     selectedMaterial = null;
     selectedRegion = null;
     document.querySelectorAll('.filter-chip').forEach(chip => {

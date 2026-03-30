@@ -1,7 +1,7 @@
 FROM ollama/ollama:latest
 
-# Install Python, supervisor, and create virtual environment
-RUN apt-get update && apt-get install -y python3 python3-pip python3-venv supervisor && rm -rf /var/lib/apt/lists/*
+# Install Python, supervisor, curl, and create virtual environment
+RUN apt-get update && apt-get install -y python3 python3-pip python3-venv supervisor curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -14,6 +14,9 @@ RUN pip install --no-cache-dir fastapi uvicorn diffusers transformers accelerate
 
 COPY . /app
 
+# Make model pull script executable
+RUN chmod +x /app/pull-model.sh
+
 # Configure supervisor to run both Ollama and FastAPI
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -21,18 +24,4 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ENTRYPOINT []
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
-WORKDIR /app
-
-COPY . /app
-
-RUN pip install --no-cache-dir fastapi uvicorn diffusers transformers accelerate safetensors
-
-# Entrypoint script starts Ollama + FastAPI
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-EXPOSE 80
-EXPOSE 11434
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["uvicorn", "sd-server.app:app", "--host", "0.0.0.0", "--port", "80", "--workers", "1"]
+EXPOSE 80 11434

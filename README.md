@@ -38,13 +38,14 @@ digital-museum-of-tomorrow/
 
 ## Current architecture
 
-The project is now unified into a single container for easier deployment.
+The project is now unified into a single container managed by supervisord.
 
-- One Docker image / service (`museum-app`) runs everything from port `80`
-- FastAPI serves the static front end from `/` plus the Stable Diffusion API under `/sdapi/v1/`
-- SD model inference uses `sd-server/app.py` with `torch` and `diffusers`
+- One Docker image / service (`museum-app`) runs everything
+- `Ollama` server runs on port `11434` (managed by supervisord)
+- `FastAPI` serves the static front end from `/` plus the Stable Diffusion API under `/sdapi/v1/` on port `80` (managed by supervisord)
+- Both services start automatically when the container starts
 
-The app still integrates with external services directly from the browser:
+The app integrates with external services directly from the browser:
 
 - V&A Collections API: `https://api.vam.ac.uk/v2`
 - Ollama chat API: `http://localhost:11434/api/chat`
@@ -114,65 +115,43 @@ Common endpoints used by the UI:
 
 ### Ollama
 
-The unified Docker image now includes Ollama server and exposes it on port `11434`.
+The unified Docker image now includes Ollama server managed by supervisord, exposing it on port `11434`.
+
+Ollama API endpoints:
 
 - `http://localhost:11434/api/chat`
 - `http://localhost:11434/api/tags`
 
-Default model used by the UI reference code is:
+Default model used by the UI:
 
 - `phi3:mini` for chatbot, visual search, and generative interpretation
 
-In `docker-compose.yml`, you can override the Ollama model with:
-
-- `OLLAMA_MODEL=phi3:mini`
-
-GPU configuration options for Ollama:
-
-- `OLLAMA_GPU=all` (or `0` / `1` / `2` / etc for individual gpus) 
-- `OLLAMA_GPU=false` or `OLLAMA_GPU=0` to disable GPU for Ollama
-- `OLLAMA_SERVE_ARGS="--some-ollama-flag"` to pass any additional CLI options
-
-Example with GPU on:
+Set Ollama model in `docker-compose.yml`:
 
 ```yaml
 services:
   museum-app:
     environment:
-      - MODEL_ID=runwayml/stable-diffusion-v1-5
       - OLLAMA_MODEL=phi3:mini
-      - OLLAMA_GPU=all
 ```
 
-Example with Ollama CPU-only:
-
-```yaml
-services:
-  museum-app:
-    environment:
-      - OLLAMA_GPU=false
-```
-
-This image starts Ollama in the same container as the Stable Diffusion API and static site, so no external Ollama container is needed.
+Ollama is automatically started by supervisord inside the container; no separate service is needed.
 
 ### Stable Diffusion service
 
-The unified container uses the `sd-server` FastAPI app built from a CUDA-enabled PyTorch image:
+The unified container runs a `sd-server` FastAPI app for image generation:
 
-- Base image: `pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime`
-- App entrypoint: `uvicorn sd-server.app:app --host 0.0.0.0 --port 80`
-- Default model: `runwayml/stable-diffusion-v1-5`
+- Base image: `ollama/ollama:latest` (includes Ollama + Python environment)
+- Dependency: `fastapi`, `uvicorn`, `diffusers`, `transformers`, `accelerate`, `safetensors`
+- FastAPI runs on port `80`
+- Default SD model: `runwayml/stable-diffusion-v1-5`
 
 Current API routes exposed by `sd-server/app.py`:
 
 - `GET /sdapi/v1/sd-models`
 - `POST /sdapi/v1/txt2img`
 
-The app automatically uses CUDA when available:
-
-- `torch.cuda.is_available()` selects `cuda`
-- `float16` is used on GPU
-- attention slicing is enabled when running on CUDA
+Process management: Both Ollama and FastAPI are managed by supervisord.
 
 ## Docker setup
 
@@ -180,14 +159,15 @@ The app automatically uses CUDA when available:
 
 `docker-compose.yml` now defines:
 
-- `museum-app`: single container on port `80`
+- `museum-app`: single container running Ollama + FastAPI via supervisord
 
 The unified container:
 
-- builds from root `Dockerfile`
+- builds from root `Dockerfile` using `ollama/ollama:latest` as base
 - copies both frontend and `sd-server` code into `/app`
-- installs `fastapi`, `uvicorn`, `diffusers`, `transformers`, `accelerate`, and `safetensors`
-- runs `uvicorn sd-server.app:app --host 0.0.0.0 --port 80`
+- installs Python and FastAPI dependencies in a virtual environment
+- starts supervisord which manages both Ollama and FastAPI processes
+- exposes port `80` (FastAPI) and `11434` (Ollama)
 - supports GPU via `gpus: all`
 
 ### Start and stop
@@ -197,7 +177,10 @@ docker-compose build
 docker-compose up -d
 ```
 
-Static + app URL:
+Access the app:
+
+- UI + SD API: `http://localhost/`
+- Ollama API: `http://localhost:11434/api/`
 
 - `http://localhost`
 
@@ -265,9 +248,10 @@ npx serve .
 You will still need separate local services for:
 
 - Ollama on port `11434`
-- Stable Diffusion API on port `7860` if you want the Reimagine image generation feature to work
+- Stable Diffusion API on port `7860` or configured separately if you want the Reimagine image generation feature to work
 
 Opening `index.html` directly in the browser may work for basic navigation, but a local server is the safer option for development and service integration.
+
 
 ## Accessibility
 
@@ -294,19 +278,23 @@ The current look and feel is editorial, museum-inspired, and dark-toned, with cl
 
 ## Known implementation notes
 
-- The compose file still includes a top-level `version` key, and modern Docker Compose warns that it is obsolete and ignored.
-- Ollama is expected to be reachable at `localhost:11434` from the browser, which may require adjustment depending on how you host the UI.
-- The Stable Diffusion model downloads on first startup, so the first run can take noticeably longer.
+- The compose file still includes a top-level `version` key, and modern Docker Compose warns that it is obsolete and ignored. This can be removed safely.
+- Both Ollama and FastAPI are managed by supervisord inside the single container.
+- On first run, Ollama may take time to initialize and pull the required model.
+- The Stable Diffusion model downloads on first use, so initial image generation requests may take noticeably longer.
 - The Visual Search page currently uses a text model to infer search suggestions rather than true image embedding similarity.
 
 ## Verified current state
 
-As of March 26, 2026, the repository has been aligned to the following runtime behavior:
+As of March 30, 2026, the repository has been updated to:
 
-- generative interpretation uses `phi3:mini` instead of the removed `llama3.2` reference
-- the Stable Diffusion Docker service is configured to run with NVIDIA GPU access
-- the `sd-api` service responds on port `7860`
-- the Stable Diffusion model route returns `runwayml/stable-diffusion-v1-5`
+- Use a unified single-container Docker setup with supervisord managing both Ollama and FastAPI
+- Build from `ollama/ollama:latest` base image
+- Run Ollama on port `11434` and FastAPI on port `80`
+- Expose both API endpoints from a single `museum-app` service
+- Use `phi3:mini` as the default Ollama model
+- Use `runwayml/stable-diffusion-v1-5` as the default SD model
+- Support GPU acceleration via `gpus: all` in docker-compose.yml
 
 ## Development notes
 

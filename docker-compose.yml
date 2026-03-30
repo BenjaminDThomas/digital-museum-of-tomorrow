@@ -8,10 +8,12 @@ services:
     container_name: museum-app
     ports:
       - "80:80"
+      - "11434:11434"
     restart: unless-stopped
     gpus: all
     environment:
       - MODEL_ID=runwayml/stable-diffusion-v1-5
+      - OLLAMA_MODEL=phi3:mini
     labels:
       - "com.museum.app=museum-app"
       - "com.museum.version=1.0.0"

@@ -114,25 +114,53 @@ Common endpoints used by the UI:
 
 ### Ollama
 
-The current repository code expects a local Ollama instance listening on:
+The unified Docker image now includes Ollama server and exposes it on port `11434`.
 
 - `http://localhost:11434/api/chat`
 - `http://localhost:11434/api/tags`
 
-Current model references in the site:
+Default model used by the UI reference code is:
 
-- `phi3:mini` for chatbot
-- `phi3:mini` for visual search
-- `phi3:mini` for generative interpretation
+- `phi3:mini` for chatbot, visual search, and generative interpretation
 
-If you run the front end inside Docker but Ollama on the Windows host, you may need to replace `localhost` with a host-accessible name such as `host.docker.internal`, depending on your setup.
+In `docker-compose.yml`, you can override the Ollama model with:
+
+- `OLLAMA_MODEL=phi3:mini`
+
+GPU configuration options for Ollama:
+
+- `OLLAMA_GPU=all` (or `0` / `1` / `2` / etc for individual gpus) 
+- `OLLAMA_GPU=false` or `OLLAMA_GPU=0` to disable GPU for Ollama
+- `OLLAMA_SERVE_ARGS="--some-ollama-flag"` to pass any additional CLI options
+
+Example with GPU on:
+
+```yaml
+services:
+  museum-app:
+    environment:
+      - MODEL_ID=runwayml/stable-diffusion-v1-5
+      - OLLAMA_MODEL=phi3:mini
+      - OLLAMA_GPU=all
+```
+
+Example with Ollama CPU-only:
+
+```yaml
+services:
+  museum-app:
+    environment:
+      - OLLAMA_GPU=false
+```
+
+This image starts Ollama in the same container as the Stable Diffusion API and static site, so no external Ollama container is needed.
 
 ### Stable Diffusion service
 
-The `sd-server` service is a FastAPI app built from a CUDA-enabled PyTorch image:
+The unified container uses the `sd-server` FastAPI app built from a CUDA-enabled PyTorch image:
 
 - Base image: `pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime`
-- App entrypoint: `uvicorn app:app --host 0.0.0.0 --port 7860`
+- App entrypoint: `uvicorn sd-server.app:app --host 0.0.0.0 --port 80`
 - Default model: `runwayml/stable-diffusion-v1-5`
 
 Current API routes exposed by `sd-server/app.py`:

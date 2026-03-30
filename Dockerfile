@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir fastapi uvicorn diffusers transformers accelerate
 
 COPY . /app
 
-# Make model pull script executable
-RUN chmod +x /app/pull-model.sh
+# Strip Windows CRLF line endings and make executable
+RUN sed -i 's/\r//' /app/pull-model.sh && chmod +x /app/pull-model.sh
 
 # Configure supervisor to run both Ollama and FastAPI
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf

@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 set -e
 
 MODEL="${OLLAMA_MODEL:-phi3:mini}"

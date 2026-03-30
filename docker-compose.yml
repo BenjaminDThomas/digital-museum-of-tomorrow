@@ -1,29 +1,17 @@
 version: '3.8'
 
 services:
-  vam-explorer:
+  museum-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: vam-ai-explorer
+    container_name: museum-app
     ports:
-      - "8080:80"
-    restart: unless-stopped
-    environment:
-      - NGINX_ENTRYPOINT_QUIET_LOGS=1
-    labels:
-      - "com.museum.app=vam-ai-explorer"
-      - "com.museum.version=1.0.0"
-
-  sd-api:
-    build:
-      context: ./sd-server
-      dockerfile: Dockerfile
-    container_name: sd-api
-    ports:
-      - "7860:7860"
+      - "80:80"
     restart: unless-stopped
     gpus: all
-    runtime: nvidia
     environment:
       - MODEL_ID=runwayml/stable-diffusion-v1-5
+    labels:
+      - "com.museum.app=museum-app"
+      - "com.museum.version=1.0.0"

@@ -38,12 +38,13 @@ digital-museum-of-tomorrow/
 
 ## Current architecture
 
-The site is split into two parts:
+The project is now unified into a single container for easier deployment.
 
-1. A static front end served by Nginx on port `8080`
-2. A local Stable Diffusion API service on port `7860`
+- One Docker image / service (`museum-app`) runs everything from port `80`
+- FastAPI serves the static front end from `/` plus the Stable Diffusion API under `/sdapi/v1/`
+- SD model inference uses `sd-server/app.py` with `torch` and `diffusers`
 
-The front end also calls two external or host-local services directly:
+The app still integrates with external services directly from the browser:
 
 - V&A Collections API: `https://api.vam.ac.uk/v2`
 - Ollama chat API: `http://localhost:11434/api/chat`
@@ -147,17 +148,36 @@ The app automatically uses CUDA when available:
 
 ## Docker setup
 
-### Services in docker-compose
+### One-image service in docker-compose
 
-`docker-compose.yml` currently defines:
+`docker-compose.yml` now defines:
 
-- `vam-explorer`: the static site, exposed on port `8080`
-- `sd-api`: the Stable Diffusion API, exposed on port `7860`
+- `museum-app`: single container on port `80`
 
-The current compose file configures GPU access for the `sd-api` service with:
+The unified container:
 
-- `gpus: all`
-- `runtime: nvidia`
+- builds from root `Dockerfile`
+- copies both frontend and `sd-server` code into `/app`
+- installs `fastapi`, `uvicorn`, `diffusers`, `transformers`, `accelerate`, and `safetensors`
+- runs `uvicorn sd-server.app:app --host 0.0.0.0 --port 80`
+- supports GPU via `gpus: all`
+
+### Start and stop
+
+```powershell
+docker-compose build
+docker-compose up -d
+```
+
+Static + app URL:
+
+- `http://localhost`
+
+Stop:
+
+```powershell
+docker-compose down
+```
 
 This repository has been verified on a Windows machine with Docker, NVIDIA runtime support, and an NVIDIA GPU available to the container.
 

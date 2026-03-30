@@ -1,8 +1,16 @@
-FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y git python3 python3-venv python3-pip libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
-WORKDIR /opt
-RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
-WORKDIR /opt/stable-diffusion-webui
-EXPOSE 7860
-CMD bash -lc "python3 launch.py --listen --port 7860 --api --medvram --skip-torch-cuda-test"
+
+RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY . /app
+
+RUN pip install --no-cache-dir fastapi uvicorn diffusers transformers accelerate safetensors
+
+EXPOSE 80
+
+# Run FastAPI app that serves both API and static frontend
+CMD ["uvicorn", "sd-server.app:app", "--host", "0.0.0.0", "--port", "80", "--workers", "1"]

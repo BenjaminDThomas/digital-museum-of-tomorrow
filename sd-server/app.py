@@ -4,10 +4,14 @@ import os
 import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from diffusers import StableDiffusionPipeline
 
 app = FastAPI()
+
+# Serve the frontend static site from the project root
+app.mount("/", StaticFiles(directory="/app", html=True), name="static")
 
 app.add_middleware(
     CORSMiddleware,

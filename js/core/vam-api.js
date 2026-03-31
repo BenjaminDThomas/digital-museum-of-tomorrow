@@ -102,9 +102,6 @@
   }
 
   async function searchObjects(params = {}) {
-    const health = await checkVamApi();
-    if (!health.ok) throw new Error(health.message);
-
     const url = new URL(`${VAM_API}/objects/search`);
     const hasValue = value => value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === '');
 
@@ -131,9 +128,6 @@
   }
 
   async function getObject(id) {
-    const health = await checkVamApi();
-    if (!health.ok) throw new Error(health.message);
-
     const url = `${VAM_API}/object/${id}`;
     const cached = vamResponseCache.get(url);
     if (cached && Date.now() - cached.at <= VAM_CACHE_TTL_MS) {

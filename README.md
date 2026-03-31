@@ -82,8 +82,8 @@ The app integrates with external services directly from the browser:
 - Uses Ollama with `phi3:mini` for structured JSON interpretation output
 - Generates text through interpretive lenses such as cultural, historical, material, symbolic, maker, and contemporary
 - Triggers Stable Diffusion image generation in parallel with the text interpretation
-- Calls the local Stable Diffusion API at `http://localhost:7860/sdapi/v1/txt2img`
-- Checks Stable Diffusion readiness through `http://localhost:7860/sdapi/v1/sd-models`
+- Calls the local Stable Diffusion API at `http://localhost/sdapi/v1/txt2img` when the frontend is served from a local preview server, otherwise uses same-origin `/sdapi/v1/txt2img`
+- Checks Stable Diffusion readiness through `http://localhost/sdapi/v1/sd-models` when needed, otherwise same-origin `/sdapi/v1/sd-models`
 
 ### AI and Trust
 
@@ -151,6 +151,8 @@ Current API routes exposed by `sd-server/app.py`:
 - `GET /sdapi/v1/sd-models`
 - `POST /sdapi/v1/txt2img`
 
+On first startup, the Stable Diffusion model may need to download from Hugging Face before image generation is available. During that period, the readiness endpoint will report that the model is still loading and the frontend will show a loading status instead of attempting generation.
+
 Process management: Both Ollama and FastAPI are managed by supervisord.
 
 ## Docker setup
@@ -182,8 +184,6 @@ Access the app:
 - UI + SD API: `http://localhost/`
 - Ollama API: `http://localhost:11434/api/`
 
-- `http://localhost`
-
 Stop:
 
 ```powershell
@@ -192,29 +192,7 @@ docker-compose down
 
 This repository has been verified on a Windows machine with Docker, NVIDIA runtime support, and an NVIDIA GPU available to the container.
 
-### Start with Docker
-
-From the project root:
-
-```powershell
-docker-compose up --build -d
-```
-
-Static site:
-
-- `http://localhost:8080`
-
-Stable Diffusion API:
-
-- `http://localhost:7860/sdapi/v1/sd-models`
-
-Stop the stack:
-
-```powershell
-docker-compose down
-```
-
-Rebuild after changes:
+### Rebuild after changes
 
 ```powershell
 docker-compose up --build -d
@@ -245,10 +223,12 @@ python -m http.server 8080
 npx serve .
 ```
 
-You will still need separate local services for:
+You will still need local services for:
 
 - Ollama on port `11434`
-- Stable Diffusion API on port `7860` or configured separately if you want the Reimagine image generation feature to work
+- FastAPI SD routes (`/sdapi/v1/*`) reachable from the same origin as the frontend, or configure equivalent routing
+
+If you run the HTML through a dev static server such as VS Code Live Server (`127.0.0.1:5500`), the frontend now targets `http://localhost/sdapi/v1/*` automatically so requests reach the Docker container instead of the static file server.
 
 Opening `index.html` directly in the browser may work for basic navigation, but a local server is the safer option for development and service integration.
 

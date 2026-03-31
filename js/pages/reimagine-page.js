@@ -1,45 +1,41 @@
 'use strict';
 
-function initGenerativePage() {
+function initReimaginePage() {
   const lensGrid = document.getElementById('lens-grid');
   if (!lensGrid) return;
 
   const lenses = [
-    { id: 'cultural', icon: '\uD83C\uDF0D', title: 'Cultural connections', desc: 'How does this object connect to similar traditions in other cultures?' },
-    { id: 'historical', icon: '\u23F3', title: 'Through time', desc: 'How would this object have been understood in different time periods?' },
-    { id: 'material', icon: '\uD83D\uDD2C', title: 'Material stories', desc: 'What journeys did the materials take to become this object?' },
-    { id: 'maker', icon: '\uD83E\uDD32', title: 'The maker\'s hand', desc: 'Who made this and what was their world like?' },
-    { id: 'symbol', icon: '\u2736', title: 'Symbols and meaning', desc: 'What symbols, motifs, or hidden meanings does this carry?' },
-    { id: 'contemporary', icon: '\uD83C\uDF31', title: 'Contemporary resonance', desc: 'How does this object speak to contemporary issues?' },
+    { id: 'cultural', icon: '🌍', title: 'Cultural connections', desc: 'How does this object connect to similar traditions in other cultures?' },
+    { id: 'historical', icon: '⏳', title: 'Through time', desc: 'How would this object have been understood in different time periods?' },
+    { id: 'material', icon: '🔬', title: 'Material stories', desc: 'What journeys did the materials take to become this object?' },
+    { id: 'maker', icon: '👐', title: 'The maker\'s hand', desc: 'Who made this and what was their world like?' },
+    { id: 'symbol', icon: '✶', title: 'Symbols and meaning', desc: 'What symbols, motifs, or hidden meanings does this carry?' },
+    { id: 'contemporary', icon: '🌱', title: 'Contemporary resonance', desc: 'How does this object speak to contemporary issues?' },
   ];
   const generativeSystem = `You are a thoughtful, imaginative museum educator at A2BC. Your role is to create engaging, accurate, and culturally sensitive interpretations of museum artefacts from specific perspectives.
 
 When given an artefact and an interpretive lens, you:
-1. Write a poetic, evocative opening passage (2-3 sentences) about the artefact from that lens
-2. Provide a substantive cultural/historical analysis (3-4 paragraphs) that is educational and nuanced
-3. Surface 3-4 specific connections to other A2BC objects or broader cultural movements as search suggestions
-4. Always acknowledge limitations and areas where interpretation is uncertain
+1. Write a poetic, evocative opening passage (2-3 sentences) about the artefact from that lens.
+2. Provide a substantive but concise cultural/historical analysis (2-3 short paragraphs).
+3. Surface 3 specific connections to other A2BC objects or broader cultural movements as search suggestions.
+4. Always acknowledge limitations and areas where interpretation is uncertain.
 
-Format your response as JSON:
-{
-  "opening": "Poetic opening passage",
-  "analysis": "Full educational analysis text",
-  "connections": [
-    {"label": "Connection title", "search": "V&A API search term", "reason": "Why this connects"},
-    ...
-  ],
-  "caveats": "Any important caveats about the interpretation"
-}
+Format your response exactly like this:
+OPENING:
+<opening text>
 
-Be culturally sensitive, avoid stereotypes, and acknowledge when historical accounts were written from a colonial or limited perspective. This content will be clearly labelled as AI interpretation.`;
-  const ollamaChatUrl = 'http://localhost:11434/api/chat';
-  const ollamaTagsUrl = 'http://localhost:11434/api/tags';
-  const isLocalPreviewHost = ['127.0.0.1', 'localhost'].includes(window.location.hostname)
-    && window.location.port
-    && window.location.port !== '80';
-  const sdApiBaseUrl = isLocalPreviewHost ? 'http://localhost' : window.location.origin;
-  const sdTxt2ImgUrl = `${sdApiBaseUrl}/sdapi/v1/txt2img`;
-  const sdModelsUrl = `${sdApiBaseUrl}/sdapi/v1/sd-models`;
+ANALYSIS:
+<analysis text>
+
+CONNECTIONS:
+- Label :: Search term :: Reason
+- Label :: Search term :: Reason
+- Label :: Search term :: Reason
+
+CAVEATS:
+<caveat text>
+
+Do not use JSON. Do not add any extra headings. Keep the writing accessible, culturally sensitive, and clearly interpretive rather than authoritative.`;
   const sdLensPrompts = {
     cultural: 'cross-cultural artistic fusion, world art traditions, multicultural decorative motifs',
     historical: 'historical period art style, period-accurate aesthetic, art history reimagining',
@@ -49,69 +45,41 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     contemporary: 'contemporary modern art reinterpretation, minimalist redesign, modern aesthetic',
   };
 
+  const isLocalPreviewHost = ['127.0.0.1', 'localhost'].includes(window.location.hostname)
+    && window.location.port
+    && window.location.port !== '80';
+  const sdApiBaseUrl = isLocalPreviewHost ? 'http://localhost' : window.location.origin;
+  const sdTxt2ImgUrl = `${sdApiBaseUrl}/sdapi/v1/txt2img`;
+  const sdModelsUrl = `${sdApiBaseUrl}/sdapi/v1/sd-models`;
+
   let selectedArtefact = null;
   let selectedLens = null;
-  let ollamaChecked = false;
   let sdStatusPollId = null;
 
-  async function checkOllamaApi() {
-    if (ollamaChecked) return;
-    const response = await fetch(ollamaTagsUrl, { method: 'GET' });
-    if (!response.ok) throw new Error(`Ollama health check failed: ${response.status}`);
-    ollamaChecked = true;
-  }
-
-  async function callOllamaJson(systemPrompt, userPrompt) {
-    await checkOllamaApi();
-    const response = await fetch(ollamaChatUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'phi3:mini',
-        format: 'json',
-        stream: false,
-        options: { num_predict: 1000 },
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ]
-      })
-    });
-    if (!response.ok) throw new Error(`Ollama request failed: ${response.status}`);
-
-    const data = await response.json();
-    const text = (data.message?.content || '').replace(/```json|```/g, '').trim();
-    try {
-      return JSON.parse(text);
-    } catch (_) {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Text model did not return valid JSON.');
-      return JSON.parse(jsonMatch[0]);
-    }
-  }
-
   function setSdStatusBadge(state, message = '') {
+    const sdStatusBadge = document.getElementById('sd-status-badge');
+    if (!sdStatusBadge) return;
     if (state === 'ready') {
-      sdStatusBadge.textContent = '\u25cf Stable Diffusion ready';
+      sdStatusBadge.textContent = '● Stable Diffusion ready';
       sdStatusBadge.className = 'sd-status-badge sd-status-badge--online';
       return;
     }
     if (state === 'loading') {
-      sdStatusBadge.textContent = '\u25cf Stable Diffusion loading model - first run may take several minutes';
+      sdStatusBadge.textContent = '● Stable Diffusion loading model - first run may take several minutes';
       sdStatusBadge.className = 'sd-status-badge sd-status-badge--offline';
       return;
     }
     if (state === 'error') {
-      sdStatusBadge.textContent = `\u25cf Stable Diffusion failed: ${message || 'startup error'}`;
+      sdStatusBadge.textContent = `● Stable Diffusion failed: ${message || 'startup error'}`;
       sdStatusBadge.className = 'sd-status-badge sd-status-badge--offline';
       return;
     }
     if (state === 'missing') {
-      sdStatusBadge.textContent = '\u25cf Stable Diffusion unavailable';
+      sdStatusBadge.textContent = '● Stable Diffusion unavailable';
       sdStatusBadge.className = 'sd-status-badge sd-status-badge--offline';
       return;
     }
-    sdStatusBadge.textContent = '\u25cf Stable Diffusion offline';
+    sdStatusBadge.textContent = '● Stable Diffusion offline';
     sdStatusBadge.className = 'sd-status-badge sd-status-badge--offline';
   }
 
@@ -128,6 +96,48 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
 
   function updateGenerateButton() {
     document.getElementById('generate-btn').disabled = !(selectedArtefact && selectedLens);
+  }
+
+  function parseInterpretationResponse(text) {
+    const normalized = String(text || '').trim();
+    const extractSection = (startLabel, endLabel) => {
+      const regex = endLabel
+        ? new RegExp(`${startLabel}:\\s*([\\s\\S]*?)\\n\\s*${endLabel}:`, 'i')
+        : new RegExp(`${startLabel}:\\s*([\\s\\S]*)$`, 'i');
+      return normalized.match(regex)?.[1]?.trim() || '';
+    };
+
+    const opening = extractSection('OPENING', 'ANALYSIS');
+    const analysis = extractSection('ANALYSIS', 'CONNECTIONS') || extractSection('ANALYSIS', 'CAVEATS');
+    const connectionsBlock = extractSection('CONNECTIONS', 'CAVEATS');
+    const caveats = extractSection('CAVEATS');
+    const connections = connectionsBlock
+      .split('\n')
+      .map(line => line.replace(/^[-•]\s*/, '').trim())
+      .filter(Boolean)
+      .map(line => {
+        const [label, search, reason] = line.split(/\s*::\s*/);
+        return { label: label || 'Related connection', search: search || label || '', reason: reason || '' };
+      })
+      .filter(connection => connection.search);
+
+    return {
+      opening,
+      analysis: analysis || normalized,
+      connections,
+      caveats,
+    };
+  }
+
+  function renderStreamingInterpretation(container, text) {
+    container.className = 'generation-output';
+    container.innerHTML = `
+      <div class="generation-label">
+        <strong>✶ AI-generated interpretation</strong> — <span>Streaming response…</span>
+      </div>
+      <div class="generation-analysis" id="generation-streaming-text"></div>
+    `;
+    window.A2BCText.renderInline(container.querySelector('#generation-streaming-text'), text);
   }
 
   lenses.forEach(lens => {
@@ -156,7 +166,6 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
 
   const artefactSearch = document.getElementById('artefact-search');
   const dropdown = document.getElementById('search-dropdown');
-  const sdStatusBadge = document.getElementById('sd-status-badge');
   let searchTimeout;
 
   artefactSearch.addEventListener('input', () => {
@@ -211,7 +220,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
           ${imageUrl ? `<img src="${imageUrl}" alt="" />` : '<div class="dropdown-item__placeholder"></div>'}
           <div>
             <div class="dropdown-item__title">${window.VAM.escHtml(title.slice(0, 50))}</div>
-            <div class="dropdown-item__meta">${window.VAM.escHtml(record.objectType || '')} \u00b7 ${window.VAM.escHtml(date)}</div>
+            <div class="dropdown-item__meta">${window.VAM.escHtml(record.objectType || '')} · ${window.VAM.escHtml(date)}</div>
           </div>
         `;
         item.addEventListener('click', () => selectArtefact(record));
@@ -250,7 +259,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     const selectedDate = document.getElementById('selected-date');
 
     selectedTitle.textContent = title;
-    selectedDate.textContent = `${window.VAM.formatDateRange(record)}${record.objectType ? ` \u00b7 ${record.objectType}` : ''}`;
+    selectedDate.textContent = `${window.VAM.formatDateRange(record)}${record.objectType ? ` · ${record.objectType}` : ''}`;
     if (imageUrl) {
       selectedImage.src = imageUrl;
       selectedImage.alt = title;
@@ -288,7 +297,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
         return { ready: false, loading: false, error: 'No model reported by backend.' };
       }
     } catch (_) {
-      // ignore
+      // Ignore temporary startup failures.
     }
     setSdStatusBadge('offline');
     return { ready: false, loading: false, error: 'Service offline.' };
@@ -321,8 +330,8 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
 
     output.className = 'sd-output sd-output--loading';
     output.innerHTML = `
-      <div class="sd-output__spinner" aria-hidden="true">\u2736</div>
-      <p class="sd-output__status">Generating visual reimagining \u2014 this may take 20\u201360 seconds\u2026</p>
+      <div class="sd-output__spinner" aria-hidden="true">✶</div>
+      <p class="sd-output__status">Generating visual reimagining — this may take 20–60 seconds…</p>
     `;
 
     try {
@@ -352,13 +361,13 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
       const escapedTitle = window.VAM.escHtml(artefactTitle);
       output.className = 'sd-output sd-output--result';
       output.innerHTML = `
-        <div class="sd-result-label">\u2736 AI-generated visual \u2014 Stable Diffusion \u00b7 ${window.VAM.escHtml(lensStyle)}</div>
+        <div class="sd-result-label">✶ AI-generated visual — Stable Diffusion · ${window.VAM.escHtml(lensStyle)}</div>
         <figure class="sd-figure sd-figure--single">
           <img src="data:image/png;base64,${outputBase64}" alt="AI visual reimagining of ${escapedTitle}" />
-          <figcaption>${escapedTitle} \u2014 reimagined through ${window.VAM.escHtml(selectedLens.title)}</figcaption>
+          <figcaption>${escapedTitle} — reimagined through ${window.VAM.escHtml(selectedLens.title)}</figcaption>
         </figure>
         <a class="btn btn--ghost sd-download-btn" href="data:image/png;base64,${outputBase64}" download="reimagined-artefact.png" aria-label="Download reimagined image as PNG">
-          \u2193 Download PNG
+          ↓ Download PNG
         </a>
       `;
     } catch (error) {
@@ -368,6 +377,42 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
           <strong>Visual reimagining unavailable.</strong> ${window.VAM.escHtml(error.message)}
         </p>
       `;
+    }
+  }
+
+  function renderFinalInterpretation(output, interpretation) {
+    output.className = 'generation-output';
+    output.innerHTML = `
+      <div class="generation-label">
+        <strong>✶ AI-generated interpretation</strong> — <span>Lens: ${selectedLens.icon} ${selectedLens.title}</span>
+      </div>
+      <div class="generation-text" id="gen-opening"></div>
+      <div class="generation-analysis" id="gen-analysis"></div>
+      ${interpretation.caveats ? `<div class="bias-notice"><span class="bias-notice__icon">ℹ</span><span>${window.VAM.escHtml(interpretation.caveats)}</span></div>` : ''}
+      ${interpretation.connections?.length ? '<div class="generation-connections"><h4>Explore further</h4><div class="connection-list" id="connection-list"></div></div>' : ''}
+    `;
+
+    document.getElementById('gen-opening').textContent = interpretation.opening || '';
+    window.A2BCText.renderParagraphs(document.getElementById('gen-analysis'), interpretation.analysis || '');
+
+    if (interpretation.connections?.length) {
+      const connectionList = document.getElementById('connection-list');
+      interpretation.connections.forEach(connection => {
+        const item = document.createElement('button');
+        item.className = 'connection-item';
+        item.type = 'button';
+        item.innerHTML = `
+          <span class="connection-item__arrow">→</span>
+          <div>
+            <div class="connection-item__title">${window.VAM.escHtml(connection.label)}</div>
+            <div class="connection-item__reason">${window.VAM.escHtml(connection.reason)}</div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          window.open(`https://collections.vam.ac.uk/search/?q=${encodeURIComponent(connection.search)}`, '_blank', 'noopener,noreferrer');
+        });
+        connectionList.appendChild(item);
+      });
     }
   }
 
@@ -386,8 +431,8 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     const output = document.getElementById('generation-output');
     output.className = 'generation-output loading';
     output.innerHTML = `
-      <div class="spinning generation-output__spinner" aria-hidden="true">\u2736</div>
-      <p class="generation-output__status">Generating interpretation\u2026</p>
+      <div class="spinning generation-output__spinner" aria-hidden="true">✶</div>
+      <p class="generation-output__status">Generating interpretation…</p>
     `;
 
     const title = selectedArtefact._primaryTitle || selectedArtefact.objectType || 'Object';
@@ -398,46 +443,20 @@ Artefact: ${title}
 Type: ${selectedArtefact.objectType || 'Unknown'}
 Date: ${date}
 Description: ${description}
-Lens: ${selectedLens.title} \u2014 ${selectedLens.desc}
+Lens: ${selectedLens.title} — ${selectedLens.desc}
 ${customQuestion ? `Additional question: ${customQuestion}` : ''}
 
 Please generate an interpretation of this artefact through the "${selectedLens.title}" lens.`;
 
     try {
-      const parsed = await callOllamaJson(generativeSystem, userPrompt);
-      output.className = 'generation-output';
-      output.innerHTML = `
-        <div class="generation-label">
-          <strong>\u2736 AI-generated interpretation</strong> \u2014 <span>Lens: ${selectedLens.icon} ${selectedLens.title}</span>
-        </div>
-        <div class="generation-text" id="gen-opening"></div>
-        <div class="generation-analysis" id="gen-analysis"></div>
-        ${parsed.caveats ? `<div class="bias-notice"><span class="bias-notice__icon">\u2139</span><span>${window.VAM.escHtml(parsed.caveats)}</span></div>` : ''}
-        ${parsed.connections?.length ? '<div class="generation-connections"><h4>Explore further</h4><div class="connection-list" id="connection-list"></div></div>' : ''}
-      `;
-
-      document.getElementById('gen-opening').textContent = parsed.opening || '';
-      document.getElementById('gen-analysis').textContent = parsed.analysis || '';
-
-      if (parsed.connections) {
-        const connectionList = document.getElementById('connection-list');
-        parsed.connections.forEach(connection => {
-          const item = document.createElement('button');
-          item.className = 'connection-item';
-          item.type = 'button';
-          item.innerHTML = `
-            <span class="connection-item__arrow">\u2192</span>
-            <div>
-              <div class="connection-item__title">${window.VAM.escHtml(connection.label)}</div>
-              <div class="connection-item__reason">${window.VAM.escHtml(connection.reason)}</div>
-            </div>
-          `;
-          item.addEventListener('click', () => {
-            window.open(`https://collections.vam.ac.uk/search/?q=${encodeURIComponent(connection.search)}`, '_blank', 'noopener,noreferrer');
-          });
-          connectionList?.appendChild(item);
-        });
-      }
+      const streamedText = await window.A2BCOllama.streamChat({
+        systemPrompt: generativeSystem,
+        userPrompt,
+        options: { num_predict: 800, temperature: 0.4 },
+        onText: partialText => renderStreamingInterpretation(output, partialText)
+      });
+      const parsed = parseInterpretationResponse(streamedText);
+      renderFinalInterpretation(output, parsed);
     } catch (error) {
       output.className = 'generation-output';
       output.innerHTML = `
@@ -453,5 +472,5 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  initGenerativePage();
+  initReimaginePage();
 });

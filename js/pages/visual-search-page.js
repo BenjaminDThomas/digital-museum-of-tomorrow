@@ -139,7 +139,7 @@ function initVisualSearchPage() {
       if (colours[1]) {
         searches.push({
           q: `${colours[0]} ${colours[1]} ${label}`.trim(),
-          label: `Colour and form match`,
+          label: 'Colour and form match',
           confidence: Math.max(0.4, prediction.probability * 0.9),
         });
       }
@@ -178,7 +178,7 @@ function initVisualSearchPage() {
   async function loadVisualResults(searches) {
     resultsSection.style.display = 'block';
     visualResults.innerHTML = renderSkeletons(8);
-    resultCount.textContent = 'Loading\u2026';
+    resultCount.textContent = 'Loading…';
 
     try {
       const allRecords = [];

@@ -30,7 +30,7 @@ Your role:
 - Make connections between objects, periods, and cultures in an engaging, accessible way
 - Be honest when you don't know something or when data may be incomplete
 - Flag if descriptions may use dated terminology and suggest respectful alternatives
-- Keep responses concise but rich \u2014 this is a museum context, not an academic paper
+- Keep responses concise but rich — this is a museum context, not an academic paper
 
 Hard rules:
 - Keep prose replies brief: maximum 2-4 short sentences.
@@ -44,8 +44,6 @@ When suggesting V&A API searches, format them as JSON at the end of your respons
 {"vam_search": {"q": "search term", "id_material": "AAT12345"}}
 
 Be inclusive, curious, and celebratory of human creativity across all cultures and time periods.`;
-  const ollamaChatUrl = 'http://localhost:11434/api/chat';
-  const ollamaTagsUrl = 'http://localhost:11434/api/tags';
 
   const chatInput = document.getElementById('chat-input');
   const sendButton = document.getElementById('send-btn');
@@ -56,14 +54,6 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
   const topicSuggestions = document.getElementById('topic-suggestions');
 
   let conversationHistory = [];
-  let ollamaChecked = false;
-
-  async function checkOllamaApi() {
-    if (ollamaChecked) return;
-    const response = await fetch(ollamaTagsUrl, { method: 'GET' });
-    if (!response.ok) throw new Error(`Ollama health check failed: ${response.status}`);
-    ollamaChecked = true;
-  }
 
   function createPromptButton(text) {
     const button = document.createElement('button');
@@ -86,12 +76,13 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
     const message = document.createElement('div');
     message.className = `message message--${role === 'user' ? 'user' : 'ai'}`;
     message.innerHTML = `
-      <div class="message__avatar" aria-hidden="true">${role === 'user' ? '\uD83D\uDC64' : '\u2736'}</div>
+      <div class="message__avatar" aria-hidden="true">${role === 'user' ? '👤' : '✶'}</div>
       <div class="message__bubble">
-        <div class="message__text">${window.VAM.escHtml(content).replace(/\n/g, '<br>')}</div>
-        ${extras.source ? `<div class="message__source"><span>\uD83D\uDCD6</span> Source: ${extras.source}</div>` : ''}
+        <div class="message__text"></div>
+        ${extras.source ? `<div class="message__source"><span>📖</span> Source: ${extras.source}</div>` : ''}
       </div>
     `;
+    window.A2BCText.renderInline(message.querySelector('.message__text'), content);
     chatMessages.appendChild(message);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     return message;
@@ -117,8 +108,8 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
         const imageUrl = window.VAM.getArtefactImageUrl(record, 'thumb');
         const title = record._primaryTitle || record.objectType || 'Object';
         mini.innerHTML = `
-          ${imageUrl ? `<img src="${imageUrl}" alt="${window.VAM.escHtml(title)}" loading="lazy"/>` : '<div class="artefact-placeholder">\uD83C\uDFFA</div>'}
-          <p>${window.VAM.escHtml(title.slice(0, 40))}${title.length > 40 ? '\u2026' : ''}</p>
+          ${imageUrl ? `<img src="${imageUrl}" alt="${window.VAM.escHtml(title)}" loading="lazy"/>` : '<div class="artefact-placeholder">🏺</div>'}
+          <p>${window.VAM.escHtml(title.slice(0, 40))}${title.length > 40 ? '…' : ''}</p>
         `;
         mini.addEventListener('click', () => window.VAM.openArtefactModal(record, record.systemNumber || ''));
         mini.addEventListener('keydown', event => {
@@ -219,63 +210,37 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
 
     const historyItem = document.createElement('div');
     historyItem.className = 'chat-history-item';
-    historyItem.textContent = text.slice(0, 50) + (text.length > 50 ? '\u2026' : '');
+    historyItem.textContent = text.slice(0, 50) + (text.length > 50 ? '…' : '');
     historyItem.tabIndex = 0;
     chatHistory.prepend(historyItem);
 
     const assistantMessage = appendMessage('ai', '');
+    const textNode = assistantMessage.querySelector('.message__text');
     let fullResponse = '';
 
     try {
-      await checkOllamaApi();
-      const response = await fetch(ollamaChatUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'phi3:mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...conversationHistory
-          ],
-          stream: true,
-          options: {
-            temperature: 0.3,
-            num_predict: 180
-          }
-        })
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
-        for (const line of lines) {
-          try {
-            const data = JSON.parse(line);
-            if (data.message && data.message.content) {
-              fullResponse += data.message.content;
-              assistantMessage.querySelector('.message__text').innerHTML = window.VAM.escHtml(fullResponse).replace(/\n/g, '<br>');
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-          } catch (_) {
-            // Ignore malformed stream lines.
-          }
+      fullResponse = await window.A2BCOllama.streamChat({
+        systemPrompt,
+        messages: conversationHistory,
+        options: {
+          temperature: 0.3,
+          num_predict: 180
+        },
+        onText: streamedText => {
+          window.A2BCText.renderInline(textNode, streamedText);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-      }
+      });
 
       conversationHistory.push({ role: 'assistant', content: fullResponse });
       const extracted = extractVamSearch(fullResponse);
       let searchParams = extracted.searchParams;
       const cleanText = makeConciseReply(extracted.cleanText);
-      assistantMessage.querySelector('.message__text').innerHTML = window.VAM.escHtml(cleanText).replace(/\n/g, '<br>');
+      window.A2BCText.renderInline(textNode, cleanText);
 
       const source = document.createElement('div');
       source.className = 'message__source';
-      source.innerHTML = '<span>\uD83D\uDCD6</span> Source: V&A Collections API + AI';
+      source.innerHTML = '<span>📖</span> Source: V&A Collections API + AI';
       assistantMessage.querySelector('.message__bubble').appendChild(source);
 
       if (!searchParams && isCollectionIntent(text)) {
@@ -287,7 +252,7 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
       }
       showInlinePrompts();
     } catch (error) {
-      assistantMessage.querySelector('.message__text').textContent = `Error: ${error.message}. Make sure OLLAMA is running.`;
+      textNode.textContent = `Error: ${error.message}. Make sure OLLAMA is running.`;
     } finally {
       sendButton.disabled = false;
       chatInput.focus();

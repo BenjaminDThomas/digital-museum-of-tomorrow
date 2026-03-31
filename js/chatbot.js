@@ -32,6 +32,14 @@ Your role:
 - Flag if descriptions may use dated terminology and suggest respectful alternatives
 - Keep responses concise but rich \u2014 this is a museum context, not an academic paper
 
+Hard rules:
+- Keep prose replies brief: maximum 2-4 short sentences.
+- Never invent exhibits, object titles, IDs, or records.
+- Never say you cannot access the museum data.
+- If the user asks to see/find/show objects, always provide a vam_search JSON suggestion.
+- If you are uncertain about exact matches, say so briefly and immediately provide a broad vam_search query.
+- Only include filter IDs (e.g. id_material, id_technique) if you are confident they are valid; otherwise omit IDs and use q only.
+
 When suggesting V&A API searches, format them as JSON at the end of your response like this:
 {"vam_search": {"q": "search term", "id_material": "AAT12345"}}
 
@@ -126,6 +134,79 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
     }
   }
 
+  function parseVamSearchSnippet(snippet) {
+    if (!snippet) return null;
+    const normalized = snippet
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2018\u2019]/g, "'")
+      .trim();
+    try {
+      const parsed = JSON.parse(normalized);
+      if (parsed && typeof parsed === 'object' && parsed.vam_search && typeof parsed.vam_search === 'object') {
+        return parsed.vam_search;
+      }
+    } catch (_) {
+      // Ignore invalid JSON snippets.
+    }
+    return null;
+  }
+
+  function extractVamSearch(text) {
+    let cleanText = text;
+    let searchParams = null;
+
+    const fencedBlockRegex = /```(?:json)?\s*([\s\S]*?)```/gi;
+    cleanText = cleanText.replace(fencedBlockRegex, (fullMatch, blockContent) => {
+      if (!searchParams) {
+        const direct = parseVamSearchSnippet(blockContent);
+        if (direct) searchParams = direct;
+      }
+      const embeddedMatches = blockContent.match(/\{[\s\S]*?"vam_search"\s*:\s*\{[\s\S]*?\}\s*\}/g) || [];
+      if (!searchParams) {
+        for (const match of embeddedMatches) {
+          const parsed = parseVamSearchSnippet(match);
+          if (parsed) {
+            searchParams = parsed;
+            break;
+          }
+        }
+      }
+      return '';
+    });
+
+    const inlineMatches = cleanText.match(/\{[\s\S]*?"vam_search"\s*:\s*\{[\s\S]*?\}\s*\}/g) || [];
+    for (const match of inlineMatches) {
+      if (!searchParams) {
+        const parsed = parseVamSearchSnippet(match);
+        if (parsed) searchParams = parsed;
+      }
+      cleanText = cleanText.replace(match, '');
+    }
+
+    return {
+      searchParams,
+      cleanText: cleanText.trim()
+    };
+  }
+
+  function isCollectionIntent(text) {
+    return /(show|find|search|looking for|look for|artefacts?|artifacts?|objects?|collection|related to)/i.test(text || '');
+  }
+
+  function makeConciseReply(text, maxChars = 480) {
+    const normalized = (text || '').trim();
+    if (normalized.length <= maxChars) return normalized;
+    const sentences = normalized.match(/[^.!?]+[.!?]?/g) || [normalized];
+    let concise = '';
+    for (const sentence of sentences) {
+      const candidate = `${concise} ${sentence}`.trim();
+      if (candidate.length > maxChars) break;
+      concise = candidate;
+      if ((concise.match(/[.!?]/g) || []).length >= 3) break;
+    }
+    return concise || `${normalized.slice(0, maxChars - 1)}…`;
+  }
+
   async function sendMessage(text) {
     if (!text.trim()) return;
 
@@ -156,7 +237,11 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
             { role: 'system', content: systemPrompt },
             ...conversationHistory
           ],
-          stream: true
+          stream: true,
+          options: {
+            temperature: 0.3,
+            num_predict: 180
+          }
         })
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -183,24 +268,19 @@ Be inclusive, curious, and celebratory of human creativity across all cultures a
       }
 
       conversationHistory.push({ role: 'assistant', content: fullResponse });
-      let cleanText = fullResponse;
-      let searchParams = null;
-      const jsonMatch = fullResponse.match(/\{"vam_search":\s*(\{[^}]+\})\}/);
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[0]);
-          searchParams = parsed.vam_search;
-          cleanText = fullResponse.replace(jsonMatch[0], '').trim();
-          assistantMessage.querySelector('.message__text').innerHTML = window.VAM.escHtml(cleanText).replace(/\n/g, '<br>');
-        } catch (_) {
-          // Ignore invalid trailing JSON.
-        }
-      }
+      const extracted = extractVamSearch(fullResponse);
+      let searchParams = extracted.searchParams;
+      const cleanText = makeConciseReply(extracted.cleanText);
+      assistantMessage.querySelector('.message__text').innerHTML = window.VAM.escHtml(cleanText).replace(/\n/g, '<br>');
 
       const source = document.createElement('div');
       source.className = 'message__source';
       source.innerHTML = '<span>\uD83D\uDCD6</span> Source: V&A Collections API + AI';
       assistantMessage.querySelector('.message__bubble').appendChild(source);
+
+      if (!searchParams && isCollectionIntent(text)) {
+        searchParams = { q: text };
+      }
 
       if (searchParams) {
         await appendRelatedObjects(assistantMessage.querySelector('.message__bubble'), searchParams);

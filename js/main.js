@@ -193,9 +193,14 @@ async function searchObjects(params = {}) {
   if (!health.ok) throw new Error(health.message);
 
   const url = new URL(`${VAM_API}/objects/search`);
+  const hasValue = value => value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === '');
   Object.entries(params).forEach(([k, v]) => {
-    if (Array.isArray(v)) v.forEach(val => url.searchParams.append(k, val));
-    else url.searchParams.set(k, v);
+    if (Array.isArray(v)) {
+      v.filter(hasValue).forEach(val => url.searchParams.append(k, val));
+      return;
+    }
+    if (!hasValue(v)) return;
+    url.searchParams.set(k, typeof v === 'string' ? v.trim() : v);
   });
   const cacheKey = url.toString();
   const cached = vamResponseCache.get(cacheKey);

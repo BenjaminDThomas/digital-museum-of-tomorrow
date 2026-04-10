@@ -17,7 +17,7 @@
 
   --clr-text:           #F8F8F8;  /* near-white body text */
   --clr-text-muted:     #D6D6D6;  /* high contrast muted text */
-  --clr-text-faint:     #B2B2B2;  /* still WCAG accessible for labels */
+  --clr-text-faint:     #FFFFFF;  /* white for WCAG accessible labels */
 
   /* Accent palette with bright contrast colors */
   --clr-accent:         #FF8C00;  /* vivid orange */

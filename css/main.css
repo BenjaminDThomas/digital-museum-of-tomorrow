@@ -223,7 +223,8 @@ h4 {
 .upload-zone__icon {
   font-size: 2.5rem;
   margin-bottom: var(--sp-4);
-  opacity: 0.5;
+  color: #FFFFFF;
+  opacity: 1;
 }
 .upload-zone__title {
   font-family: var(--ff-display);
@@ -927,7 +928,8 @@ body.high-contrast .logo-divider {
   line-height: var(--lh-loose);
 }
 .footer-bottom a {
-  color: var(--clr-accent-dim);
+  color: #FFD699;
+  text-decoration: underline;
   transition: color var(--transition-fast);
 }
 .footer-bottom a:hover {
@@ -1377,7 +1379,7 @@ select:focus {
 
 .artefact-card {
   background: var(--clr-surface-2);
-  border: 1px solid var(--clr-border);
+  border: 1px solid #FFFFFF;
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition:
@@ -1386,7 +1388,7 @@ select:focus {
     box-shadow var(--transition-base);
 }
 .artefact-card:hover {
-  border-color: var(--clr-border-light);
+  border-color: #FFFFFF;
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
 }
@@ -2115,7 +2117,8 @@ body.high-contrast .logo-divider {
   color: var(--clr-text-faint);
 }
 .discover-inline-link {
-  color: var(--clr-accent-dim);
+  color: #FFD699;
+  text-decoration: underline;
 }
 .discover-results-controls {
   display: flex;
@@ -2634,9 +2637,9 @@ body.high-contrast .logo-divider {
   font-size: var(--fs-xs);
 }
 .status-badge--on {
-  background: rgba(123, 172, 122, 0.15);
-  color: var(--clr-success);
-  border: 1px solid rgba(123, 172, 122, 0.3);
+  background: rgba(95, 208, 104, 0.15);
+  color: #5FD068;
+  border: 1px solid rgba(95, 208, 104, 0.3);
 }
 .status-badge--partial {
   background: rgba(201, 168, 76, 0.12);

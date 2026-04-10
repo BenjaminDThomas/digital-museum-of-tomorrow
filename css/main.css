@@ -2295,9 +2295,22 @@ body.large-text {
   color: #FFFFFF;
   display: inline-block;
 }
-.generation-output__status {
-  color: var(--clr-text-muted);
-  font-size: var(--fs-sm);
+.generation-actions {
+  margin-top: var(--sp-4);
+  display: flex;
+  gap: var(--sp-2);
+}
+.history-controls {
+  margin-top: var(--sp-3);
+  display: flex;
+  gap: var(--sp-2);
+  justify-content: center;
+}
+.sd-actions {
+  margin-top: var(--sp-3);
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
 }
 .connection-item__arrow {
   font-size: 1rem;

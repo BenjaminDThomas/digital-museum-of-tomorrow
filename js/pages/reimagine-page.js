@@ -55,6 +55,8 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
   let selectedArtefact = null;
   let selectedLens = null;
   let sdStatusPollId = null;
+  let generationHistory = [];
+  let currentHistoryIndex = -1;
 
   function setSdStatusBadge(state, message = '') {
     const sdStatusBadge = document.getElementById('sd-status-badge');
@@ -96,6 +98,79 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
 
   function updateGenerateButton() {
     document.getElementById('generate-btn').disabled = !(selectedArtefact && selectedLens);
+  }
+
+  function saveToFavorites(generation) {
+    const favorites = JSON.parse(localStorage.getItem('vam-favorites') || '[]');
+    favorites.push({
+      ...generation,
+      savedAt: new Date().toISOString(),
+      id: Date.now()
+    });
+    localStorage.setItem('vam-favorites', JSON.stringify(favorites));
+    alert('Reimagining saved to favorites!');
+  }
+
+  function addToHistory(generation) {
+    // Remove any history after current index (for when user generates after undo)
+    generationHistory = generationHistory.slice(0, currentHistoryIndex + 1);
+    generationHistory.push(generation);
+    currentHistoryIndex = generationHistory.length - 1;
+    updateHistoryButtons();
+  }
+
+  function updateHistoryButtons() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    if (undoBtn) undoBtn.disabled = currentHistoryIndex <= 0;
+    if (redoBtn) redoBtn.disabled = currentHistoryIndex >= generationHistory.length - 1;
+  }
+
+  function undoGeneration() {
+    if (currentHistoryIndex > 0) {
+      currentHistoryIndex--;
+      const previousGeneration = generationHistory[currentHistoryIndex];
+      restoreGeneration(previousGeneration);
+      updateHistoryButtons();
+    }
+  }
+
+  function redoGeneration() {
+    if (currentHistoryIndex < generationHistory.length - 1) {
+      currentHistoryIndex++;
+      const nextGeneration = generationHistory[currentHistoryIndex];
+      restoreGeneration(nextGeneration);
+      updateHistoryButtons();
+    }
+  }
+
+  function restoreGeneration(generation) {
+    // Restore the generation state
+    const output = document.getElementById('generation-output');
+    const sdOutput = document.getElementById('sd-output');
+
+    if (generation.interpretation) {
+      renderFinalInterpretation(output, generation.interpretation);
+    }
+
+    if (generation.visualData) {
+      const escapedTitle = window.VAM.escHtml(generation.artefactTitle);
+      sdOutput.className = 'sd-output sd-output--result';
+      sdOutput.innerHTML = `
+        <div class="sd-result-label">✶ AI-generated visual — Stable Diffusion · ${window.VAM.escHtml(generation.lensStyle)}</div>
+        <figure class="sd-figure sd-figure--single">
+          <img src="${generation.visualData}" alt="AI visual reimagining of ${escapedTitle}" />
+          <figcaption>${escapedTitle} — reimagined through ${window.VAM.escHtml(generation.lensTitle)}</figcaption>
+        </figure>
+        <a class="btn btn--ghost sd-download-btn" href="${generation.visualData}" download="reimagined-artefact.png" aria-label="Download reimagined image as PNG">
+          ↓ Download PNG
+        </a>
+        <button class="btn btn--ghost save-favorite-btn" id="save-favorite-btn">♥ Save to Favorites</button>
+      `;
+
+      // Re-attach save event
+      document.getElementById('save-favorite-btn').addEventListener('click', () => saveToFavorites(generation));
+    }
   }
 
   function parseInterpretationResponse(text) {
@@ -366,10 +441,28 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
           <img src="data:image/png;base64,${outputBase64}" alt="AI visual reimagining of ${escapedTitle}" />
           <figcaption>${escapedTitle} — reimagined through ${window.VAM.escHtml(selectedLens.title)}</figcaption>
         </figure>
-        <a class="btn btn--ghost sd-download-btn" href="data:image/png;base64,${outputBase64}" download="reimagined-artefact.png" aria-label="Download reimagined image as PNG">
-          ↓ Download PNG
-        </a>
+        <div class="sd-actions">
+          <a class="btn btn--ghost sd-download-btn" href="data:image/png;base64,${outputBase64}" download="reimagined-artefact.png" aria-label="Download reimagined image as PNG">
+            ↓ Download PNG
+          </a>
+          <button class="btn btn--ghost save-favorite-btn" id="save-visual-favorite-btn">♥ Save to Favorites</button>
+        </div>
       `;
+
+      // Store visual generation in history
+      const visualGeneration = {
+        artefact: selectedArtefact,
+        lens: selectedLens,
+        visualData: `data:image/png;base64,${outputBase64}`,
+        artefactTitle: artefactTitle,
+        lensStyle: lensStyle,
+        lensTitle: selectedLens.title,
+        timestamp: new Date().toISOString()
+      };
+      addToHistory(visualGeneration);
+
+      // Add save event listener
+      document.getElementById('save-visual-favorite-btn').addEventListener('click', () => saveToFavorites(visualGeneration));
     } catch (error) {
       output.className = 'sd-output sd-output--error';
       output.innerHTML = `
@@ -390,6 +483,9 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
       <div class="generation-analysis" id="gen-analysis"></div>
       ${interpretation.caveats ? `<div class="bias-notice"><span class="bias-notice__icon">ℹ</span><span>${window.VAM.escHtml(interpretation.caveats)}</span></div>` : ''}
       ${interpretation.connections?.length ? '<div class="generation-connections"><h4>Explore further</h4><div class="connection-list" id="connection-list"></div></div>' : ''}
+      <div class="generation-actions">
+        <button class="btn btn--ghost save-favorite-btn" id="save-favorite-btn">♥ Save to Favorites</button>
+      </div>
     `;
 
     document.getElementById('gen-opening').textContent = interpretation.opening || '';
@@ -414,6 +510,18 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
         connectionList.appendChild(item);
       });
     }
+
+    // Store this generation in history
+    const generation = {
+      artefact: selectedArtefact,
+      lens: selectedLens,
+      interpretation: interpretation,
+      timestamp: new Date().toISOString()
+    };
+    addToHistory(generation);
+
+    // Add save event listener
+    document.getElementById('save-favorite-btn').addEventListener('click', () => saveToFavorites(generation));
   }
 
   async function generateInterpretation() {
@@ -468,6 +576,9 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
   }
 
   document.getElementById('generate-btn').addEventListener('click', generateInterpretation);
+  document.getElementById('undo-btn').addEventListener('click', undoGeneration);
+  document.getElementById('redo-btn').addEventListener('click', redoGeneration);
+  updateHistoryButtons();
   checkSdApi();
 }
 

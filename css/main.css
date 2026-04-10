@@ -1390,7 +1390,7 @@ select:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+  font-size: 6rem;
   opacity: 0.3;
   color: var(--clr-text-faint);
 }
@@ -2041,6 +2041,7 @@ body.large-text {
 .discover-sidebar-btn {
   width: 100%;
   justify-content: center;
+  font-size: 0.7rem;
 }
 .discover-sidebar-btn--primary {
   margin-top: var(--sp-5);
@@ -2378,7 +2379,7 @@ body.large-text {
   background: var(--clr-surface-2);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-md);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--clr-text-muted);
   cursor: pointer;
   text-align: center;

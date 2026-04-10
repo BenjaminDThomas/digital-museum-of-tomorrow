@@ -276,6 +276,13 @@ function initRecommenderPage() {
     records.forEach(record => {
       const key = record.systemNumber || record.id || record.pk;
       if (!key || seenKeys.has(key)) return;
+
+      // Check if user has marked this item as not interested
+      const systemNumber = record.systemNumber || '';
+      if (localStorage.getItem(`vam-not-interested-${systemNumber}`) === 'true') {
+        return; // Skip this record
+      }
+
       seenKeys.add(key);
 
       const card = window.VAM.renderArtefactCard(record, whyLabels[mode]);

@@ -245,10 +245,27 @@
             <span class="ai-badge" aria-label="AI recommendation reason">✦ AI</span>
             <span>${escHtml(whyLabel)}</span>
           </div>` : ''}
+        <div class="artefact-card__actions">
+          <button class="artefact-action-btn artefact-action-btn--not-interested" data-system-number="${escHtml(systemNumber)}" aria-label="Mark as not interested">
+            👎 Not interested
+          </button>
+        </div>
       </div>
     `;
 
-    card.addEventListener('click', () => openArtefactModal(record, systemNumber));
+    // Add event listeners for feedback buttons
+    const notInterestedBtn = card.querySelector('.artefact-action-btn--not-interested');
+
+    notInterestedBtn.addEventListener('click', () => {
+      localStorage.setItem(`vam-not-interested-${systemNumber}`, 'true');
+      card.style.display = 'none'; // Hide the card
+    });
+
+    card.addEventListener('click', event => {
+      if (!event.target.classList.contains('artefact-action-btn')) {
+        openArtefactModal(record, systemNumber);
+      }
+    });
     return card;
   }
 

@@ -1425,6 +1425,29 @@ select:focus {
   font-size: var(--fs-xs);
   color: var(--clr-text-faint);
 }
+.artefact-card__actions {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+.artefact-action-btn {
+  flex: 1;
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-xs);
+  background: var(--clr-surface-3);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  color: var(--clr-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.artefact-action-btn:hover {
+  background: var(--clr-surface-2);
+  color: var(--clr-text);
+}
+.artefact-action-btn:active {
+  transform: scale(0.98);
+}
 
 /* ====================================
    LOADING / SKELETON

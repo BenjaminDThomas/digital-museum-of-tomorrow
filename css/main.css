@@ -221,7 +221,7 @@ h4 {
   border-color: var(--clr-accent);
 }
 .upload-zone__icon {
-  font-size: 2.5rem;
+  font-size: 5rem;
   margin-bottom: var(--sp-4);
   color: #FFFFFF;
   opacity: 1;
@@ -1803,6 +1803,7 @@ body.large-text {
 .lens-card__icon {
   font-size: 1.5rem;
   margin-bottom: var(--sp-2);
+  color: #FFFFFF;
 }
 .lens-card__title {
   font-size: var(--fs-sm);
@@ -1926,6 +1927,7 @@ body.large-text {
 .sd-output__spinner {
   font-size: 2rem;
   animation: spin 1.5s linear infinite;
+  color: #FFFFFF;
 }
 .sd-result-label {
   font-size: var(--fs-xs);
@@ -2267,6 +2269,7 @@ body.large-text {
 }
 .generation-output__spinner {
   font-size: 2rem;
+  color: #FFFFFF;
   display: inline-block;
 }
 .generation-output__status {

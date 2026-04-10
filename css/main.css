@@ -122,9 +122,9 @@ h4 {
 }
 
 .btn--primary {
-  background: var(--clr-accent);
+  background: #CC6600;
   color: var(--clr-bg);
-  border-color: var(--clr-accent);
+  border-color: #CC6600;
 }
 .btn--primary:hover {
   background: var(--clr-accent-light);
@@ -384,7 +384,7 @@ h4 {
   font-weight: var(--fw-medium);
   letter-spacing: var(--ls-wider);
   text-transform: uppercase;
-  color: var(--clr-accent);
+  color: #CC6600;
   margin-bottom: var(--sp-4);
 }
 
@@ -472,30 +472,6 @@ h4 {
 }
 .main-nav a[aria-current="page"] {
   color: var(--clr-accent);
-}
-
-/* Light mode / high contrast settings */
-body.high-contrast .main-nav a:hover,
-body.high-contrast .main-nav a[aria-current="page"] {
-  color: var(--clr-text);
-  background: var(--clr-surface-2);
-}
-
-/* Keep nav text fixed even in high contrast mode */
-body.high-contrast .main-nav a {
-  color: var(--clr-text) !important;
-}
-
-body.high-contrast .main-nav a:hover,
-body.high-contrast .main-nav a[aria-current="page"] {
-  color: var(--clr-text) !important;
-  background: var(--clr-surface-2) !important;
-}
-
-body.high-contrast .logo-vam,
-body.high-contrast .logo-sub,
-body.high-contrast .logo-divider {
-  color: var(--clr-header-text) !important;
 }
 
 .nav-toggle {
@@ -1617,30 +1593,6 @@ body.large-text {
   --fs-sm: 1rem;
   --fs-xs: 0.875rem;
   --fs-md: 1.25rem;
-}
-
-/* ====================================
-   HIGH CONTRAST MODE  
-   ==================================== */
-body.high-contrast {
-  --clr-bg: #ffffff;
-  --clr-surface: #fafafa;
-  --clr-surface-2: #f0f0f0;
-  --clr-surface-3: #e0e0e0;
-  --clr-border: #c4c4c4;
-  --clr-border-light: #a0a0a0;
-  --clr-text: #000000;
-  --clr-text-muted: #2f2f2f;
-  --clr-text-faint: #505050;
-  --clr-accent: #ff8c00;
-}
-
-/* Keep nav text consistent in high contrast mode */
-body.high-contrast .main-nav a,
-body.high-contrast .logo-vam,
-body.high-contrast .logo-sub,
-body.high-contrast .logo-divider {
-  color: var(--clr-header-text) !important;
 }
 
 /* ====================================

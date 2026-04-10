@@ -21,12 +21,7 @@
       localStorage.setItem('vam-large-text', document.body.classList.contains('large-text'));
     });
 
-    const contrastBtn = createA11yBtn('◑', 'Toggle high contrast', () => {
-      document.body.classList.toggle('high-contrast');
-      localStorage.setItem('vam-high-contrast', document.body.classList.contains('high-contrast'));
-    });
-
-    toolbar.append(largeTextBtn, contrastBtn);
+    toolbar.append(largeTextBtn);
     const headerInner = document.querySelector('.header-inner');
     const navToggle = document.querySelector('.nav-toggle');
     if (headerInner && navToggle) {
@@ -38,7 +33,6 @@
     }
 
     if (localStorage.getItem('vam-large-text') === 'true') document.body.classList.add('large-text');
-    if (localStorage.getItem('vam-high-contrast') === 'true') document.body.classList.add('high-contrast');
   }
 
   function initScrollReveal() {

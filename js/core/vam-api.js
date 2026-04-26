@@ -15,6 +15,7 @@
     return date.toISOString().slice(0, 10);
   }
 
+  // Read the daily request count from local storage, resetting it if the day has rolled over.
   function readVamDailyUsage() {
     try {
       const raw = localStorage.getItem(VAM_DAILY_USAGE_KEY);
@@ -32,6 +33,7 @@
     }
   }
 
+  // Persist the updated usage record to local storage.
   function writeVamDailyUsage(usage) {
     try {
       localStorage.setItem(VAM_DAILY_USAGE_KEY, JSON.stringify(usage));
@@ -40,6 +42,7 @@
     }
   }
 
+  // Increment the daily quota counter and throw if the limit has been reached.
   function consumeDailyQuota() {
     const usage = readVamDailyUsage();
     if (usage.count >= VAM_DAILY_LIMIT) {
@@ -49,10 +52,12 @@
     writeVamDailyUsage(usage);
   }
 
+  // Return a deep copy of a value via JSON round-trip.
   function deepClone(value) {
     return JSON.parse(JSON.stringify(value));
   }
 
+  // Queue a request task so it fires at least VAM_RATE_LIMIT_MS after the previous one.
   async function enqueueVamRequest(task) {
     const run = async () => {
       const now = Date.now();
@@ -71,6 +76,7 @@
     return scheduled;
   }
 
+  // Wrap fetch with an AbortController so requests are cancelled after timeoutMs.
   async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -81,6 +87,7 @@
     }
   }
 
+  // Perform a lightweight health check on the V&A API and cache the result.
   async function checkVamApi(force = false) {
     if (!force && vamApiStatus) return vamApiStatus;
     try {
@@ -101,6 +108,7 @@
     }
   }
 
+  // Search the V&A collection with the given params, returning cached data when still fresh.
   async function searchObjects(params = {}) {
     const url = new URL(`${VAM_API}/objects/search`);
     const hasValue = value => value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === '');
@@ -127,6 +135,7 @@
     return deepClone(payload);
   }
 
+  // Fetch a single V&A collection object by system number, using the cache when fresh.
   async function getObject(id) {
     const url = `${VAM_API}/object/${id}`;
     const cached = vamResponseCache.get(url);
@@ -141,6 +150,7 @@
     return deepClone(payload);
   }
 
+  // Resolve the best available image URL from a collection record at the requested size.
   function getArtefactImageUrl(record, size = 'medium') {
     const imageId = record?._images?._primary_thumbnail || record?._images?._iiif_image_base_url;
     if (!imageId) return null;
@@ -152,6 +162,7 @@
     return imageId;
   }
 
+  // Format a human-readable date string from the available date fields on a record.
   function formatDateRange(record) {
     const parts = [];
     if (record.object_date_text) return record.object_date_text;
@@ -160,6 +171,7 @@
     return parts.length ? parts.join('–') : 'Date unknown';
   }
 
+  // Escape a string for safe insertion into HTML to prevent XSS.
   function escHtml(str) {
     if (!str) return '';
     return String(str)
@@ -169,6 +181,7 @@
       .replace(/"/g, '&quot;');
   }
 
+  // Build and open a full-detail modal dialog for the given collection record.
   function openArtefactModal(record, systemNumber) {
     const existing = document.getElementById('artefact-modal');
     if (existing) existing.remove();
@@ -208,6 +221,7 @@
     document.body.appendChild(modal);
     modal.showModal();
 
+    // Close on the X button, backdrop click, or Escape key.
     modal.querySelector('.artefact-modal__close').addEventListener('click', () => modal.remove());
     modal.addEventListener('click', event => {
       if (event.target === modal) modal.remove();
@@ -220,6 +234,7 @@
     });
   }
 
+  // Create an artefact card DOM element with image, metadata, and action buttons.
   function renderArtefactCard(record, whyLabel = null) {
     const card = document.createElement('article');
     card.className = 'artefact-card';
@@ -253,14 +268,15 @@
       </div>
     `;
 
-    // Add event listeners for feedback buttons
     const notInterestedBtn = card.querySelector('.artefact-action-btn--not-interested');
 
+    // Record user feedback and hide the card immediately.
     notInterestedBtn.addEventListener('click', () => {
       localStorage.setItem(`vam-not-interested-${systemNumber}`, 'true');
-      card.style.display = 'none'; // Hide the card
+      card.style.display = 'none';
     });
 
+    // Open the detail modal on click, ignoring clicks on the action buttons.
     card.addEventListener('click', event => {
       if (!event.target.classList.contains('artefact-action-btn')) {
         openArtefactModal(record, systemNumber);

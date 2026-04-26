@@ -1,9 +1,12 @@
 'use strict';
 
+// Transparency page controller. Builds the FAQ accordion from a static list
+// and wires up expand/collapse interactions.
 function initTransparencyPage() {
   const faqList = document.getElementById('faq-list');
   if (!faqList) return;
 
+  // Frequently asked questions about AI use, bias, data, and accessibility.
   const faqs = [
     {
       q: 'Is the AI making things up about artefacts?',
@@ -35,6 +38,7 @@ function initTransparencyPage() {
     },
   ];
 
+  // Build each FAQ item as a disclosure widget and append it to the list.
   faqs.forEach((faq, index) => {
     const item = document.createElement('div');
     item.className = 'faq-item';
@@ -51,6 +55,7 @@ function initTransparencyPage() {
         </div>
       </div>
     `;
+    // Toggle the open class and update aria-expanded on click.
     const button = item.querySelector('.faq-question');
     button.addEventListener('click', () => {
       const open = item.classList.toggle('open');
@@ -60,6 +65,7 @@ function initTransparencyPage() {
   });
 }
 
+// Initialise the transparency page once the DOM is ready.
 document.addEventListener('DOMContentLoaded', () => {
   initTransparencyPage();
 });

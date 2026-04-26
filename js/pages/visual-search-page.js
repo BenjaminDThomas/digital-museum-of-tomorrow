@@ -1,9 +1,13 @@
 'use strict';
 
+// Visual search page controller. Accepts an image upload, runs MobileNet
+// classification and dominant-colour extraction client-side, then searches
+// the V&A collection with the derived terms and renders ranked result cards.
 function initVisualSearchPage() {
   const uploadZone = document.getElementById('upload-zone');
   if (!uploadZone) return;
 
+  // CDN URLs for TensorFlow.js and the MobileNet model, loaded lazily on first upload.
   const tfJsUrl = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js';
   const mobileNetUrl = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js';
   const fileInput = document.getElementById('file-input');
@@ -18,6 +22,7 @@ function initVisualSearchPage() {
   let uploadedBase64 = null;
   let cvModelPromise = null;
 
+  // Dynamically inject an external script tag, resolving once the script has loaded.
   function loadExternalScript(src) {
     return new Promise((resolve, reject) => {
       const existing = document.querySelector(`script[src="${src}"]`);
@@ -43,6 +48,7 @@ function initVisualSearchPage() {
     });
   }
 
+  // Load TensorFlow.js and MobileNet on first call, reusing the same promise thereafter.
   async function ensureComputerVisionModel() {
     if (cvModelPromise) return cvModelPromise;
 
@@ -55,6 +61,7 @@ function initVisualSearchPage() {
     return cvModelPromise;
   }
 
+  // Strip classifier noise (commas, underscores, hyphens) from a MobileNet label.
   function normaliseLabel(value) {
     return String(value || '')
       .split(',')[0]
@@ -62,6 +69,7 @@ function initVisualSearchPage() {
       .trim();
   }
 
+  // Map an RGB pixel value to the nearest basic colour name via HSL conversion.
   function rgbToColourName(r, g, b) {
     const rn = r / 255;
     const gn = g / 255;
@@ -97,6 +105,7 @@ function initVisualSearchPage() {
     return 'pink';
   }
 
+  // Sample the image at 120×120, bin pixels by colour name, and return the top three.
   function extractDominantColours(imageElement) {
     const canvas = document.createElement('canvas');
     canvas.width = 120;
@@ -123,6 +132,7 @@ function initVisualSearchPage() {
       .map(entry => entry[0]);
   }
 
+  // Combine classifier predictions and dominant colours into a deduplicated search list.
   function buildVisualSearches(predictions, colours) {
     const searches = [];
 
@@ -158,10 +168,12 @@ function initVisualSearchPage() {
     }).slice(0, 4);
   }
 
+  // Show or hide the upload drop zone depending on whether a preview image is active.
   function setUploadPreviewActive(active) {
     uploadZone.classList.toggle('upload-zone--hidden', active);
   }
 
+  // Return a string of skeleton card placeholders to show while results load.
   function renderSkeletons(count) {
     return Array(count).fill(`
       <div class="result-skeleton-card">
@@ -175,6 +187,7 @@ function initVisualSearchPage() {
     `).join('');
   }
 
+  // Search the collection for each visual query and render ranked result cards.
   async function loadVisualResults(searches) {
     resultsSection.style.display = 'block';
     visualResults.innerHTML = renderSkeletons(8);
@@ -233,6 +246,7 @@ function initVisualSearchPage() {
     }
   }
 
+  // Run the CV model on the uploaded image and kick off the collection search.
   async function analyseAndSearch() {
     if (!uploadedBase64) return;
     detectedAttributes.innerHTML = '<span class="visual-attr-chip skeleton"></span>'.repeat(3);
@@ -262,6 +276,7 @@ function initVisualSearchPage() {
     }
   }
 
+  // Validate the file size, read it as a data URL, and trigger analysis.
   function handleFile(file) {
     if (file.size > 5 * 1024 * 1024) {
       alert('Please upload an image under 5MB.');

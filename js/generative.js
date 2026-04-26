@@ -1,9 +1,13 @@
 'use strict';
 
+// Generative page controller (legacy standalone version). Handles artefact search,
+// lens selection, JSON-formatted Ollama requests, and Stable Diffusion image output.
+// The reimagine-page.js version supersedes this with streamed responses and history.
 function initGenerativePage() {
   const lensGrid = document.getElementById('lens-grid');
   if (!lensGrid) return;
 
+  // Interpretive lenses the user can pick to frame the AI response.
   const lenses = [
     { id: 'cultural', icon: '\uD83C\uDF0D', title: 'Cultural connections', desc: 'How does this object connect to similar traditions in other cultures?' },
     { id: 'historical', icon: '\u23F3', title: 'Through time', desc: 'How would this object have been understood in different time periods?' },
@@ -40,6 +44,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
   const sdApiBaseUrl = isLocalPreviewHost ? 'http://localhost' : window.location.origin;
   const sdTxt2ImgUrl = `${sdApiBaseUrl}/sdapi/v1/txt2img`;
   const sdModelsUrl = `${sdApiBaseUrl}/sdapi/v1/sd-models`;
+  // Stable Diffusion style keywords mapped to each interpretive lens.
   const sdLensPrompts = {
     cultural: 'cross-cultural artistic fusion, world art traditions, multicultural decorative motifs',
     historical: 'historical period art style, period-accurate aesthetic, art history reimagining',
@@ -54,6 +59,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
   let ollamaChecked = false;
   let sdStatusPollId = null;
 
+  // Ping the Ollama tags endpoint to confirm the server is reachable before sending requests.
   async function checkOllamaApi() {
     if (ollamaChecked) return;
     const response = await fetch(ollamaTagsUrl, { method: 'GET' });
@@ -61,6 +67,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     ollamaChecked = true;
   }
 
+  // Send a non-streaming JSON format request to Ollama and parse the response.
   async function callOllamaJson(systemPrompt, userPrompt) {
     await checkOllamaApi();
     const response = await fetch(ollamaChatUrl, {
@@ -90,6 +97,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     }
   }
 
+  // Update the SD status badge with a ready, loading, error, missing, or offline state.
   function setSdStatusBadge(state, message = '') {
     if (state === 'ready') {
       sdStatusBadge.textContent = '\u25cf Stable Diffusion ready';
@@ -115,6 +123,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     sdStatusBadge.className = 'sd-status-badge sd-status-badge--offline';
   }
 
+  // Poll the SD API every 10 seconds until it reports ready or a terminal error.
   function startSdStatusPolling() {
     if (sdStatusPollId) return;
     sdStatusPollId = window.setInterval(async () => {
@@ -126,6 +135,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     }, 10000);
   }
 
+  // Enable or disable the Generate button depending on whether an artefact and lens are chosen.
   function updateGenerateButton() {
     document.getElementById('generate-btn').disabled = !(selectedArtefact && selectedLens);
   }
@@ -159,6 +169,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
   const sdStatusBadge = document.getElementById('sd-status-badge');
   let searchTimeout;
 
+  // Search the collection as the user types, showing results in a dropdown.
   artefactSearch.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     const value = artefactSearch.value.trim();
@@ -183,12 +194,14 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     }
   });
 
+  // Close the dropdown when clicking outside the search box.
   document.addEventListener('click', event => {
     if (!artefactSearch.closest('.artefact-search-box').contains(event.target)) {
       dropdown.classList.remove('open');
     }
   });
 
+  // Fetch up to five matching artefacts from the V&A API and populate the dropdown.
   async function doArtefactSearch(query) {
     try {
       const data = await window.VAM.searchObjects({ q: query, page_size: 5 });
@@ -237,6 +250,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     }
   }
 
+  // Confirm an artefact choice, update the preview panel, and check SD readiness.
   function selectArtefact(record) {
     selectedArtefact = record;
     dropdown.classList.remove('open');
@@ -265,6 +279,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     checkSdApi();
   }
 
+  // Check the SD backend and update the status badge on the page.
   async function checkSdApi() {
     try {
       const response = await fetch(sdModelsUrl, { signal: AbortSignal.timeout(3000) });
@@ -294,6 +309,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     return { ready: false, loading: false, error: 'Service offline.' };
   }
 
+  // Send the artefact and lens to Stable Diffusion and render the output image.
   async function runSdReimagining(lensId, customQuestion) {
     const output = document.getElementById('sd-output');
     if (!output) return;
@@ -371,6 +387,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     }
   }
 
+  // Request a JSON interpretation from Ollama and render the parsed result.
   async function generateInterpretation() {
     if (!selectedArtefact || !selectedLens) return;
 
@@ -452,6 +469,7 @@ Please generate an interpretation of this artefact through the "${selectedLens.t
   checkSdApi();
 }
 
+// Initialise the generative page once the DOM is ready.
 document.addEventListener('DOMContentLoaded', () => {
   initGenerativePage();
 });

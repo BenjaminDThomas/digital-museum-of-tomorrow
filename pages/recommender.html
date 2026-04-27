@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Page metadata and shared styles for the discovery feed -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
@@ -51,10 +52,12 @@
 
     <!-- Main content -->
     <main id="main">
+      <!-- Split layout with filter controls and recommendation feed -->
       <div class="discover-layout">
         <!-- Sidebar filters -->
         <aside class="discover-sidebar" aria-label="Preferences and filters">
           <div class="filter-panel discover-filter-panel">
+            <!-- Interest chips influence upcoming recommendations -->
             <p class="filter-panel__title">Your interests</p>
             <p class="discover-filter-help">
               Select topics to shape upcoming recommendations while you scroll.
@@ -161,6 +164,7 @@
           </div>
 
           <div class="results-header">
+            <!-- Result count and sort controls for loaded recommendation tiles -->
             <p class="results-count" id="results-count" aria-live="polite"></p>
             <div class="discover-results-controls">
               <label for="sort-select" class="sr-only">Sort by</label>
@@ -182,8 +186,9 @@
             aria-label="Recommended artefacts"
             role="list"
           >
-            <!-- populated by JS -->
+            <!-- JS renders recommendation cards here -->
           </div>
+          <!-- Live status and sentinel used for infinite-scroll loading -->
           <div class="discover-feed-meta" aria-live="polite">
             <p class="discover-feed-status" id="discover-feed-status"></p>
             <div class="discover-feed-sentinel" id="discover-feed-sentinel" aria-hidden="true"></div>

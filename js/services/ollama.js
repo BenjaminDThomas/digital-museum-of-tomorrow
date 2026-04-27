@@ -1,10 +1,14 @@
 'use strict';
 
+// Ollama API service layer. Handles health checks, streamed chat, and JSON
+// response parsing. Exposes window.A2BCOllama for use across all AI features.
 (function initOllamaService() {
   const defaultChatUrl = 'http://localhost:11434/api/chat';
   const defaultTagsUrl = 'http://localhost:11434/api/tags';
+  // Cache pending readiness checks to avoid duplicate requests on the same URL.
   const readinessChecks = new Map();
 
+  // Check that the Ollama server is reachable, caching the in-flight promise.
   async function checkApi(tagsUrl = defaultTagsUrl) {
     const existingCheck = readinessChecks.get(tagsUrl);
     if (existingCheck) return existingCheck;
@@ -25,6 +29,7 @@
     }
   }
 
+  // Send a streaming chat request to Ollama, calling onText with each accumulated chunk.
   async function streamChat({
     systemPrompt,
     messages = [],
@@ -38,6 +43,7 @@
   }) {
     await checkApi(tagsUrl);
 
+    // Build the message array with optional system and user entries.
     const payload = {
       model,
       messages: [
@@ -68,6 +74,7 @@
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let fullResponse = '';
+    // Buffer incomplete lines between chunks.
     let remainder = '';
 
     while (true) {
@@ -92,6 +99,7 @@
       }
     }
 
+    // Flush any final incomplete line that was not followed by a newline.
     if (remainder.trim()) {
       try {
         const data = JSON.parse(remainder);
@@ -108,6 +116,7 @@
     return fullResponse;
   }
 
+  // Strip code fences and attempt to parse the model's text output as JSON.
   function parseJsonResponse(text) {
     const cleaned = (text || '').replace(/```json|```/g, '').trim();
     try {
@@ -121,6 +130,7 @@
     }
   }
 
+  // Stream a chat request and parse the full response as JSON.
   async function streamJsonChat(config) {
     const text = await streamChat(config);
     return {

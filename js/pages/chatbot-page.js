@@ -1,9 +1,12 @@
 'use strict';
 
+// Chatbot page controller. Manages the conversational interface, suggested prompts,
+// V&A collection search triggered by AI responses, and streamed message rendering.
 function initChatbotPage() {
   const chatMessages = document.getElementById('chat-messages');
   if (!chatMessages) return;
 
+  // Conversation starters shown in the topic sidebar.
   const topics = [
     'Victorian fashion',
     'Japanese ceramics',
@@ -14,6 +17,7 @@ function initChatbotPage() {
     'William Morris designs',
     'Medieval manuscripts'
   ];
+  // Short prompt buttons shown in the welcome screen and inline after replies.
   const prompts = [
     'Show me objects made of silk',
     'What did people wear in 1870s England?',
@@ -54,6 +58,7 @@ Format your search suggestion as JSON at the end of your response:
 
   let conversationHistory = [];
 
+  // Create a suggested-prompt button that sends a preset message on click.
   function createPromptButton(text) {
     const button = document.createElement('button');
     button.className = 'suggested-prompt';
@@ -63,6 +68,7 @@ Format your search suggestion as JSON at the end of your response:
     return button;
   }
 
+  // Populate the inline prompt bar with the first three prompt suggestions.
   function showInlinePrompts() {
     inlinePrompts.innerHTML = '';
     prompts.slice(0, 3).forEach(prompt => {
@@ -70,6 +76,7 @@ Format your search suggestion as JSON at the end of your response:
     });
   }
 
+  // Append a message bubble to the chat window for either the user or the AI.
   function appendMessage(role, content, extras = {}) {
     if (chatWelcome) chatWelcome.hidden = true;
     const message = document.createElement('div');
@@ -87,6 +94,7 @@ Format your search suggestion as JSON at the end of your response:
     return message;
   }
 
+  // Normalise curly quotes and extra whitespace from a search string.
   function normaliseSearchText(value) {
     return (value || '')
       .replace(/[“”]/g, '"')
@@ -96,6 +104,7 @@ Format your search suggestion as JSON at the end of your response:
       .trim();
   }
 
+  // Strip conversational filler from the user's message to derive a clean search term.
   function deriveCollectionQuery(text) {
     let query = normaliseSearchText(text)
       .replace(/^(please\s+)?(can you\s+)?(show|find|get|search(?:\s+for)?|look(?:ing)?\s+for)\s+(me\s+)?/i, '')
@@ -113,6 +122,7 @@ Format your search suggestion as JSON at the end of your response:
     return normaliseSearchText(query);
   }
 
+  // Build a deduplicated list of search queries from the user text and any AI suggestion.
   function buildCollectionSearchQueries(userText, params) {
     const queries = [];
 
@@ -141,6 +151,7 @@ Format your search suggestion as JSON at the end of your response:
     return queries;
   }
 
+  // Fetch related artefacts and render mini-cards beneath the AI message bubble.
   async function appendRelatedObjects(container, params, userText) {
     try {
       const queries = buildCollectionSearchQueries(userText, params);
@@ -185,6 +196,7 @@ Format your search suggestion as JSON at the end of your response:
     }
   }
 
+  // Try to parse a vam_search JSON object from a snippet of model output.
   function parseVamSearchSnippet(snippet) {
     if (!snippet) return null;
     const normalized = snippet
@@ -202,6 +214,7 @@ Format your search suggestion as JSON at the end of your response:
     return null;
   }
 
+  // Strip code fences from the AI response and extract any embedded vam_search params.
   function extractVamSearch(text) {
     let cleanText = text;
     let searchParams = null;
@@ -240,10 +253,12 @@ Format your search suggestion as JSON at the end of your response:
     };
   }
 
+  // Return true if the user message looks like a collection search intent.
   function isCollectionIntent(text) {
     return /(show|find|search|looking for|look for|artefacts?|artifacts?|objects?|collection|related to)/i.test(text || '');
   }
 
+  // Strip common prompt-injection patterns from AI-generated text before display.
   function sanitiseAiResponse(text) {
     return (text || '')
       // Strip markdown headings (prompt injection vector: "### Instruction:")
@@ -254,6 +269,7 @@ Format your search suggestion as JSON at the end of your response:
       .trim();
   }
 
+  // Truncate a sanitised reply to a readable length without cutting mid-sentence.
   function makeConciseReply(text, maxChars = 480) {
     const normalized = sanitiseAiResponse(text || '').trim();
     if (normalized.length <= maxChars) return normalized;
@@ -268,6 +284,7 @@ Format your search suggestion as JSON at the end of your response:
     return concise || `${normalized.slice(0, maxChars - 1)}…`;
   }
 
+  // Send the user's message, stream the AI reply, and trigger a collection search.
   async function sendMessage(text) {
     if (!text.trim()) return;
 
@@ -303,6 +320,7 @@ Format your search suggestion as JSON at the end of your response:
       });
 
       conversationHistory.push({ role: 'assistant', content: fullResponse });
+      // Extract any vam_search suggestion the model embedded in its reply.
       const extracted = extractVamSearch(fullResponse);
       let searchParams = extracted.searchParams;
       const cleanText = makeConciseReply(extracted.cleanText) || 'Here are some artefacts from the collection:';
@@ -313,6 +331,7 @@ Format your search suggestion as JSON at the end of your response:
       source.innerHTML = '<span>📖</span> Source: V&A Collections API + AI';
       assistantMessage.querySelector('.message__bubble').appendChild(source);
 
+      // Fall back to searching with the user's own text if no AI suggestion was found.
       if (isCollectionIntent(text)) {
         searchParams = searchParams || { q: text };
       }

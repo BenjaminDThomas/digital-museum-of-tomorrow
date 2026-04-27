@@ -1,9 +1,13 @@
 'use strict';
 
+// Reimagine page controller. Lets users search for a V&A artefact, choose an
+// interpretive lens, then generate a streamed AI interpretation and a Stable
+// Diffusion visual reimagining with undo/redo history and favourites support.
 function initReimaginePage() {
   const lensGrid = document.getElementById('lens-grid');
   if (!lensGrid) return;
 
+  // Interpretive lenses the user can pick to frame the AI response.
   const lenses = [
     { id: 'cultural', icon: '🌍', title: 'Cultural connections', desc: 'How does this object connect to similar traditions in other cultures?' },
     { id: 'historical', icon: '⏳', title: 'Through time', desc: 'How would this object have been understood in different time periods?' },
@@ -36,6 +40,7 @@ CAVEATS:
 <caveat text>
 
 Do not use JSON. Do not add any extra headings. Keep the writing accessible, culturally sensitive, and clearly interpretive rather than authoritative.`;
+  // Stable Diffusion style keywords mapped to each interpretive lens.
   const sdLensPrompts = {
     cultural: 'cross-cultural artistic fusion, world art traditions, multicultural decorative motifs',
     historical: 'historical period art style, period-accurate aesthetic, art history reimagining',
@@ -58,6 +63,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
   let generationHistory = [];
   let currentHistoryIndex = -1;
 
+  // Update the SD status badge with a ready, loading, error, missing, or offline state.
   function setSdStatusBadge(state, message = '') {
     const sdStatusBadge = document.getElementById('sd-status-badge');
     if (!sdStatusBadge) return;
@@ -85,6 +91,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     sdStatusBadge.className = 'sd-status-badge sd-status-badge--offline';
   }
 
+  // Poll the SD API every 10 seconds until it reports ready or a terminal error.
   function startSdStatusPolling() {
     if (sdStatusPollId) return;
     sdStatusPollId = window.setInterval(async () => {
@@ -96,10 +103,12 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     }, 10000);
   }
 
+  // Enable or disable the Generate button depending on whether an artefact and lens are chosen.
   function updateGenerateButton() {
     document.getElementById('generate-btn').disabled = !(selectedArtefact && selectedLens);
   }
 
+  // Persist the current generation to the favourites list in local storage.
   function saveToFavorites(generation) {
     const favorites = JSON.parse(localStorage.getItem('vam-favorites') || '[]');
     favorites.push({
@@ -111,6 +120,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     alert('Reimagining saved to favorites!');
   }
 
+  // Push a generation onto the history stack, discarding any future entries.
   function addToHistory(generation) {
     // Remove any history after current index (for when user generates after undo)
     generationHistory = generationHistory.slice(0, currentHistoryIndex + 1);
@@ -119,6 +129,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     updateHistoryButtons();
   }
 
+  // Sync the enabled state of the undo and redo buttons with the current history position.
   function updateHistoryButtons() {
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
@@ -126,6 +137,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     if (redoBtn) redoBtn.disabled = currentHistoryIndex >= generationHistory.length - 1;
   }
 
+  // Step back one entry in the generation history.
   function undoGeneration() {
     if (currentHistoryIndex > 0) {
       currentHistoryIndex--;
@@ -135,6 +147,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     }
   }
 
+  // Step forward one entry in the generation history.
   function redoGeneration() {
     if (currentHistoryIndex < generationHistory.length - 1) {
       currentHistoryIndex++;
@@ -144,6 +157,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     }
   }
 
+  // Re-render the output panels for a previously generated entry.
   function restoreGeneration(generation) {
     // Restore the generation state
     const output = document.getElementById('generation-output');
@@ -173,6 +187,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     }
   }
 
+  // Parse the OPENING/ANALYSIS/CONNECTIONS/CAVEATS sections from the model's plain-text reply.
   function parseInterpretationResponse(text) {
     const normalized = String(text || '').trim();
     const extractSection = (startLabel, endLabel) => {
@@ -204,6 +219,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     };
   }
 
+  // Show a live streaming preview of the interpretation as tokens arrive.
   function renderStreamingInterpretation(container, text) {
     container.className = 'generation-output';
     container.innerHTML = `
@@ -349,6 +365,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     checkSdApi();
   }
 
+  // Check the SD backend and update the status badge on the page.
   async function checkSdApi() {
     try {
       const response = await fetch(sdModelsUrl, { signal: AbortSignal.timeout(3000) });
@@ -378,6 +395,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     return { ready: false, loading: false, error: 'Service offline.' };
   }
 
+  // Send the artefact and lens to Stable Diffusion and render the output image.
   async function runSdReimagining(lensId, customQuestion) {
     const output = document.getElementById('sd-output');
     if (!output) return;
@@ -473,6 +491,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     }
   }
 
+  // Render the fully parsed interpretation with opening, analysis, caveats, and connections.
   function renderFinalInterpretation(output, interpretation) {
     output.className = 'generation-output';
     output.innerHTML = `
@@ -504,15 +523,16 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
             <div class="connection-item__reason">${window.VAM.escHtml(connection.reason)}</div>
           </div>
         `;
-        item.addEventListener('click', () => {
-          window.open(`https://collections.vam.ac.uk/search/?q=${encodeURIComponent(connection.search)}`, '_blank', 'noopener,noreferrer');
+      // Open the V&A search results for this connection in a new tab.
+      item.addEventListener('click', () => {
+        window.open(`https://collections.vam.ac.uk/search/?q=${encodeURIComponent(connection.search)}`, '_blank', 'noopener,noreferrer');
         });
         connectionList.appendChild(item);
       });
     }
 
-    // Store this generation in history
-    const generation = {
+      // Store this generation in history.
+      const generation = {
       artefact: selectedArtefact,
       lens: selectedLens,
       interpretation: interpretation,
@@ -520,10 +540,11 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     };
     addToHistory(generation);
 
-    // Add save event listener
-    document.getElementById('save-favorite-btn').addEventListener('click', () => saveToFavorites(generation));
+      // Add save event listener
+      document.getElementById('save-favorite-btn').addEventListener('click', () => saveToFavorites(generation));
   }
 
+  // Kick off SD image generation and stream the textual interpretation in parallel.
   async function generateInterpretation() {
     if (!selectedArtefact || !selectedLens) return;
 

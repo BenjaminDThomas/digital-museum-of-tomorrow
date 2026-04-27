@@ -1,5 +1,7 @@
 'use strict';
 
+// Recommender (Discover) page controller. Manages filter chips, discovery modes,
+// infinite scroll, and fetching personalised/serendipitous/underrepresented results.
 function initRecommenderPage() {
   const interestTags = document.getElementById('interest-tags');
   if (!interestTags) return;
@@ -13,6 +15,7 @@ function initRecommenderPage() {
   const PAGE_SIZE = 12;
   const PREFETCH_ROOT_MARGIN = '1100px 0px';
 
+  // Object category interests the user can toggle.
   const interests = [
     { label: 'Fashion & Textiles', q: 'fashion textile' },
     { label: 'Ceramics', q: 'ceramics pottery' },
@@ -25,6 +28,7 @@ function initRecommenderPage() {
     { label: 'Sculpture', q: 'sculpture' },
     { label: 'Architecture', q: 'architecture' },
   ];
+  // Historical period ranges used to filter search results.
   const periods = [
     { label: 'Medieval', range: [1000, 1500] },
     { label: '16th-17th c.', range: [1500, 1700] },
@@ -32,6 +36,7 @@ function initRecommenderPage() {
     { label: 'Victorian', range: [1837, 1901] },
     { label: '20th century', range: [1900, 2000] },
   ];
+  // Material filter options mapped to V&A AAT identifiers.
   const materials = [
     { label: 'Silk', id: 'AAT11029' },
     { label: 'Glass', id: 'AAT10797' },
@@ -40,6 +45,7 @@ function initRecommenderPage() {
     { label: 'Wool', id: 'AAT11011' },
     { label: 'Ivory', id: 'AAT12309' },
   ];
+  // Geographic region filters.
   const regions = [
     { label: 'Britain', q: 'Britain' },
     { label: 'Japan', q: 'Japan' },
@@ -48,6 +54,7 @@ function initRecommenderPage() {
     { label: 'Italy', q: 'Italy' },
     { label: 'Middle East', q: 'Middle East' },
   ];
+  // Discovery mode definitions with labels and explanatory text.
   const modes = {
     personalised: { label: 'Personalised', info: 'Recommendations based on your selected interests, from V&A Collections API data.' },
     serendipitous: { label: 'Serendipitous', info: 'Random selection across the whole collection - expect the unexpected.' },
@@ -73,10 +80,12 @@ function initRecommenderPage() {
   let filterVersion = 0;
   const seenKeys = new Set();
 
+  // Update the live status region for screen readers.
   function setFeedStatus(text) {
     if (feedStatus) feedStatus.textContent = text;
   }
 
+  // Render a row of toggle chips from an items array into a container.
   function renderChips(container, items, onSelect, options = {}) {
     const { singleSelect = false } = options;
     container.innerHTML = '';
@@ -163,6 +172,7 @@ function initRecommenderPage() {
     });
   }
 
+  // Update the info banner to reflect the currently active discovery mode.
   function updateBanner() {
     const banner = document.getElementById('serendipity-banner');
     const paragraph = banner.querySelector('p');
@@ -176,6 +186,7 @@ function initRecommenderPage() {
     paragraph.appendChild(link);
   }
 
+  // Capture a snapshot of all active filter state for use in a single batch load.
   function getFilterSnapshot() {
     return {
       mode: currentMode,
@@ -187,6 +198,7 @@ function initRecommenderPage() {
     };
   }
 
+  // Return a human-readable summary of a filter snapshot for status messages.
   function describeSnapshot(snapshot) {
     const parts = [];
 
@@ -199,6 +211,7 @@ function initRecommenderPage() {
     return parts.join(' • ');
   }
 
+  // Notify the feed that filters changed and optionally trigger an immediate load.
   function markFeedFiltersUpdated(tryAutoload) {
     filterVersion += 1;
     const snapshot = getFilterSnapshot();
@@ -210,11 +223,13 @@ function initRecommenderPage() {
     }
   }
 
+  // Return true if the viewport is close enough to the bottom to warrant prefetching.
   function shouldLoadSoon() {
     const pixelsFromBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
     return pixelsFromBottom < 1200;
   }
 
+  // Sort a records array by object date, ascending or descending.
   function sortRecords(records, sortMode) {
     if (sortMode === 'date_asc') {
       return records.slice().sort((a, b) => Number(a.object_begin_date || 99999) - Number(b.object_begin_date || 99999));
@@ -225,6 +240,7 @@ function initRecommenderPage() {
     return records;
   }
 
+  // Keep only records whose date range overlaps the selected period.
   function filterByPeriod(records, period) {
     if (!period) return records;
     const [startYear, endYear] = period.range;
@@ -246,6 +262,7 @@ function initRecommenderPage() {
     });
   }
 
+  // Build the API search params for the current mode and filters.
   function buildSearchParams(snapshot, page) {
     const params = { page_size: PAGE_SIZE, page };
 
@@ -270,6 +287,7 @@ function initRecommenderPage() {
     return params;
   }
 
+  // Append new, unseen artefact cards to the results grid and return the count added.
   function appendRecords(records, mode) {
     let appended = 0;
 
@@ -295,11 +313,13 @@ function initRecommenderPage() {
     return appended;
   }
 
+  // Refresh the results count label beneath the grid.
   function updateResultsCount() {
     const periodSummary = selectedPeriod ? ` (${selectedPeriod.label})` : '';
     resultsCount.textContent = `Loaded ${loadedCount.toLocaleString()} tiles${periodSummary}. Filter changes affect upcoming tiles only.`;
   }
 
+  // Fetch and render the next page of results, retrying if few records pass the period filter.
   async function loadNextBatch() {
     if (isLoading || !hasMore) return;
 
@@ -359,6 +379,7 @@ function initRecommenderPage() {
     }
   }
 
+  // Set up IntersectionObserver (or scroll fallback) to load more tiles near the page end.
   function setupInfiniteScroll() {
     if (!feedSentinel) return;
 

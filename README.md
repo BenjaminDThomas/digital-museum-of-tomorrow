@@ -232,6 +232,67 @@ If you run the HTML through a dev static server such as VS Code Live Server (`12
 
 Opening `index.html` directly in the browser may work for basic navigation, but a local server is the safer option for development and service integration.
 
+## Running the test suite
+
+Use the steps below any time you want to run the JavaScript unit tests again.
+
+1. Open a terminal in the project root.
+
+```powershell
+cd c:\Users\25917714\Downloads\digital-museum-of-tomorrow
+```
+
+2. Install test dependencies (first run, or after pulling dependency changes).
+
+```powershell
+npm install
+```
+
+3. Run all tests once.
+
+```powershell
+npm test
+```
+
+4. (Optional) Re-run tests automatically while you edit code.
+
+```powershell
+npm run test:watch
+```
+
+5. (Optional) Generate a coverage report.
+
+```powershell
+npm run test:coverage
+```
+
+6. (Optional) Run a single feature suite.
+
+```powershell
+npx jest tests/ollama.test.js
+npx jest tests/recommender.test.js
+npx jest tests/stable-diffusion.test.js
+npx jest tests/visual-search.test.js
+npx jest tests/vam-api.test.js
+```
+
+What these suites validate:
+
+- `tests/ollama.test.js`: Ollama API connectivity and chat-stream behavior
+- `tests/recommender.test.js`: discovery/recommendation interface behavior and filtering logic
+- `tests/stable-diffusion.test.js`: Stable Diffusion API readiness and image-generation request contracts
+- `tests/visual-search.test.js`: visual-search parsing and upload-flow logic
+- `tests/vam-api.test.js`: V&A API service logic, caching, and rendering helpers
+
+### Troubleshooting test runs
+
+- `npm install` fails: confirm Node.js and npm are installed, then run `node -v` and `npm -v` to verify.
+- `npm test` says command not found: make sure you are in the project root (`digital-museum-of-tomorrow`) and rerun `npm install`.
+- A single test file fails after edits: run only that suite with `npx jest tests/<file>.test.js` to debug faster.
+- Jest cache feels stale: clear it with `npx jest --clearCache`, then run `npm test` again.
+- Port or Docker issues while testing: these unit tests are mocked and do not require live Ollama or Stable Diffusion services, so Docker can be stopped for test execution.
+- You want to stop watch mode: press `q` in the watch terminal.
+
 
 ## Accessibility
 

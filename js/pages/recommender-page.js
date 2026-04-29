@@ -80,6 +80,31 @@ function initRecommenderPage() {
   let filterVersion = 0;
   const seenKeys = new Set();
 
+  const LEARNED_KEY = 'vam-learned-interests';
+  function loadLearnedInterests() {
+    try { return JSON.parse(localStorage.getItem(LEARNED_KEY)) || []; }
+    catch (_) { return []; }
+  }
+  function saveLearnedInterests(arr) {
+    try { localStorage.setItem(LEARNED_KEY, JSON.stringify(arr)); } catch (_) {}
+  }
+  let learnedInterests = loadLearnedInterests();
+
+  function renderLearnedInterests() {
+    const panel = document.getElementById('learned-interests-panel');
+    const chips = document.getElementById('learned-interest-chips');
+    if (!panel || !chips) return;
+    panel.hidden = learnedInterests.length === 0;
+    chips.innerHTML = '';
+    learnedInterests.forEach(type => {
+      const chip = document.createElement('span');
+      chip.className = 'filter-chip filter-chip--passive';
+      chip.setAttribute('role', 'listitem');
+      chip.textContent = type;
+      chips.appendChild(chip);
+    });
+  }
+
   // Update the live status region for screen readers.
   function setFeedStatus(text) {
     if (feedStatus) feedStatus.textContent = text;
@@ -195,6 +220,7 @@ function initRecommenderPage() {
       material: selectedMaterial,
       region: selectedRegion,
       sort: sortSelect ? sortSelect.value : 'relevance',
+      learnedInterests: learnedInterests.slice(),
     };
   }
 
@@ -273,7 +299,15 @@ function initRecommenderPage() {
       const underrepresented = ['Korea', 'Peru', 'Mali', 'Ethiopia', 'Indonesia', 'Mexico', 'Iran', 'Nigeria'];
       params.q = underrepresented[Math.floor(Math.random() * underrepresented.length)];
     } else {
-      params.q = snapshot.interests.length ? snapshot.interests.join(' ') : 'art design';
+      const allTerms = [
+        ...(snapshot.interests.length ? snapshot.interests : []),
+        ...snapshot.learnedInterests,
+      ];
+      if (allTerms.length) {
+        params.q = allTerms[Math.floor(Math.random() * allTerms.length)];
+      } else {
+        params.q = 'art design';
+      }
     }
 
     if (snapshot.material) {
@@ -307,6 +341,17 @@ function initRecommenderPage() {
       card.setAttribute('role', 'listitem');
       resultsGrid.appendChild(card);
       appended += 1;
+
+      card.addEventListener('click', event => {
+        if (event.target.classList.contains('artefact-action-btn')) return;
+        const type = record.objectType;
+        if (type && !learnedInterests.includes(type)) {
+          learnedInterests.unshift(type);
+          if (learnedInterests.length > 20) learnedInterests.length = 20;
+          saveLearnedInterests(learnedInterests);
+          renderLearnedInterests();
+        }
+      });
     });
 
     loadedCount += appended;
@@ -338,6 +383,12 @@ function initRecommenderPage() {
         attempts += 1;
 
         const data = await window.VAM.searchObjects(params);
+
+        if (requestVersion !== filterVersion) {
+          isLoading = false;
+          return;
+        }
+
         const rawRecords = data.records || [];
         totalRecords = data.info?.record_count || totalRecords;
 
@@ -416,6 +467,27 @@ function initRecommenderPage() {
     markFeedFiltersUpdated(true);
   });
 
+  document.getElementById('clear-learned-interests').addEventListener('click', () => {
+    learnedInterests.splice(0);
+    saveLearnedInterests(learnedInterests);
+    renderLearnedInterests();
+  });
+
+  document.getElementById('clear-results').addEventListener('click', () => {
+    resultsGrid.innerHTML = '';
+    nextPage = 1;
+    totalRecords = 0;
+    loadedCount = 0;
+    isLoading = false;
+    hasMore = true;
+    seenKeys.clear();
+    filterVersion += 1;
+    updateResultsCount();
+    setFeedStatus('Results cleared. Loading fresh recommendations.');
+    loadNextBatch();
+  });
+
+  renderLearnedInterests();
   updateBanner();
   updateResultsCount();
   setupInfiniteScroll();

@@ -9,8 +9,8 @@
       content="Discover artefacts personalised to your interests. Our bias-aware recommender surfaces unexpected connections across the collection."
     />
     <title>Discover — A2BC</title>
-    <link rel="stylesheet" href="../css/tokens.css" />
-    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/tokens.css?v=2" />
+    <link rel="stylesheet" href="../css/main.css?v=2" />
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
@@ -101,11 +101,30 @@
             ></div>
           </div>
 
+          <div class="filter-panel discover-filter-panel" id="learned-interests-panel" hidden>
+            <p class="filter-panel__title">Explored interests</p>
+            <p class="discover-filter-help">Automatically added from items you've opened.</p>
+            <div class="filter-chips" id="learned-interest-chips" role="list" aria-label="Explored interests"></div>
+            <button
+              class="btn btn--ghost discover-sidebar-btn discover-sidebar-btn--secondary"
+              id="clear-learned-interests"
+            >
+              Clear explored interests
+            </button>
+          </div>
+
           <button
             class="btn btn--ghost discover-sidebar-btn discover-sidebar-btn--secondary"
             id="reset-filters"
           >
             Clear filters for next tiles
+          </button>
+
+          <button
+            class="btn btn--ghost discover-sidebar-btn discover-sidebar-btn--danger"
+            id="clear-results"
+          >
+            Clear results &amp; reload
           </button>
         </aside>
 

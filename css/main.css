@@ -1554,6 +1554,11 @@ select:focus {
   outline: 2px solid var(--clr-accent);
   outline-offset: 2px;
 }
+.filter-chip--passive {
+  pointer-events: none;
+  opacity: 0.75;
+  cursor: default;
+}
 
 /* ====================================
    BIAS / TRANSPARENCY NOTICE
@@ -2057,6 +2062,11 @@ body.large-text {
 .discover-filter-panel {
   margin-bottom: var(--sp-5);
 }
+#learned-interests-panel {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--clr-border);
+}
 .discover-filter-help {
   font-size: var(--fs-xs);
   color: var(--clr-text-faint);
@@ -2067,12 +2077,27 @@ body.large-text {
   width: 100%;
   justify-content: center;
   font-size: 0.7rem;
+  white-space: normal;
+  text-align: center;
+  height: auto;
+  padding-top: var(--sp-2);
+  padding-bottom: var(--sp-2);
 }
 .discover-sidebar-btn--primary {
   margin-top: var(--sp-5);
 }
 .discover-sidebar-btn--secondary {
   margin-top: var(--sp-5);
+}
+.discover-sidebar-btn--danger {
+  margin-top: var(--sp-3);
+  color: var(--clr-error, #c0392b);
+  border-color: var(--clr-error, #c0392b);
+}
+.discover-sidebar-btn--danger:hover,
+.discover-sidebar-btn--danger:focus-visible {
+  background: var(--clr-error, #c0392b);
+  color: #fff;
 }
 .discover-intro {
   margin-bottom: var(--sp-6);

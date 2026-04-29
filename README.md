@@ -28,7 +28,7 @@ Public endpoints:
 
 - Docker Desktop (Windows/macOS) or Docker Engine (Linux)
 - Docker Compose v2 (`docker compose`)
-- Internet access for first-time model downloads
+- Internet access for first-time model downloads and museum API access
 
 Optional for GPU mode:
 
@@ -125,30 +125,7 @@ On first deployment:
 
 During warm-up, generation endpoints can briefly return `503` until the model is ready.
 
-## Deploying to a server
-
-For a VM or on-prem host:
-
-1. Install Docker + Compose.
-2. Clone this repository.
-3. Choose mode:
-- NVIDIA host: run the default `docker-compose.yml`.
-- CPU-only host: run `docker-compose.cpu.yml`.
-4. Run `docker compose up -d --build`.
-5. Expose ports `80` and `11434` only as needed.
-
-Recommended production hardening:
-
-- Put a reverse proxy/TLS terminator in front of port `80`.
-- Restrict public access to port `11434` (Ollama API).
-- Add monitoring for container health and disk usage (models can be large).
-
 ## Troubleshooting deployment
-
-`Error response from daemon: could not select device driver "" with capabilities: [[gpu]]`
-
-- Cause: GPU mode enabled on a non-NVIDIA or non-configured host.
-- Fix: run CPU mode with `docker compose -f docker-compose.cpu.yml up -d --build`.
 
 `Stable Diffusion model is still loading`
 
@@ -159,9 +136,3 @@ Recommended production hardening:
 
 - Cause: model pull still in progress or failed.
 - Fix: check logs and confirm `OLLAMA_MODEL` value.
-
-## Local development notes
-
-- Front-end files are served from the same FastAPI container as `/`.
-- Stable Diffusion routes are available at `/sdapi/v1/*`.
-- If you change model names/endpoints, update both environment values and any hardcoded front-end model references.

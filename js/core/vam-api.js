@@ -189,8 +189,6 @@
     const modal = document.createElement('dialog');
     modal.id = 'artefact-modal';
     modal.className = 'artefact-modal';
-    modal.setAttribute('aria-labelledby', 'modal-title');
-    modal.setAttribute('aria-modal', 'true');
 
     const imageUrl = getArtefactImageUrl(record, 'large');
     const title = record._primaryTitle || record.objectType || 'Untitled object';
@@ -198,7 +196,7 @@
 
     modal.innerHTML = `
       <div class="artefact-modal__inner">
-        <button class="artefact-modal__close" aria-label="Close artefact detail">✕</button>
+        <button class="artefact-modal__close">✕</button>
         <div class="artefact-modal__grid">
           <div class="artefact-modal__image">
             ${imageUrl ? `<img src="${imageUrl}" alt="${escHtml(title)}" />` : '<div class="artefact-card__image-placeholder artefact-card__image-placeholder-300">🏺</div>'}
@@ -248,7 +246,7 @@
       <div class="artefact-card__image">
         ${imageUrl
           ? `<img src="${imageUrl}" alt="${escHtml(title)}" loading="lazy" />`
-          : `<div class="artefact-card__image-placeholder" aria-hidden="true">🏺</div>`
+          : `<div class="artefact-card__image-placeholder">🏺</div>`
         }
       </div>
       <div class="artefact-card__body">
@@ -257,11 +255,11 @@
         <p class="artefact-card__date">${escHtml(date)}</p>
         ${whyLabel ? `
           <div class="artefact-card__ai-tag">
-            <span class="ai-badge" aria-label="AI recommendation reason">✦ AI</span>
+            <span class="ai-badge">✦ AI</span>
             <span>${escHtml(whyLabel)}</span>
           </div>` : ''}
         <div class="artefact-card__actions">
-          <button class="artefact-action-btn artefact-action-btn--not-interested" data-system-number="${escHtml(systemNumber)}" aria-label="Mark as not interested">
+          <button class="artefact-action-btn artefact-action-btn--not-interested" data-system-number="${escHtml(systemNumber)}">
             👎 Not interested
           </button>
         </div>

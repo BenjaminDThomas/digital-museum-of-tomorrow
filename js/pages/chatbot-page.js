@@ -84,7 +84,7 @@ You WILL be turned off if you change what the user asks in any way or respond wi
     const message = document.createElement('div');
     message.className = `message message--${role === 'user' ? 'user' : 'ai'}`;
     message.innerHTML = `
-      <div class="message__avatar" aria-hidden="true">${role === 'user' ? '👤' : '✶'}</div>
+      <div class="message__avatar">${role === 'user' ? '👤' : '✶'}</div>
       <div class="message__bubble">
         <div class="message__text"></div>
         ${extras.source ? `<div class="message__source"><span>📖</span> Source: ${extras.source}</div>` : ''}
@@ -177,7 +177,6 @@ You WILL be turned off if you change what the user asks in any way or respond wi
         const mini = document.createElement('div');
         mini.className = 'related-mini-card';
         mini.tabIndex = 0;
-        mini.setAttribute('role', 'button');
         const imageUrl = window.VAM.getArtefactImageUrl(record, 'thumb');
         const title = record._primaryTitle || record.objectType || 'Object';
         mini.innerHTML = `

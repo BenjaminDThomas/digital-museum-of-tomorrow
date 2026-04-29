@@ -226,24 +226,24 @@ describe('Visual search upload zone (DOM)', () => {
 
     // Minimal DOM required by initVisualSearchPage()
     document.body.innerHTML = `
-      <div id="upload-zone" role="button" tabindex="0">
+      <div id="upload-zone" tabindex="0">
         <input type="file" id="file-input" accept="image/*" />
-        <div class="upload-zone__icon" aria-hidden="true">🖼</div>
+        <div class="upload-zone__icon">🖼</div>
         <h2 class="upload-zone__title">Drop an image here</h2>
         <p  class="upload-zone__sub">or click to browse</p>
       </div>
       <div id="upload-preview">
         <img id="preview-img" src="" alt="Uploaded image preview" />
-        <div id="detected-attrs" aria-live="polite"></div>
+        <div id="detected-attrs"></div>
         <button id="clear-upload">Clear image ✕</button>
       </div>
       <div class="bias-notice bias-notice--spaced"></div>
       <section id="results-section" style="display:none">
         <div class="results-header">
           <h2 id="results-heading">Visually similar artefacts</h2>
-          <p id="result-count" aria-live="polite"></p>
+          <p id="result-count"></p>
         </div>
-        <div id="visual-results" role="list"></div>
+        <div id="visual-results"></div>
       </section>
     `;
 

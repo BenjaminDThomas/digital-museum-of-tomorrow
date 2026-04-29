@@ -30,7 +30,7 @@ function initTransparencyPage() {
     },
     {
       q: 'How accessible are these tools?',
-      a: 'All tools are built with accessibility as a core requirement, not an afterthought. This includes: semantic HTML5 landmarks and headings; ARIA labels throughout; full keyboard navigation; screen reader compatible (tested with NVDA, VoiceOver); a built-in large text mode; a high contrast mode; colour choices that meet WCAG 2.1 AA contrast ratios; and a skip-to-content link. We welcome accessibility feedback to improve further.'
+      a: 'All tools are built with accessibility as a core requirement, not an afterthought. This includes: semantic HTML5 landmarks and headings; full keyboard navigation; a built-in large text mode; a high contrast mode, and colour choices that meet WCAG 2.1 AA contrast ratios. We welcome accessibility feedback to improve further.'
     },
     {
       q: 'Are the AI interpretations in the Reimagine tool accurate?',
@@ -42,24 +42,22 @@ function initTransparencyPage() {
   faqs.forEach((faq, index) => {
     const item = document.createElement('div');
     item.className = 'faq-item';
-    item.setAttribute('role', 'listitem');
     const id = `faq-answer-${index}`;
     item.innerHTML = `
-      <button class="faq-question" aria-expanded="false" aria-controls="${id}" type="button">
+      <button class="faq-question" type="button">
         <span>${faq.q}</span>
-        <span class="faq-question__icon" aria-hidden="true">+</span>
+        <span class="faq-question__icon">+</span>
       </button>
-      <div class="faq-answer" id="${id}" role="region">
+      <div class="faq-answer" id="${id}">
         <div class="faq-answer-inner">
           ${faq.a.split('\n').map(paragraph => paragraph.trim() ? `<p>${paragraph.trim()}</p>` : '').join('')}
         </div>
       </div>
     `;
-    // Toggle the open class and update aria-expanded on click.
+    // Toggle the open class on click.
     const button = item.querySelector('.faq-question');
     button.addEventListener('click', () => {
-      const open = item.classList.toggle('open');
-      button.setAttribute('aria-expanded', String(open));
+      item.classList.toggle('open');
     });
     faqList.appendChild(item);
   });

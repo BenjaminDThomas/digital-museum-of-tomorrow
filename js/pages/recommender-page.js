@@ -99,13 +99,12 @@ function initRecommenderPage() {
     learnedInterests.forEach(type => {
       const chip = document.createElement('span');
       chip.className = 'filter-chip filter-chip--passive';
-      chip.setAttribute('role', 'listitem');
       chip.textContent = type;
       chips.appendChild(chip);
     });
   }
 
-  // Update the live status region for screen readers.
+  // Update the feed status text.
   function setFeedStatus(text) {
     if (feedStatus) feedStatus.textContent = text;
   }
@@ -120,20 +119,17 @@ function initRecommenderPage() {
       button.className = 'filter-chip';
       button.textContent = item.label;
       button.type = 'button';
-      button.setAttribute('aria-pressed', 'false');
 
       button.addEventListener('click', () => {
         if (singleSelect) {
           const wasSelected = button.classList.contains('active');
           container.querySelectorAll('.filter-chip').forEach(chip => {
             chip.classList.remove('active');
-            chip.setAttribute('aria-pressed', 'false');
           });
 
           const isSelected = !wasSelected;
           if (isSelected) {
             button.classList.add('active');
-            button.setAttribute('aria-pressed', 'true');
           }
 
           onSelect(item, isSelected);
@@ -142,7 +138,6 @@ function initRecommenderPage() {
         }
 
         const isSelected = button.classList.toggle('active');
-        button.setAttribute('aria-pressed', String(isSelected));
         onSelect(item, isSelected);
         markFeedFiltersUpdated(true);
       });
@@ -201,7 +196,7 @@ function initRecommenderPage() {
   function updateBanner() {
     const banner = document.getElementById('serendipity-banner');
     const paragraph = banner.querySelector('p');
-    banner.querySelector('h3').textContent = modes[currentMode].label;
+    banner.querySelector('h2').textContent = modes[currentMode].label;
     paragraph.textContent = `${modes[currentMode].info} `;
 
     const link = document.createElement('a');
@@ -338,7 +333,6 @@ function initRecommenderPage() {
       seenKeys.add(key);
 
       const card = window.VAM.renderArtefactCard(record, whyLabels[mode]);
-      card.setAttribute('role', 'listitem');
       resultsGrid.appendChild(card);
       appended += 1;
 
@@ -461,7 +455,6 @@ function initRecommenderPage() {
 
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.classList.remove('active');
-      chip.setAttribute('aria-pressed', 'false');
     });
 
     markFeedFiltersUpdated(true);

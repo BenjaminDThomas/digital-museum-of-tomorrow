@@ -2,39 +2,38 @@
 <html lang="en">
   <head>
     <!-- Core metadata, page title, and shared styles/fonts -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
       name="description"
       content="Explore collection records using AI-powered tools — discover artefacts, find connections, and reimagine cultural heritage using the V&A Collections API."
-    />
+    >
     <title>A2BC — AI Explorer</title>
-    <link rel="stylesheet" href="css/tokens.css" />
-    <link rel="stylesheet" href="css/main.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
-    />
+    >
   </head>
   <body>
     <!-- Skip link -->
     <a href="#main" class="skip-link">Skip to main content</a>
 
     <!-- Header -->
-    <header class="site-header" role="banner">
+    <header class="site-header">
       <div class="header-inner">
         <a
           href="index.html"
           class="logo"
-          aria-label="A2BC home"
         >
           <span class="logo-vam">A2BC</span>
         </a>
-        <nav class="main-nav" aria-label="Main navigation">
-          <ul role="list">
-            <li><a href="index.html" aria-current="page">Home</a></li>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Home</a></li>
             <li><a href="pages/chatbot.html">Ask the Collection</a></li>
             <li><a href="pages/recommender.html">Discover</a></li>
             <li><a href="pages/visual.html">Visual Search</a></li>
@@ -44,9 +43,6 @@
         </nav>
         <button
           class="nav-toggle"
-          aria-expanded="false"
-          aria-controls="main-nav"
-          aria-label="Open navigation menu"
         >
         </button>
       </div>
@@ -55,9 +51,9 @@
     <!-- Main content -->
     <main id="main">
       <!-- Hero -->
-      <section class="hero" aria-labelledby="hero-heading">
+      <section class="hero">
         <!-- Decorative background layers for atmosphere only -->
-        <div class="hero-bg" aria-hidden="true">
+        <div class="hero-bg">
           <div class="hero-grain"></div>
           <div class="hero-glow"></div>
         </div>
@@ -65,7 +61,7 @@
           <!-- Primary value proposition and main calls to action -->
           <p class="hero-eyebrow">A2BC</p>
           <h1 id="hero-heading" class="hero-heading">
-            Explore the Collection.<br />
+            Explore the Collection.<br>
             <em>Differently.</em>
           </h1>
           <p class="hero-body">
@@ -86,7 +82,7 @@
       </section>
 
       <!-- Tools grid -->
-      <section class="tools-section" aria-labelledby="tools-heading">
+      <section class="tools-section">
         <div class="container">
           <!-- Section heading that frames the four AI entry points -->
           <header class="section-header">
@@ -99,15 +95,14 @@
           </header>
 
           <!-- Interactive list of available AI tools -->
-          <div class="tools-grid" role="list">
-            <article class="tool-card tool-card--chatbot" role="listitem">
-              <div class="tool-card__icon" aria-hidden="true">
+          <div class="tools-grid">
+            <article class="tool-card tool-card--chatbot">
+              <div class="tool-card__icon">
                 <svg
                   width="36"
                   height="36"
                   viewBox="0 0 36 36"
                   fill="none"
-                  aria-hidden="true"
                 >
                   <path
                     d="M4 8a4 4 0 014-4h20a4 4 0 014 4v14a4 4 0 01-4 4H22l-4 6-4-6H8a4 4 0 01-4-4V8z"
@@ -127,7 +122,7 @@
                   Ask about periods, materials, makers, or meanings. Follow your
                   curiosity.
                 </p>
-                <ul class="tool-card__features" aria-label="Features">
+                <ul class="tool-card__features">
                   <li>Natural language search</li>
                   <li>Contextual artefact explanations</li>
                   <li>Source transparency</li>
@@ -136,20 +131,18 @@
               <a
                 href="pages/chatbot.html"
                 class="tool-card__link btn btn--outline"
-                aria-label="Open Ask the Collection chatbot"
                 >Open Tool →</a
               >
               <p class="tool-card__prompt">Try: “Show me Japanese lacquer objects”</p>
             </article>
 
-            <article class="tool-card tool-card--recommender" role="listitem">
-              <div class="tool-card__icon" aria-hidden="true">
+            <article class="tool-card tool-card--recommender">
+              <div class="tool-card__icon">
                 <svg
                   width="36"
                   height="36"
                   viewBox="0 0 36 36"
                   fill="none"
-                  aria-hidden="true"
                 >
                   <rect
                     x="4"
@@ -205,7 +198,7 @@
                   connections across time, culture, and medium — without
                   trapping you in a filter bubble.
                 </p>
-                <ul class="tool-card__features" aria-label="Features">
+                <ul class="tool-card__features">
                   <li>Serendipitous discovery</li>
                   <li>Bias-aware recommendations</li>
                   <li>Preference controls</li>
@@ -214,20 +207,18 @@
               <a
                 href="pages/recommender.html"
                 class="tool-card__link btn btn--outline"
-                aria-label="Open Discover recommender"
                 >Open Tool →</a
               >
               <p class="tool-card__prompt">Try: Serendipitous mode for unexpected objects</p>
             </article>
 
-            <article class="tool-card tool-card--visual" role="listitem">
-              <div class="tool-card__icon" aria-hidden="true">
+            <article class="tool-card tool-card--visual">
+              <div class="tool-card__icon">
                 <svg
                   width="36"
                   height="36"
                   viewBox="0 0 36 36"
                   fill="none"
-                  aria-hidden="true"
                 >
                   <circle
                     cx="18"
@@ -260,7 +251,7 @@
                   artefacts from the collection. Search by shape, colour,
                   texture, or pattern.
                 </p>
-                <ul class="tool-card__features" aria-label="Features">
+                <ul class="tool-card__features">
                   <li>Image upload &amp; URL input</li>
                   <li>Style &amp; period matching</li>
                   <li>Similarity confidence scores</li>
@@ -269,20 +260,18 @@
               <a
                 href="pages/visual.html"
                 class="tool-card__link btn btn--outline"
-                aria-label="Open Visual Search tool"
                 >Open Tool →</a
               >
               <p class="tool-card__prompt">Try: “Blue floral porcelain with gold border”</p>
             </article>
 
-            <article class="tool-card tool-card--generative" role="listitem">
-              <div class="tool-card__icon" aria-hidden="true">
+            <article class="tool-card tool-card--generative">
+              <div class="tool-card__icon">
                 <svg
                   width="36"
                   height="36"
                   viewBox="0 0 36 36"
                   fill="none"
-                  aria-hidden="true"
                 >
                   <path
                     d="M18 4l2.5 7.5L28 14l-7.5 2.5L18 24l-2.5-7.5L8 14l7.5-2.5z"
@@ -305,7 +294,7 @@
                   through different cultural lenses, time periods, or artistic
                   movements. Always clearly labelled as AI-generated.
                 </p>
-                <ul class="tool-card__features" aria-label="Features">
+                <ul class="tool-card__features">
                   <li>Contextual reinterpretation</li>
                   <li>AI-generated clearly labelled</li>
                   <li>Educational framing</li>
@@ -314,7 +303,6 @@
               <a
                 href="pages/generative.html"
                 class="tool-card__link btn btn--outline"
-                aria-label="Open Reimagine generative AI tool"
                 >Open Tool →</a
               >
               <p class="tool-card__prompt">Try: Explore one object through a cultural lens</p>
@@ -324,45 +312,45 @@
       </section>
 
       <!-- Trust banner -->
-      <section class="trust-section" aria-labelledby="trust-heading">
+      <section class="trust-section">
         <div class="container">
           <!-- Four trust pillars describing responsible AI commitments -->
           <h2 id="trust-heading" class="sr-only">
             Our commitment to responsible AI
           </h2>
           <div class="trust-pillars">
-            <div class="trust-pillar">
-              <div class="trust-pillar__icon" aria-hidden="true">⚖</div>
+            <article class="trust-pillar">
+              <span class="trust-pillar__icon">⚖</span>
               <h3>Transparent</h3>
               <p>
                 Every AI recommendation shows you why it was suggested. No black
                 boxes.
               </p>
-            </div>
-            <div class="trust-pillar">
-              <div class="trust-pillar__icon" aria-hidden="true">🌍</div>
+            </article>
+            <article class="trust-pillar">
+              <span class="trust-pillar__icon">🌍</span>
               <h3>Inclusive</h3>
               <p>
                 Designed for all audiences. Screen reader friendly, plain
                 language mode, multiple languages.
               </p>
-            </div>
-            <div class="trust-pillar">
-              <div class="trust-pillar__icon" aria-hidden="true">🔍</div>
+            </article>
+            <article class="trust-pillar">
+              <span class="trust-pillar__icon">🔍</span>
               <h3>Bias-aware</h3>
               <p>
                 We actively surface under-represented collections and flag where
                 our data has gaps.
               </p>
-            </div>
-            <div class="trust-pillar">
-              <div class="trust-pillar__icon" aria-hidden="true">🔒</div>
+            </article>
+            <article class="trust-pillar">
+              <span class="trust-pillar__icon">🔒</span>
               <h3>Private</h3>
               <p>
                 Your data is yours. No personal data is stored without your
                 explicit consent.
               </p>
-            </div>
+            </article>
           </div>
           <a href="pages/transparency.html" class="btn btn--primary trust-cta"
             >Read our AI principles</a
@@ -371,7 +359,7 @@
       </section>
 
       <!-- Featured artefact teaser -->
-      <section class="featured-section" aria-labelledby="featured-heading">
+      <section class="featured-section">
         <div class="container">
           <div class="featured-inner">
             <!-- Short narrative that explains the learning purpose of the platform -->
@@ -389,26 +377,25 @@
             </div>
             <div
               class="featured-artefact-showcase"
-              aria-label="Artefact discovery preview"
             >
               <!-- Static mock card preview showing a sample AI insight -->
-              <div class="artefact-card-preview" tabindex="0">
-                <div class="artefact-card-preview__label">
+              <div class="artefact-card-preview">
+                <p class="artefact-card-preview__label">
                   Object #1234 · Textile · 1860–1880
-                </div>
-                <div class="artefact-card-preview__title">
+                </p>
+                <p class="artefact-card-preview__title">
                   Silk panel with peacock motif
-                </div>
-                <div class="artefact-card-preview__meta">
+                </p>
+                <p class="artefact-card-preview__meta">
                   Probably woven in Lyon, France
-                </div>
-                <div class="artefact-card-preview__ai">
-                  <span class="ai-badge" aria-label="AI insight">✦ AI</span>
+                </p>
+                <p class="artefact-card-preview__ai">
+                  <span class="ai-badge">✦ AI</span>
                   <span
                     >Connected to 14 other silk artefacts in the
                     collection</span
                   >
-                </div>
+                </p>
               </div>
             </div>
           </div>
@@ -417,26 +404,26 @@
     </main>
 
     <!-- Footer -->
-    <footer class="site-footer" role="contentinfo">
+    <footer class="site-footer">
       <div class="container">
         <!-- Footer navigation split by tool links and general site information -->
         <div class="footer-grid">
           <div class="footer-brand">
             <span class="logo-vam">A2BC</span>
-            <p>A2BC<br />AI Explorer</p>
+            <p>A2BC<br>AI Explorer</p>
           </div>
-          <nav aria-label="Footer navigation — Tools">
+          <nav>
             <h3>AI Tools</h3>
-            <ul role="list">
+            <ul>
               <li><a href="pages/chatbot.html">Ask the Collection</a></li>
               <li><a href="pages/recommender.html">Discover</a></li>
               <li><a href="pages/visual.html">Visual Search</a></li>
               <li><a href="pages/generative.html">Reimagine</a></li>
             </ul>
           </nav>
-          <nav aria-label="Footer navigation — About">
+          <nav>
             <h3>About</h3>
-            <ul role="list">
+            <ul>
               <li><a href="pages/transparency.html">AI &amp; Trust</a></li>
               <li><a href="#">Accessibility</a></li>
               <li><a href="#">Privacy Policy</a></li>

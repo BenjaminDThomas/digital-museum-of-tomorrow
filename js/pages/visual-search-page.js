@@ -220,7 +220,6 @@ function initVisualSearchPage() {
 
       rankedRecords.forEach(record => {
         const card = window.VAM.renderArtefactCard(record, record._whyLabel);
-        card.setAttribute('role', 'listitem');
         const score = Math.max(10, Math.min(99, Math.round(record._similarityScore || 40)));
         const bar = document.createElement('div');
         bar.innerHTML = `

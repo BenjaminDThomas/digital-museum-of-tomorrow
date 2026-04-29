@@ -2,48 +2,44 @@
 <html lang="en">
   <head>
     <!-- Page metadata and shared styles for the Reimagine experience -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
       name="description"
       content="Reimagine artefacts through generative AI. Explore what an object might look like through different cultural lenses, periods, or artistic styles."
-    />
+    >
     <title>Reimagine — A2BC</title>
-    <link rel="stylesheet" href="../css/tokens.css" />
-    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/tokens.css">
+    <link rel="stylesheet" href="../css/main.css">
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
-    />
+    >
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to main content</a>
 
     <!-- Header -->
-    <header class="site-header" role="banner">
+    <header class="site-header">
       <div class="header-inner">
         <a
           href="../index.html"
           class="logo"
-          aria-label="A2BC home"
         >
           <span class="logo-vam">A2BC</span>
         </a>
-        <nav class="main-nav" aria-label="Main navigation">
-          <ul role="list">
+        <nav class="main-nav">
+          <ul>
             <li><a href="../index.html">Home</a></li>
             <li><a href="chatbot.html">Ask the Collection</a></li>
             <li><a href="recommender.html">Discover</a></li>
             <li><a href="visual.html">Visual Search</a></li>
-            <li><a href="generative.html" aria-current="page">Reimagine</a></li>
+            <li><a href="generative.html">Reimagine</a></li>
             <li><a href="transparency.html">AI &amp; Trust</a></li>
           </ul>
         </nav>
         <button
           class="nav-toggle"
-          aria-expanded="false"
-          aria-controls="main-nav"
-          aria-label="Open navigation"
         >
 
         </button>
@@ -54,10 +50,10 @@
     <main id="main">
       <div class="container generative-page">
         <!-- Page intro -->
-        <div class="generative-page__intro">
+        <header class="generative-page__intro">
           <!-- Intro copy explaining creative AI interpretation boundaries -->
           <div class="ai-badge generative-page__badge">
-            ✦ AI Tool — Generative
+            ❆ AI Tool — Generative
           </div>
           <h1 class="generative-page__title">Reimagine an artefact</h1>
           <p class="generative-page__body">
@@ -65,15 +61,15 @@
             will explore how the object connects to other cultures, periods, and
             ideas — always clearly labelled as AI interpretation, not fact.
           </p>
-        </div>
+        </header>
 
         <div class="reimagine-layout">
           <!-- Input panel -->
-          <section aria-label="Choose artefact and lens">
+          <div>
             <!-- Step 1: Choose artefact -->
-            <div class="generative-step-block">
+            <section class="generative-step-block">
               <!-- Search and select one source object from collection data -->
-              <p class="section-eyebrow">Step 1 — Choose an artefact</p>
+              <h2 class="section-eyebrow">Step 1 — Choose an artefact</h2>
               <div class="artefact-search-box">
                 <label for="artefact-search" class="sr-only"
                   >Search for an artefact</label
@@ -82,50 +78,44 @@
                   type="search"
                   id="artefact-search"
                   placeholder="Search collection — e.g. 'Japanese vase', 'Victorian dress'…"
-                />
+                >
                 <div
                   class="search-results-dropdown"
                   id="search-dropdown"
-                  role="listbox"
-                  aria-label="Artefact search results"
                 ></div>
               </div>
 
-              <div
+              <figure
                 class="selected-artefact"
                 id="selected-artefact"
-                aria-live="polite"
-                aria-label="Selected artefact"
               >
-                <img id="selected-img" src="" alt="" />
-                <div>
+                <img id="selected-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
+                <figcaption>
                   <p class="selected-artefact__label">Selected</p>
                   <p id="selected-title" class="selected-artefact__title"></p>
                   <p id="selected-date" class="selected-artefact__date"></p>
-                </div>
-              </div>
-            </div>
+                </figcaption>
+              </figure>
+            </section>
 
             <!-- Step 2: Choose lens -->
-            <div class="generative-step-block">
+            <section class="generative-step-block">
               <!-- Pick the interpretive perspective applied to the output -->
-              <p class="section-eyebrow">
+              <h2 class="section-eyebrow">
                 Step 2 — Choose an interpretive lens
-              </p>
+              </h2>
               <div
                 class="lens-grid"
-                role="radiogroup"
-                aria-label="Interpretive lens options"
                 id="lens-grid"
               ></div>
-            </div>
+            </section>
 
             <!-- Step 3: Custom prompt -->
-            <div class="generative-step-block">
+            <section class="generative-step-block">
               <!-- Optional user guidance to steer the generated interpretation -->
-              <p class="section-eyebrow">
+              <h2 class="section-eyebrow">
                 Step 3 — Add your own question (optional)
-              </p>
+              </h2>
               <div class="field-group">
                 <label for="custom-prompt">Your question or focus</label>
                 <textarea
@@ -134,7 +124,7 @@
                   placeholder="e.g. How might this design have influenced later movements? What materials could replace these today?"
                 ></textarea>
               </div>
-            </div>
+            </section>
 
             <button
               class="btn btn--primary generative-generate-btn"
@@ -163,21 +153,20 @@
                 Cultural interpretations may be incomplete or imperfect.</span
               >
             </div>
-          </section>
+          </div>
 
           <!-- Output panel -->
-          <section aria-label="Generated interpretation" aria-live="polite">
-            <div class="generative-output-header">
+          <section>
+            <header class="generative-output-header">
               <!-- Status line that reflects Stable Diffusion readiness -->
-              <p class="section-eyebrow generative-output-header__eyebrow">
+              <h2 class="section-eyebrow generative-output-header__eyebrow">
                 AI Interpretation
-              </p>
+              </h2>
               <span
                 class="sd-status-badge"
                 id="sd-status-badge"
-                aria-live="polite"
               ></span>
-            </div>
+            </header>
             <div class="generation-output" id="generation-output">
               <!-- Text interpretation stream and final formatted response -->
               <p class="generation-output__placeholder">
@@ -187,8 +176,6 @@
             <div
               class="sd-output"
               id="sd-output"
-              aria-live="polite"
-              aria-label="Visual reimagining"
             ></div>
             <!-- Generated image output area rendered after interpretation -->
           </section>

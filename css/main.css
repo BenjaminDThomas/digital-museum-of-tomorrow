@@ -809,13 +809,7 @@ h4 {
   border-radius: var(--radius-lg);
   padding: var(--sp-8);
   position: relative;
-  cursor: pointer;
   transition: border-color var(--transition-base);
-}
-.artefact-card-preview:hover,
-.artefact-card-preview:focus-visible {
-  border-color: var(--clr-accent-dim);
-  outline: none;
 }
 .artefact-card-preview__label {
   font-size: var(--fs-xs);

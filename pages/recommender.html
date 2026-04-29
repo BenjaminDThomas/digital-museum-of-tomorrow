@@ -2,38 +2,37 @@
 <html lang="en">
   <head>
     <!-- Page metadata and shared styles for the discovery feed -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
       name="description"
       content="Discover artefacts personalised to your interests. Our bias-aware recommender surfaces unexpected connections across the collection."
-    />
+    >
     <title>Discover — A2BC</title>
-    <link rel="stylesheet" href="../css/tokens.css?v=2" />
-    <link rel="stylesheet" href="../css/main.css?v=2" />
+    <link rel="stylesheet" href="../css/tokens.css?v=2">
+    <link rel="stylesheet" href="../css/main.css?v=2">
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
-    />
+    >
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to main content</a>
 
     <!-- Header -->
-    <header class="site-header" role="banner">
+    <header class="site-header">
       <div class="header-inner">
         <a
           href="../index.html"
           class="logo"
-          aria-label="A2BC home"
         >
           <span class="logo-vam">A2BC</span>
         </a>
-        <nav class="main-nav" aria-label="Main navigation">
-          <ul role="list">
+        <nav class="main-nav">
+          <ul>
             <li><a href="../index.html">Home</a></li>
             <li><a href="chatbot.html">Ask the Collection</a></li>
-            <li><a href="recommender.html" aria-current="page">Discover</a></li>
+            <li><a href="recommender.html">Discover</a></li>
             <li><a href="visual.html">Visual Search</a></li>
             <li><a href="generative.html">Reimagine</a></li>
             <li><a href="transparency.html">AI &amp; Trust</a></li>
@@ -41,9 +40,6 @@
         </nav>
         <button
           class="nav-toggle"
-          aria-expanded="false"
-          aria-controls="main-nav"
-          aria-label="Open navigation"
         >
 
         </button>
@@ -55,7 +51,7 @@
       <!-- Split layout with filter controls and recommendation feed -->
       <div class="discover-layout">
         <!-- Sidebar filters -->
-        <aside class="discover-sidebar" aria-label="Preferences and filters">
+        <aside class="discover-sidebar">
           <div class="filter-panel discover-filter-panel">
             <!-- Interest chips influence upcoming recommendations -->
             <p class="filter-panel__title">Your interests</p>
@@ -66,8 +62,6 @@
             <div
               class="filter-chips"
               id="interest-tags"
-              role="group"
-              aria-label="Interest topics"
             ></div>
           </div>
 
@@ -76,8 +70,6 @@
             <div
               class="filter-chips"
               id="period-filters"
-              role="group"
-              aria-label="Time period filters"
             ></div>
           </div>
 
@@ -86,8 +78,6 @@
             <div
               class="filter-chips"
               id="material-filters"
-              role="group"
-              aria-label="Material filters"
             ></div>
           </div>
 
@@ -96,15 +86,13 @@
             <div
               class="filter-chips"
               id="region-filters"
-              role="group"
-              aria-label="Region filters"
             ></div>
           </div>
 
           <div class="filter-panel discover-filter-panel" id="learned-interests-panel" hidden>
             <p class="filter-panel__title">Explored interests</p>
             <p class="discover-filter-help">Automatically added from items you've opened.</p>
-            <div class="filter-chips" id="learned-interest-chips" role="list" aria-label="Explored interests"></div>
+            <div class="filter-chips" id="learned-interest-chips"></div>
             <button
               class="btn btn--ghost discover-sidebar-btn discover-sidebar-btn--secondary"
               id="clear-learned-interests"
@@ -129,10 +117,10 @@
         </aside>
 
         <!-- Discovery content -->
-        <div class="discover-main">
-          <div class="discover-intro">
+        <section class="discover-main">
+          <header class="discover-intro">
             <div class="ai-badge discover-intro__badge">
-              ✦ AI Tool — Recommender
+              ❆ AI Tool — Recommender
             </div>
             <h1 class="discover-intro__title">Discover the Collection</h1>
             <p class="discover-intro__body">
@@ -140,10 +128,10 @@
               unexpected connections and actively highlight under-represented
               collections.
             </p>
-          </div>
+          </header>
 
           <!-- Discovery mode -->
-          <div class="discovery-mode" role="group" aria-label="Discovery mode">
+          <div class="discovery-mode">
             <button
               class="discovery-mode-btn active"
               data-mode="personalised"
@@ -167,10 +155,10 @@
             </button>
           </div>
 
-          <div class="serendipity-banner" id="serendipity-banner" role="note">
+          <aside class="serendipity-banner" id="serendipity-banner">
             <span class="serendipity-banner__icon">✦</span>
             <div>
-              <h3>About these recommendations</h3>
+              <h2>About these recommendations</h2>
               <p>
                 Recommendations are generated from the V&A API based on your
                 selected interests. We deliberately include objects from less
@@ -180,38 +168,35 @@
                 >
               </p>
             </div>
-          </div>
+          </aside>
 
-          <div class="results-header">
+          <header class="results-header">
             <!-- Result count and sort controls for loaded recommendation tiles -->
-            <p class="results-count" id="results-count" aria-live="polite"></p>
+            <p class="results-count" id="results-count"></p>
             <div class="discover-results-controls">
               <label for="sort-select" class="sr-only">Sort by</label>
               <select
                 id="sort-select"
                 class="discover-sort-select"
-                aria-label="Sort results"
               >
                 <option value="relevance">Sort: Relevance</option>
                 <option value="date_asc">Date: Oldest first</option>
                 <option value="date_desc">Date: Newest first</option>
               </select>
             </div>
-          </div>
+          </header>
 
           <div
             class="artefact-grid discover-feed-grid"
             id="results-grid"
-            aria-label="Recommended artefacts"
-            role="list"
           >
             <!-- JS renders recommendation cards here -->
           </div>
           <!-- Live status and sentinel used for infinite-scroll loading -->
-          <div class="discover-feed-meta" aria-live="polite">
+          <footer class="discover-feed-meta">
             <p class="discover-feed-status" id="discover-feed-status"></p>
-            <div class="discover-feed-sentinel" id="discover-feed-sentinel" aria-hidden="true"></div>
-          </div>
+            <div class="discover-feed-sentinel" id="discover-feed-sentinel"></div>
+          </footer>
 
           <div class="bias-notice discover-bias-notice">
             <span class="bias-notice__icon">ℹ</span>
@@ -224,7 +209,7 @@
               ></span
             >
           </div>
-        </div>
+        </section>
       </div>
     </main>
 

@@ -2,34 +2,34 @@
 <html lang="en">
 <head>
   <!-- Page metadata plus shared design tokens and typography -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Ask questions about museum collection data in natural language. Our AI chatbot surfaces relevant artefacts, contexts, and connections using the V&A Collections API." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ask questions about museum collection data in natural language. Our AI chatbot surfaces relevant artefacts, contexts, and connections using the V&A Collections API.">
   <title>Ask the Collection — A2BC</title>
-  <link rel="stylesheet" href="../css/tokens.css" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to main content</a>
 
   <!-- Header -->
-  <header class="site-header" role="banner">
+  <header class="site-header">
     <div class="header-inner">
-      <a href="../index.html" class="logo" aria-label="A2BC home">
+      <a href="../index.html" class="logo">
         <span class="logo-vam">A2BC</span>
       </a>
-      <nav class="main-nav" aria-label="Main navigation">
-        <ul role="list">
+      <nav class="main-nav">
+        <ul>
           <li><a href="../index.html">Home</a></li>
-          <li><a href="chatbot.html" aria-current="page">Ask the Collection</a></li>
+          <li><a href="chatbot.html">Ask the Collection</a></li>
           <li><a href="recommender.html">Discover</a></li>
           <li><a href="visual.html">Visual Search</a></li>
           <li><a href="generative.html">Reimagine</a></li>
           <li><a href="transparency.html">AI &amp; Trust</a></li>
         </ul>
       </nav>
-      <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation menu">
+      <button class="nav-toggle">
       </button>
     </div>
   </header>
@@ -39,17 +39,17 @@
     <!-- Two-column chatbot layout: left context panel, right conversation area -->
     <div class="chat-layout">
       <!-- Sidebar -->
-      <aside class="chat-sidebar" aria-label="Conversation history and filters">
+      <aside class="chat-sidebar">
         <!-- Quick-start topic ideas to help users begin asking questions -->
-        <div>
-          <p class="chat-sidebar__title">Suggested topics</p>
+        <section>
+          <h2 class="chat-sidebar__title">Suggested topics</h2>
           <div id="topic-suggestions"></div>
-        </div>
-        <div>
+        </section>
+        <section>
           <!-- Session-level recent prompts for easy revisit -->
-          <p class="chat-sidebar__title">Recent chats</p>
-          <div id="chat-history" aria-live="polite"></div>
-        </div>
+          <h2 class="chat-sidebar__title">Recent chats</h2>
+          <div id="chat-history"></div>
+        </section>
         <div class="chat-sidebar-footer">
           <!-- Trust and source disclosure shown alongside the chat experience -->
           <div class="bias-notice">
@@ -60,9 +60,9 @@
       </aside>
 
       <!-- Chat conversation area -->
-      <div class="chat-main" role="region" aria-label="Chat conversation">
+      <section class="chat-main">
         <!-- Streaming message log where assistant and user messages are rendered -->
-        <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="Conversation messages">
+        <div class="chat-messages" id="chat-messages">
           <div class="chat-welcome" id="chat-welcome">
             <div class="ai-badge">✦ AI Tool</div>
             <h2>Ask the Collection</h2>
@@ -82,21 +82,20 @@
               id="chat-input"
               rows="1"
               placeholder="Ask about any artefact, period, material, or maker…"
-              aria-label="Your question"
               maxlength="500"
             ></textarea>
-            <button class="chat-send-btn" id="send-btn" aria-label="Send message" disabled>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <button class="chat-send-btn" id="send-btn" disabled>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M2 10l16-8-8 16v-8L2 10z" fill="currentColor"/>
               </svg>
             </button>
           </div>
-          <p class="chat-disclaimer" aria-live="polite">
+          <p class="chat-disclaimer">
             <!-- Reminder that AI output should be verified against official records -->
             AI responses are generated from V&amp;A Collections API data and may contain errors. A2BC is not affiliated with the V&amp;A. Always verify with the <a href="https://collections.vam.ac.uk" target="_blank" rel="noopener noreferrer">official collections website</a>.
           </p>
         </div>
-      </div>
+      </section>
     </div>
   </main>
 

@@ -6,7 +6,6 @@
   function createA11yBtn(icon, label, onClick) {
     const btn = document.createElement('button');
     btn.className = 'a11y-btn';
-    btn.setAttribute('aria-label', label);
     btn.setAttribute('type', 'button');
     btn.textContent = icon;
     btn.addEventListener('click', onClick);
@@ -17,7 +16,6 @@
   function injectA11yToolbar() {
     const toolbar = document.createElement('aside');
     toolbar.className = 'a11y-toolbar';
-    toolbar.setAttribute('aria-label', 'Accessibility tools');
 
     // Create the text size toggle button.
     const largeTextBtn = createA11yBtn('Aa', 'Toggle large text', () => {
@@ -73,15 +71,13 @@
 
     // Toggle the nav open or closed when the burger button is clicked.
     navToggle.addEventListener('click', () => {
-      const open = navToggle.getAttribute('aria-expanded') === 'true';
-      navToggle.setAttribute('aria-expanded', String(!open));
+      const open = mainNav.classList.contains('open');
       mainNav.classList.toggle('open', !open);
     });
 
     // Close the nav on Escape and return focus to the toggle button.
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && mainNav.classList.contains('open')) {
-        navToggle.setAttribute('aria-expanded', 'false');
         mainNav.classList.remove('open');
         navToggle.focus();
       }

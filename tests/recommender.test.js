@@ -6,7 +6,7 @@
  * Covered:
  *   Page initialisation       — renders chips, loads initial batch
  *   Discovery mode buttons    — update active state
- *   Filter chips              — toggle state and aria-pressed
+ *   Filter chips              — toggle state
  *   Reset button              — clears all active chip states
  *   filterByPeriod (inline)   — period overlap logic (function is internal to IIFE,
  *                               so it is re-implemented here to test the contract)
@@ -22,22 +22,22 @@
 /** Build the minimal DOM the recommender page requires to initialise. */
 function setupRecommenderDOM() {
   document.body.innerHTML = `
-    <div id="interest-tags" role="group"></div>
-    <div id="period-filters" role="group"></div>
-    <div id="material-filters" role="group"></div>
-    <div id="region-filters" role="group"></div>
-    <div id="results-grid" role="list"></div>
+    <div id="interest-tags"></div>
+    <div id="period-filters"></div>
+    <div id="material-filters"></div>
+    <div id="region-filters"></div>
+    <div id="results-grid"></div>
     <p  id="results-count"></p>
     <select id="sort-select">
       <option value="relevance">Relevance</option>
       <option value="date_asc">Oldest first</option>
       <option value="date_desc">Newest first</option>
     </select>
-    <p   id="discover-feed-status" aria-live="polite"></p>
-    <div id="discover-feed-sentinel" aria-hidden="true"></div>
-    <div id="serendipity-banner" role="note">
+    <p   id="discover-feed-status"></p>
+    <div id="discover-feed-sentinel"></div>
+    <div id="serendipity-banner">
       <span class="serendipity-banner__icon">✦</span>
-      <div><h3></h3><p></p></div>
+      <div><h2></h2><p></p></div>
     </div>
     <button class="discovery-mode-btn active" data-mode="personalised"  type="button">Personalised</button>
     <button class="discovery-mode-btn"        data-mode="serendipitous" type="button">Serendipitous</button>
@@ -126,7 +126,7 @@ describe('Discovery mode buttons', () => {
 
     document.querySelector('[data-mode="serendipitous"]').click();
 
-    const bannerHeading = document.querySelector('#serendipity-banner h3');
+    const bannerHeading = document.querySelector('#serendipity-banner h2');
     expect(bannerHeading.textContent).toBe('Serendipitous');
   });
 });
@@ -135,11 +135,11 @@ describe('Discovery mode buttons', () => {
 // Filter chips
 // ---------------------------------------------------------------------------
 describe('Filter chips', () => {
-  it('sets aria-pressed="true" when a chip is activated', () => {
+  it('adds the active class when a chip is activated', () => {
     loadPage();
     const firstChip = document.querySelector('#interest-tags .filter-chip');
     firstChip.click();
-    expect(firstChip.getAttribute('aria-pressed')).toBe('true');
+    expect(firstChip.classList.contains('active')).toBe(true);
   });
 
   it('toggles the active class off on a second click of the same chip', () => {
@@ -180,13 +180,13 @@ describe('Reset filters button', () => {
     expect(stillActive.length).toBe(0);
   });
 
-  it('sets aria-pressed="false" on all chips after reset', () => {
+  it('deactivates all filter chips after reset', () => {
     loadPage();
     document.querySelectorAll('#interest-tags .filter-chip').forEach(c => c.click());
     document.getElementById('reset-filters').click();
 
     const pressed = [...document.querySelectorAll('.filter-chip')]
-      .filter(c => c.getAttribute('aria-pressed') === 'true');
+      .filter(c => c.classList.contains('active'));
     expect(pressed.length).toBe(0);
   });
 });

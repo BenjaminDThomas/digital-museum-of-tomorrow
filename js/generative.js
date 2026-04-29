@@ -144,20 +144,17 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     const card = document.createElement('button');
     card.className = 'lens-card';
     card.type = 'button';
-    card.setAttribute('aria-pressed', 'false');
     card.dataset.id = lens.id;
     card.innerHTML = `
-      <div class="lens-card__icon" aria-hidden="true">${lens.icon}</div>
+      <div class="lens-card__icon">${lens.icon}</div>
       <div class="lens-card__title">${lens.title}</div>
       <div class="lens-card__desc">${lens.desc}</div>
     `;
     card.addEventListener('click', () => {
       document.querySelectorAll('.lens-card').forEach(item => {
         item.classList.remove('selected');
-        item.setAttribute('aria-pressed', 'false');
       });
       card.classList.add('selected');
-      card.setAttribute('aria-pressed', 'true');
       selectedLens = lens;
       updateGenerateButton();
     });
@@ -216,7 +213,6 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
         const item = document.createElement('button');
         item.className = 'dropdown-item';
         item.type = 'button';
-        item.setAttribute('role', 'option');
         const imageUrl = window.VAM.getArtefactImageUrl(record, 'thumb');
         const title = record._primaryTitle || record.objectType || 'Object';
         const date = window.VAM.formatDateRange(record);
@@ -337,7 +333,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
 
     output.className = 'sd-output sd-output--loading';
     output.innerHTML = `
-      <div class="sd-output__spinner" aria-hidden="true">\u2736</div>
+      <div class="sd-output__spinner">\u2736</div>
       <p class="sd-output__status">Generating visual reimagining \u2014 this may take 20\u201360 seconds\u2026</p>
     `;
 
@@ -373,7 +369,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
           <img src="data:image/png;base64,${outputBase64}" alt="AI visual reimagining of ${escapedTitle}" />
           <figcaption>${escapedTitle} \u2014 reimagined through ${window.VAM.escHtml(selectedLens.title)}</figcaption>
         </figure>
-        <a class="btn btn--ghost sd-download-btn" href="data:image/png;base64,${outputBase64}" download="reimagined-artefact.png" aria-label="Download reimagined image as PNG">
+        <a class="btn btn--ghost sd-download-btn" href="data:image/png;base64,${outputBase64}" download="reimagined-artefact.png">
           \u2193 Download PNG
         </a>
       `;
@@ -403,7 +399,7 @@ Be culturally sensitive, avoid stereotypes, and acknowledge when historical acco
     const output = document.getElementById('generation-output');
     output.className = 'generation-output loading';
     output.innerHTML = `
-      <div class="spinning generation-output__spinner" aria-hidden="true">\u2736</div>
+      <div class="spinning generation-output__spinner">\u2736</div>
       <p class="generation-output__status">Generating interpretation\u2026</p>
     `;
 

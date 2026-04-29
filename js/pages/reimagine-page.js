@@ -176,7 +176,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
           <img src="${generation.visualData}" alt="AI visual reimagining of ${escapedTitle}" />
           <figcaption>${escapedTitle} — reimagined through ${window.VAM.escHtml(generation.lensTitle)}</figcaption>
         </figure>
-        <a class="btn btn--ghost sd-download-btn" href="${generation.visualData}" download="reimagined-artefact.png" aria-label="Download reimagined image as PNG">
+        <a class="btn btn--ghost sd-download-btn" href="${generation.visualData}" download="reimagined-artefact.png">
           ↓ Download PNG
         </a>
         <button class="btn btn--ghost save-favorite-btn" id="save-favorite-btn">♥ Save to Favorites</button>
@@ -235,20 +235,17 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     const card = document.createElement('button');
     card.className = 'lens-card';
     card.type = 'button';
-    card.setAttribute('aria-pressed', 'false');
     card.dataset.id = lens.id;
     card.innerHTML = `
-      <div class="lens-card__icon" aria-hidden="true">${lens.icon}</div>
+      <div class="lens-card__icon">${lens.icon}</div>
       <div class="lens-card__title">${lens.title}</div>
       <div class="lens-card__desc">${lens.desc}</div>
     `;
     card.addEventListener('click', () => {
       document.querySelectorAll('.lens-card').forEach(item => {
         item.classList.remove('selected');
-        item.setAttribute('aria-pressed', 'false');
       });
       card.classList.add('selected');
-      card.setAttribute('aria-pressed', 'true');
       selectedLens = lens;
       updateGenerateButton();
     });
@@ -303,7 +300,6 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
         const item = document.createElement('button');
         item.className = 'dropdown-item';
         item.type = 'button';
-        item.setAttribute('role', 'option');
         const imageUrl = window.VAM.getArtefactImageUrl(record, 'thumb');
         const title = record._primaryTitle || record.objectType || 'Object';
         const date = window.VAM.formatDateRange(record);
@@ -423,7 +419,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
 
     output.className = 'sd-output sd-output--loading';
     output.innerHTML = `
-      <div class="sd-output__spinner" aria-hidden="true">✶</div>
+      <div class="sd-output__spinner">✶</div>
       <p class="sd-output__status">Generating visual reimagining — this may take 20–60 seconds…</p>
     `;
 
@@ -460,7 +456,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
           <figcaption>${escapedTitle} — reimagined through ${window.VAM.escHtml(selectedLens.title)}</figcaption>
         </figure>
         <div class="sd-actions">
-          <a class="btn btn--ghost sd-download-btn" href="data:image/png;base64,${outputBase64}" download="reimagined-artefact.png" aria-label="Download reimagined image as PNG">
+          <a class="btn btn--ghost sd-download-btn" href="data:image/png;base64,${outputBase64}" download="reimagined-artefact.png">
             ↓ Download PNG
           </a>
           <button class="btn btn--ghost save-favorite-btn" id="save-visual-favorite-btn">♥ Save to Favorites</button>
@@ -560,7 +556,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     const output = document.getElementById('generation-output');
     output.className = 'generation-output loading';
     output.innerHTML = `
-      <div class="spinning generation-output__spinner" aria-hidden="true">✶</div>
+      <div class="spinning generation-output__spinner">✶</div>
       <p class="generation-output__status">Generating interpretation…</p>
     `;
 

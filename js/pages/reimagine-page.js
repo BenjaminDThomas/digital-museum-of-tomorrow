@@ -420,7 +420,7 @@ Do not use JSON. Do not add any extra headings. Keep the writing accessible, cul
     output.className = 'sd-output sd-output--loading';
     output.innerHTML = `
       <div class="sd-output__spinner">✶</div>
-      <p class="sd-output__status">Generating visual reimagining — this may take 20–60 seconds…</p>
+      <p class="sd-output__status">Generating visual reimagining — this may take several minutes…</p>
     `;
 
     try {
